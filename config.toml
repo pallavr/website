@@ -3,7 +3,7 @@
 
 # The URL of your website.
 # End your URL with a `/` trailing slash, e.g. `https://example.com/`.
-baseurl = "/about/"
+baseurl = "https://example.com/"
 
 # Title of your site
 title = "Home"
@@ -47,7 +47,7 @@ defaultContentLanguageInSubdir = false
 
   # Font style.
   #   Choose from `default`, `classic`, or `playfair`.
-  font = "default"
+  font = ""
 
   # Your details.
   name = "Pallav Routh"
