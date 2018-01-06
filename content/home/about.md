@@ -33,6 +33,11 @@ weight = 5
  
 +++
 
+<style>
+body {
+text-align: justify}
+</style>
+
 # Biography
 
 I recieved my BS in Chemistry and a post graduate diploma in Marketing Management from St. Xavier's College, Kolkata, India. While doing my diploma, I became interested in Customer Relationship Management and the fascinating world of predictive and prescriptive analytics. I decided to pursue my MS in Applied Statistics and Operation Research at Bowling Green State University here in the US. My passion for data science was instigated by my love for R. Altough I love Python too, I have a soft spot for R and the powerful Hadley Wickham packages.
