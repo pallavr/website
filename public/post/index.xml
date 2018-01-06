@@ -11,6 +11,218 @@
     <atom:link href="/post/" rel="self" type="application/rss+xml" />
     
     <item>
+      <title>Nobel Laureates</title>
+      <link>/post/nobel-laureates/</link>
+      <pubDate>Sat, 06 Jan 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/post/nobel-laureates/</guid>
+      <description>&lt;style&gt;
+body {
+text-align: justify}
+&lt;/style&gt;
+&lt;div id=&#34;motivation&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Motivation&lt;/h1&gt;
+&lt;p&gt;I was always curious to know if there was any relationship between the Intelligent Quotient (IQ) levels and the number of number laureates a country has produced. After I found the &lt;a href=&#34;https://www.kaggle.com/nobelfoundation/nobel-laureates&#34;&gt;Nobel Prize&lt;/a&gt; data set on Kaggle, I was eager to check how the numbers matched up against the IQ levels of a country. I found some average IQ data (from 1990s to 2010) for several country from this &lt;a href=&#34;https://www.worlddata.info/iq-by-country.php&#34;&gt;website&lt;/a&gt; and I was able to scrap it out to match it up with the nobel prize data. The results were quite surprising (especially for me and I will explain why). I decided to extend the plot to include more features. Surely the number of nobel laureates a country produces has to depend on how advanced the country is. A few months ago when I was working to deliver a lecture on &lt;code&gt;ggplot2&lt;/code&gt; at my school I had stumbled upon a &lt;strong&gt;Human Development Index&lt;/strong&gt; data set from this website. The HDI is a good indicator of how advanced the country is. When I added this aesthetic to the plot the results finally made more sense. More after the plot below.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;the-libraries&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;The libraries&lt;/h1&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(readxl)
+library(readr)
+library(ggplot2)
+library(dplyr)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;the-data&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;The data&lt;/h1&gt;
+&lt;div id=&#34;iq-data&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;IQ data&lt;/h2&gt;
+&lt;p&gt;Here’s a look at the IQ data:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;iq &amp;lt;- read_csv(&amp;quot;C:/Users/routh/Desktop/Study Materials/My website/Visuals/Nobel Prize/iq.csv&amp;quot;, col_types = cols(`Daily max temperature` = col_skip(), `Education expenditures per capita` = col_number(), Income = col_number()))
+
+# rename the 5th column
+colnames(iq)[5] &amp;lt;- &amp;quot;exp_per_capita&amp;quot;
+
+knitr::kable(head(iq,5))&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;right&#34;&gt;Rank&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Country&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;IQ&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Income&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;exp_per_capita&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Singapore&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;108&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;26105&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;935&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Hong Kong&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;108&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;26057&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;964&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;South Korea&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;106&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;14077&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;538&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Taiwan&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;106&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;NA&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;NA&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;5&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Japan&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;105&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;37244&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1263&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div id=&#34;nobel-prize-data&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Nobel Prize Data&lt;/h2&gt;
+&lt;p&gt;The Nobel Prize Data has several variables. I was interested only in the &lt;code&gt;bornCountry&lt;/code&gt; variable. I made the assumption that for a nobel prize winner who was born in a country, the credits of the prize went to that country even if he/she had moved out. Also if the name of the country changed over time (some cities belong to different countries now), I preserved the older country since the person was originally born in that country.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;nobel &amp;lt;- read_csv(&amp;quot;C:/Users/routh/Desktop/Study Materials/My website/Visuals/Nobel Prize/nobel_prize_by_winner.csv&amp;quot;)
+glimpse(nobel)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Observations: 972
+## Variables: 20
+## $ id                &amp;lt;int&amp;gt; 846, 846, 783, 230, 918, 428, 773, 597, 615,...
+## $ firstname         &amp;lt;chr&amp;gt; &amp;quot;Elinor&amp;quot;, &amp;quot;Elinor&amp;quot;, &amp;quot;Wangari Muta&amp;quot;, &amp;quot;Dorothy...
+## $ surname           &amp;lt;chr&amp;gt; &amp;quot;Ostrom&amp;quot;, &amp;quot;Ostrom&amp;quot;, &amp;quot;Maathai&amp;quot;, &amp;quot;Hodgkin&amp;quot;, &amp;quot;T...
+## $ born              &amp;lt;chr&amp;gt; &amp;quot;8/7/1933&amp;quot;, &amp;quot;8/7/1933&amp;quot;, &amp;quot;4/1/1940&amp;quot;, &amp;quot;5/12/19...
+## $ died              &amp;lt;chr&amp;gt; &amp;quot;6/12/2012&amp;quot;, &amp;quot;6/12/2012&amp;quot;, &amp;quot;9/25/2011&amp;quot;, &amp;quot;7/29...
+## $ bornCountry       &amp;lt;chr&amp;gt; &amp;quot;USA&amp;quot;, &amp;quot;USA&amp;quot;, &amp;quot;Kenya&amp;quot;, &amp;quot;Egypt&amp;quot;, &amp;quot;China&amp;quot;, &amp;quot;US...
+## $ bornCountryCode   &amp;lt;chr&amp;gt; &amp;quot;US&amp;quot;, &amp;quot;US&amp;quot;, &amp;quot;KE&amp;quot;, &amp;quot;EG&amp;quot;, &amp;quot;CN&amp;quot;, &amp;quot;US&amp;quot;, &amp;quot;IR&amp;quot;, &amp;quot;I...
+## $ bornCity          &amp;lt;chr&amp;gt; &amp;quot;Los Angeles, CA&amp;quot;, &amp;quot;Los Angeles, CA&amp;quot;, &amp;quot;Nyeri...
+## $ diedCountry       &amp;lt;chr&amp;gt; &amp;quot;USA&amp;quot;, &amp;quot;USA&amp;quot;, &amp;quot;Kenya&amp;quot;, &amp;quot;United Kingdom&amp;quot;, NA,...
+## $ diedCountryCode   &amp;lt;chr&amp;gt; &amp;quot;US&amp;quot;, &amp;quot;US&amp;quot;, &amp;quot;KE&amp;quot;, &amp;quot;GB&amp;quot;, NA, &amp;quot;US&amp;quot;, NA, &amp;quot;IT&amp;quot;, ...
+## $ diedCity          &amp;lt;chr&amp;gt; &amp;quot;Bloomington, IN&amp;quot;, &amp;quot;Bloomington, IN&amp;quot;, &amp;quot;Nairo...
+## $ gender            &amp;lt;chr&amp;gt; &amp;quot;female&amp;quot;, &amp;quot;female&amp;quot;, &amp;quot;female&amp;quot;, &amp;quot;female&amp;quot;, &amp;quot;fem...
+## $ year              &amp;lt;int&amp;gt; 2009, 2009, 2004, 1964, 2015, 1983, 2003, 19...
+## $ category          &amp;lt;chr&amp;gt; &amp;quot;economics&amp;quot;, &amp;quot;economics&amp;quot;, &amp;quot;peace&amp;quot;, &amp;quot;chemistr...
+## $ overallMotivation &amp;lt;chr&amp;gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
+## $ share             &amp;lt;int&amp;gt; 2, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1,...
+## $ motivation        &amp;lt;chr&amp;gt; &amp;quot;\&amp;quot;for her analysis of economic governance, ...
+## $ name              &amp;lt;chr&amp;gt; &amp;quot;Indiana University&amp;quot;, &amp;quot;Arizona State Univers...
+## $ city              &amp;lt;chr&amp;gt; &amp;quot;Bloomington, IN&amp;quot;, &amp;quot;Tempe, AZ&amp;quot;, NA, &amp;quot;Oxford&amp;quot;...
+## $ country           &amp;lt;chr&amp;gt; &amp;quot;USA&amp;quot;, &amp;quot;USA&amp;quot;, NA, &amp;quot;United Kingdom&amp;quot;, &amp;quot;China&amp;quot;,...&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;human-development-index&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Human Development Index&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;HDI &amp;lt;- read_excel(&amp;quot;C:/Users/routh/Desktop/Study Materials/Projects/Basic Workshop/HDI.xlsx&amp;quot;, col_types = c(&amp;quot;text&amp;quot;, &amp;quot;numeric&amp;quot;, &amp;quot;blank&amp;quot;))
+
+knitr::kable(head(HDI,5))&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;Country&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;HDI&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;Norway&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.9494228&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;Australia&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.9386795&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;Switzerland&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.9391309&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;Germany&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.9256689&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;Denmark&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.9246494&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;No explanation needed here!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;data-munging&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Data Munging&lt;/h1&gt;
+&lt;p&gt;I need to take exactly what I need from each of the data set and merge them to make the final plot. From the &lt;code&gt;nobel&lt;/code&gt; data set, I extracted the &lt;code&gt;bornCountry&lt;/code&gt; column to and found the total count by country.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;nobel.prize &amp;lt;- nobel %&amp;gt;%
+                 mutate(bornCountry = gsub(&amp;quot;\\s*\\([^\\)]+\\)&amp;quot;,&amp;quot;&amp;quot;,as.character(bornCountry)))%&amp;gt;%
+                 group_by(bornCountry) %&amp;gt;%
+                 summarise(count = n()) %&amp;gt;%
+                 na.omit() %&amp;gt;%
+                 rename(Country = bornCountry)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I extracted all the columns from the IQ data set and changed United States to USA to match it up with the other data sets. The &lt;code&gt;exp_per_capita&lt;/code&gt; stands for education expenditure per capita for all the countries in dollars.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;iq.country &amp;lt;- iq %&amp;gt;%
+                 select(Country,IQ,exp_per_capita)
+iq.country$Country &amp;lt;- gsub(&amp;quot;United States&amp;quot;, &amp;quot;USA&amp;quot;, iq.country$Country)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Finally, all the columns were used from the HDI data set.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;HDI$Country &amp;lt;- gsub(&amp;quot;United States&amp;quot;, &amp;quot;USA&amp;quot;, HDI$Country)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;visualization&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Visualization&lt;/h1&gt;
+&lt;p&gt;Finally we’re ready to merge the frames. A few things to note before you move on to the plots. I rescaled the x and y variable on to a logarithmic scale to make the points closer and easier to interpret.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;combine &amp;lt;- list(nobel.prize,iq.country,HDI)%&amp;gt;%
+                      purrr::reduce(left_join,&amp;quot;Country&amp;quot;) %&amp;gt;%
+                      na.omit() %&amp;gt;%
+                      mutate(log.count = log(count+1),log.iq = log(IQ+1),
+                             rank = cut(HDI,c(0.61,0.84,0.89,0.95),c(&amp;quot;Low&amp;quot;,&amp;quot;Medium&amp;quot;,&amp;quot;High&amp;quot;))) %&amp;gt;%
+                      filter(log.iq &amp;gt; 4.35 &amp;amp; log.count &amp;gt; 1)
+
+
+
+my3cols &amp;lt;- c(&amp;quot;#E7B800&amp;quot;, &amp;quot;#2E9FDF&amp;quot;, &amp;quot;#FC4E07&amp;quot;)
+my2cols &amp;lt;- c(&amp;quot;#2E9FDF&amp;quot;, &amp;quot;#FC4E07&amp;quot;)
+windowsFonts(Times=windowsFont(&amp;quot;Times New Roman&amp;quot;))
+
+ggplot(combine, aes(x = log.count, y = log.iq, size = exp_per_capita, fill = rank))+
+  geom_point(pch = 21)+
+  ggrepel::geom_text_repel(aes(label = Country),
+                           size = 3,
+                           segment.color = &amp;quot;black&amp;quot;,
+                           segment.size = 1,
+                           force = 2,
+                           arrow = arrow(angle = 4, length = unit(0.09,&amp;quot;lines&amp;quot;)))+
+  theme_minimal(base_size = 10)+
+  scale_fill_manual(&amp;quot;HDI\nRank&amp;quot;,values = my3cols)+
+  guides(fill = guide_legend(override.aes = list(size=7)))+
+  scale_size_continuous(name = &amp;quot;Education Expenditure\nPer Capita&amp;quot; ,range = c(3,6))+
+  scale_x_continuous(name = &amp;quot;Logarithm Nobel Prize Count&amp;quot;,breaks = seq(0,6,0.5))+
+  scale_y_continuous(name = &amp;quot;Logarithm Country IQ&amp;quot;,breaks = seq(4.2,5,0.05))+
+  theme(legend.position = &amp;quot;top&amp;quot;,
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        plot.title = element_text(family = &amp;quot;Times&amp;quot;,size = 18))+
+  labs(title = &amp;quot;Intelligent Quotient vs Nobel Prize Count&amp;quot;, 
+       subtitle = &amp;quot;Relationship between IQ levels,Nobel Prize count and the Human Development Index by country&amp;quot;,
+       caption = &amp;quot;Source : Multiple&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-01-06-nobel-laureates_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The plot above shows IQ of a country versus the number of nobel prize won. The points are sized according to the expenditure per capita and the countries are colored by how high or low the Human Development Index is.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;I had initially thought India would be ahead in terms of IQ but the lower position is justified by the low HDI level.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Turns out there is a relationship between the number of nobel prizes and the IQ level.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Some countries however don’t exhibit the relationship for instance Luxembourg and New Zealand.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;There is a strong relationship however between HDI and IQ levels. We can see 3 clear strata. This is also true for expenditure per capita. Countries higher up in the IQ levels have higher expenditures for expenditure.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Getting started with the Academic framework for Hugo</title>
       <link>/post/getting-started/</link>
       <pubDate>Wed, 20 Apr 2016 00:00:00 -0400</pubDate>

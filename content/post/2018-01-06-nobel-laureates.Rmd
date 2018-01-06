@@ -1,0 +1,146 @@
+---
+title: Nobel Laureates
+author: ''
+date: '2018-01-06'
+slug: nobel-laureates
+categories:
+  - visualization
+tags:
+  - ggplot2
+  - animation
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+# Motivation
+
+I was always curious to know if there was any relationship between the Intelligent Quotient (IQ) levels and the number of number laureates a country has produced. After I found the [Nobel Prize](https://www.kaggle.com/nobelfoundation/nobel-laureates) data set on Kaggle, I was eager to check how the numbers matched up against the IQ levels of a country. I found some average IQ data (from 1990s to 2010) for several country from this [website](https://www.worlddata.info/iq-by-country.php) and I was able to scrap it out to match it up with the nobel prize data. The results were quite surprising (especially for me and I will explain why). I decided to extend the plot to include more features. Surely the number of nobel laureates a country produces has to depend on how advanced the country is. A few months ago when I was working to deliver a lecture on `ggplot2` at my school I had stumbled upon a **Human Development Index** data set from this website. The HDI is a good indicator of how advanced the country is. When I added this aesthetic to the plot the results finally made more sense. More after the plot below. 
+
+
+# The libraries
+
+```{r,warning=FALSE,message=FALSE}
+library(readxl)
+library(readr)
+library(ggplot2)
+library(dplyr)
+```
+
+# The data
+
+## IQ data
+
+Here's a look at the IQ data:
+
+```{r,warning=FALSE,message=FALSE}
+iq <- read_csv("C:/Users/routh/Desktop/Study Materials/My website/Visuals/Nobel Prize/iq.csv", col_types = cols(`Daily max temperature` = col_skip(), `Education expenditures per capita` = col_number(), Income = col_number()))
+
+# rename the 5th column
+colnames(iq)[5] <- "exp_per_capita"
+
+knitr::kable(head(iq,5))
+```
+
+## Nobel Prize Data
+
+The Nobel Prize Data has several variables. I was interested only in the `bornCountry` variable. I made the assumption that for a nobel prize winner who was born in a country, the credits of the prize went to that country even if he/she had moved out. Also if the name of the country changed over time (some cities belong to different countries now), I preserved the older country since the person was originally born in that country.
+
+```{r,warning=FALSE,message=FALSE}
+nobel <- read_csv("C:/Users/routh/Desktop/Study Materials/My website/Visuals/Nobel Prize/nobel_prize_by_winner.csv")
+glimpse(nobel)
+```
+
+## Human Development Index
+
+```{r,warning=FALSE,message=FALSE}
+HDI <- read_excel("C:/Users/routh/Desktop/Study Materials/Projects/Basic Workshop/HDI.xlsx", col_types = c("text", "numeric", "blank"))
+
+knitr::kable(head(HDI,5))
+```
+
+No explanation needed here!
+
+# Data Munging
+
+I need to take exactly what I need from each of the data set and merge them to make the final plot. From the `nobel` data set, I extracted the `bornCountry` column to and found the total count by country. 
+
+```{r,message=FALSE,warning=FALSE}
+nobel.prize <- nobel %>%
+                 mutate(bornCountry = gsub("\\s*\\([^\\)]+\\)","",as.character(bornCountry)))%>%
+                 group_by(bornCountry) %>%
+                 summarise(count = n()) %>%
+                 na.omit() %>%
+                 rename(Country = bornCountry)
+                 
+```
+
+I extracted all the columns from the IQ data set and changed United States to USA to match it up with the other data sets. The `exp_per_capita` stands for education expenditure per capita for all the countries in dollars. 
+
+```{r}
+iq.country <- iq %>%
+                 select(Country,IQ,exp_per_capita)
+iq.country$Country <- gsub("United States", "USA", iq.country$Country)
+```
+
+Finally, all the columns were used from the HDI data set.
+
+```{r}
+HDI$Country <- gsub("United States", "USA", HDI$Country)
+```
+
+# Visualization
+
+Finally we're ready to merge the frames. A few things to note before you move on to the plots. I rescaled the x and y variable on to a logarithmic scale to make the points closer and easier to interpret.
+
+```{r}
+combine <- list(nobel.prize,iq.country,HDI)%>%
+                      purrr::reduce(left_join,"Country") %>%
+                      na.omit() %>%
+                      mutate(log.count = log(count+1),log.iq = log(IQ+1),
+                             rank = cut(HDI,c(0.61,0.84,0.89,0.95),c("Low","Medium","High"))) %>%
+                      filter(log.iq > 4.35 & log.count > 1)
+
+
+
+my3cols <- c("#E7B800", "#2E9FDF", "#FC4E07")
+my2cols <- c("#2E9FDF", "#FC4E07")
+windowsFonts(Times=windowsFont("Times New Roman"))
+
+ggplot(combine, aes(x = log.count, y = log.iq, size = exp_per_capita, fill = rank))+
+  geom_point(pch = 21)+
+  ggrepel::geom_text_repel(aes(label = Country),
+                           size = 3,
+                           segment.color = "black",
+                           segment.size = 1,
+                           force = 2,
+                           arrow = arrow(angle = 4, length = unit(0.09,"lines")))+
+  theme_minimal(base_size = 10)+
+  scale_fill_manual("HDI\nRank",values = my3cols)+
+  guides(fill = guide_legend(override.aes = list(size=7)))+
+  scale_size_continuous(name = "Education Expenditure\nPer Capita" ,range = c(3,6))+
+  scale_x_continuous(name = "Logarithm Nobel Prize Count",breaks = seq(0,6,0.5))+
+  scale_y_continuous(name = "Logarithm Country IQ",breaks = seq(4.2,5,0.05))+
+  theme(legend.position = "top",
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        plot.title = element_text(family = "Times",size = 18))+
+  labs(title = "Intelligent Quotient vs Nobel Prize Count", 
+       subtitle = "Relationship between IQ levels,Nobel Prize count and the Human Development Index by country",
+       caption = "Source : Multiple")
+```
+
+
+The plot above shows IQ of a country versus the number of nobel prize won. The points are sized according to the expenditure per capita and the countries are colored by how high or low the Human Development Index is.
+
+
+- I had initially thought India would be ahead in terms of IQ but the lower position is justified by the low HDI level.
+
+- Turns out there is a relationship between the number of nobel prizes and the IQ level.
+
+- Some countries however don't exhibit the relationship for instance Luxembourg and New Zealand.
+
+- There is a strong relationship however between HDI and IQ levels. We can see 3 clear strata. This is also true for expenditure per capita. Countries higher up in the IQ levels have higher expenditures for expenditure.
+
