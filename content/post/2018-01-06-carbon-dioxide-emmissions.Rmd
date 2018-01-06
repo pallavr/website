@@ -149,5 +149,4 @@ for(i in 1:frames){
 ```
 
 
-
 ![Global Carbon Dioxide Emission by Year](carbon.gif)
