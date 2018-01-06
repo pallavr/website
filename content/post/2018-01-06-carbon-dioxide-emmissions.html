@@ -1,0 +1,212 @@
+---
+title: Carbon Dioxide Emmissions
+author: ''
+date: '2018-01-06'
+slug: carbon-dioxide-emmissions
+categories:
+  - visualization
+tags:
+  - animation
+  - ggplot2
+header:
+  image: "headers/carbon.jpg"
+---
+
+
+
+<style>
+body {
+text-align: justify}
+</style>
+<div id="motivation" class="section level1">
+<h1>Motivation</h1>
+<p>Global warming is real. 100%. NASA came out with a <a href="https://www.nasa.gov/press/goddard/2014/november/nasa-computer-model-provides-a-new-portrait-of-carbon-dioxide/">beautiful simulation</a> of carbon dioxide emissions for countries all around the world. Ever since then, I was eager to replicate this in R. Of course I couldn’t make it as beautiful as theirs but nevertheless, the final picture I made came out great by R standards. I found some good data on carbon dioxide emissions from the WRI <a href="http://datasets.wri.org/dataset/cait-country">website</a>. I was able to use the data to create an animation with <code>ggplot2</code>. A great way to perform animations with <code>ggplot2</code> is to use the <code>gganimate</code> package. But the package is filled with bugs and fails to run on many occasions. The <code>gganimate</code> function is just a wrapper around image magick. You can easily create the frames, save them in a drive and just run image magick from your console. But if you do manage to make <code>gganimate</code> run on your R-studio then go ahead use that option instead.</p>
+</div>
+<div id="the-libraries" class="section level1">
+<h1>The libraries</h1>
+<pre class="r"><code>library(readr)
+library(ggplot2)
+library(dplyr)</code></pre>
+</div>
+<div id="data" class="section level1">
+<h1>Data</h1>
+<div id="carbon" class="section level2">
+<h2>Carbon</h2>
+<p>This is the carbon dioxide emission data by country and Year.</p>
+<pre class="r"><code>carbon &lt;- read.csv(&quot;C:/Users/routh/Desktop/Study Materials/Projects/Carbon Emmissions/carbon.csv&quot;)
+colnames(carbon)[3] &lt;- &quot;emission&quot;
+
+knitr::kable(tail(carbon,5))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Country</th>
+<th align="right">Year</th>
+<th align="right">emission</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>30828</td>
+<td align="left">Vietnam</td>
+<td align="right">2013</td>
+<td align="right">160.0705</td>
+</tr>
+<tr class="even">
+<td>30829</td>
+<td align="left">World</td>
+<td align="right">2013</td>
+<td align="right">34389.5959</td>
+</tr>
+<tr class="odd">
+<td>30830</td>
+<td align="left">Yemen</td>
+<td align="right">2013</td>
+<td align="right">25.9220</td>
+</tr>
+<tr class="even">
+<td>30831</td>
+<td align="left">Zambia</td>
+<td align="right">2013</td>
+<td align="right">3.4472</td>
+</tr>
+<tr class="odd">
+<td>30832</td>
+<td align="left">Zimbabwe</td>
+<td align="right">2013</td>
+<td align="right">12.3572</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># rename USA and RUSSIA
+carbon$Country &lt;- gsub(&quot;United States&quot;, &quot;USA&quot;, carbon$Country)
+carbon$Country &lt;- gsub(&quot;Russian Federation&quot;, &quot;Russia&quot;, carbon$Country)</code></pre>
+</div>
+<div id="world-map" class="section level2">
+<h2>World Map</h2>
+<p>World data with latitude and longitude values is easily available using the <code>map_data</code> function. You need to convert it into a data frame. I removed Antarctica because data for carbon dioxide emissions was not available for Antarctica.</p>
+<pre class="r"><code>world &lt;- map_data(&#39;world&#39;) %&gt;% 
+                   data.frame() %&gt;%
+                   select(1:3,5) %&gt;%
+                   filter(region != &quot;Antarctica&quot;) %&gt;%
+                   rename(Country = region)
+
+knitr::kable(head(world,5))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">long</th>
+<th align="right">lat</th>
+<th align="right">group</th>
+<th align="left">Country</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">-69.89912</td>
+<td align="right">12.45200</td>
+<td align="right">1</td>
+<td align="left">Aruba</td>
+</tr>
+<tr class="even">
+<td align="right">-69.89571</td>
+<td align="right">12.42300</td>
+<td align="right">1</td>
+<td align="left">Aruba</td>
+</tr>
+<tr class="odd">
+<td align="right">-69.94219</td>
+<td align="right">12.43853</td>
+<td align="right">1</td>
+<td align="left">Aruba</td>
+</tr>
+<tr class="even">
+<td align="right">-70.00415</td>
+<td align="right">12.50049</td>
+<td align="right">1</td>
+<td align="left">Aruba</td>
+</tr>
+<tr class="odd">
+<td align="right">-70.06612</td>
+<td align="right">12.54697</td>
+<td align="right">1</td>
+<td align="left">Aruba</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="transformations" class="section level1">
+<h1>Transformations</h1>
+<p>I noticed there was a lot of missing values for the years before 1950. So I filtered those years out. I also converted <code>Country</code> into factors. <em>Please don’t convert the years into factors</em>. We would take advantage of the numeric nature to loop through the years and create separate images.</p>
+<pre class="r"><code>carbon &lt;- carbon %&gt;%
+              filter(Year &gt; 1949) %&gt;%
+              mutate(Country = as.factor(Country))
+              
+
+carbon[is.na(carbon)] &lt;- 0</code></pre>
+</div>
+<div id="visualization" class="section level1">
+<h1>Visualization</h1>
+<p>The following codes would create 64 frame (or plots), one for each Year and save it to the current working directory. It’s pretty straight forward. The first few lines is just a fancy way to create the names for the <code>jpeg</code>s as they are created. Then I extract the <code>Year</code> one by one and combine it with the world data. The penultimate step is to create the plot in <code>ggplot2</code>. The final trick is to use the <code>ggsave</code> function to save the <code>jpegs</code>.</p>
+<p>After you have saved the plots in the current working directory, you need to download <a href="https://www.imagemagick.org/script/download.php">imagemagick</a> on your device. Then you need to go your command line (cmd for windows users) and after that your need to navigate to the working directory using <code>cd</code>. After you change the directory, you need to type this:<br />
+<code>magick convert *.jpeg -delay 10 -loop 0 carbon.gif</code>.</p>
+<pre class="r"><code>frames &lt;- length(unique(carbon$Year))
+
+windowsFonts(Times=windowsFont(&quot;Times New Roman&quot;))
+
+for(i in 1:frames){
+  # creating a name for each plot file with leading zeros
+  if (i &lt; 10) {name = paste(&#39;000&#39;,i,&#39;.jpeg&#39;,sep=&#39;&#39;)}
+  if (i &lt; 100 &amp;&amp; i &gt;= 10) {name = paste(&#39;00&#39;,i,&#39;.jpeg&#39;, sep=&#39;&#39;)}
+  if (i &gt;= 100) {name = paste(&#39;0&#39;, i,&#39;.jpeg&#39;, sep=&#39;&#39;)}
+  
+  data &lt;- carbon %&gt;%
+               filter(Year == (1949+i))
+  
+  combine &lt;- left_join(world,data,&quot;Country&quot;)
+  
+  # create plot
+  g &lt;- ggplot(combine, aes(x = long,y = lat,group = group))+
+           geom_polygon(aes(fill = emission))+
+           geom_path()+ 
+           scale_fill_gradientn( name = &quot;Carbon Emmissions Level&quot;,
+                                 colours = rev(heat.colors(10)),
+                                 na.value = &quot;grey90&quot;,
+                                 limits = c(0, 7e3),
+                                 guide = guide_legend( keyheight = unit(3, units = &quot;mm&quot;), 
+                                                       keywidth = unit(12, units = &quot;mm&quot;),
+                                                       label.position = &quot;bottom&quot;, 
+                                                       title.position = &#39;top&#39;, 
+                                                       nrow = 1))+
+           labs(title = paste(&#39;Emissions in the year&#39;,1949+i),
+                subtitle = &quot;Carbon Dioxide Emmission since 1950&quot;, 
+                caption = &quot;World Resources Institute&quot;,
+                x = &quot;Longitude&quot;,y = &quot;Latitude&quot;)+
+           theme(text = element_text(color = &quot;#22211d&quot;), 
+                 plot.background = element_rect(fill = &quot;#f5f5f2&quot;, color = NA), 
+                 panel.background = element_rect(fill = &quot;#f5f5f2&quot;, color = NA), 
+                 legend.background = element_rect(fill = &quot;#f5f5f2&quot;, color = NA),
+                 plot.title = element_text(family = &quot;Times&quot;,
+                                           size = 18, 
+                                           hjust = 0.01, 
+                                           color = &quot;#4e4d47&quot;, 
+                                           margin = margin(b = -0.1, t = 0.4, l = 2, unit = &quot;cm&quot;)),
+                plot.subtitle = element_text(size= 15, 
+                                             hjust = 0.01, 
+                                             color = &quot;#4e4d47&quot;, 
+                                             margin = margin(b = -0.1, t = 0.43, l = 2, unit = &quot;cm&quot;)),
+                plot.caption = element_text( size = 12, 
+                                             color = &quot;#4e4d47&quot;, 
+                                             margin = margin(b = 0.3, r=-99, unit = &quot;cm&quot;) ),
+                legend.position = c(0.7, 0.09))
+  
+  # print and save
+  ggsave(name,width = 40, height = 20, units = &quot;cm&quot;)
+}</code></pre>
+<div class="figure">
+<img src="carbon.gif" alt="Global Carbon Dioxide Emission by Year" />
+<p class="caption">Global Carbon Dioxide Emission by Year</p>
+</div>
+</div>

@@ -11,6 +11,211 @@
     <atom:link href="/post/" rel="self" type="application/rss+xml" />
     
     <item>
+      <title>Carbon Dioxide Emmissions</title>
+      <link>/post/carbon-dioxide-emmissions/</link>
+      <pubDate>Sat, 06 Jan 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/post/carbon-dioxide-emmissions/</guid>
+      <description>&lt;style&gt;
+body {
+text-align: justify}
+&lt;/style&gt;
+&lt;div id=&#34;motivation&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Motivation&lt;/h1&gt;
+&lt;p&gt;Global warming is real. 100%. NASA came out with a &lt;a href=&#34;https://www.nasa.gov/press/goddard/2014/november/nasa-computer-model-provides-a-new-portrait-of-carbon-dioxide/&#34;&gt;beautiful simulation&lt;/a&gt; of carbon dioxide emissions for countries all around the world. Ever since then, I was eager to replicate this in R. Of course I couldn’t make it as beautiful as theirs but nevertheless, the final picture I made came out great by R standards. I found some good data on carbon dioxide emissions from the WRI &lt;a href=&#34;http://datasets.wri.org/dataset/cait-country&#34;&gt;website&lt;/a&gt;. I was able to use the data to create an animation with &lt;code&gt;ggplot2&lt;/code&gt;. A great way to perform animations with &lt;code&gt;ggplot2&lt;/code&gt; is to use the &lt;code&gt;gganimate&lt;/code&gt; package. But the package is filled with bugs and fails to run on many occasions. The &lt;code&gt;gganimate&lt;/code&gt; function is just a wrapper around image magick. You can easily create the frames, save them in a drive and just run image magick from your console. But if you do manage to make &lt;code&gt;gganimate&lt;/code&gt; run on your R-studio then go ahead use that option instead.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;the-libraries&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;The libraries&lt;/h1&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(readr)
+library(ggplot2)
+library(dplyr)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;data&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Data&lt;/h1&gt;
+&lt;div id=&#34;carbon&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Carbon&lt;/h2&gt;
+&lt;p&gt;This is the carbon dioxide emission data by country and Year.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;carbon &amp;lt;- read.csv(&amp;quot;C:/Users/routh/Desktop/Study Materials/Projects/Carbon Emmissions/carbon.csv&amp;quot;)
+colnames(carbon)[3] &amp;lt;- &amp;quot;emission&amp;quot;
+
+knitr::kable(tail(carbon,5))&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Country&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Year&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;emission&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;30828&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Vietnam&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;2013&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;160.0705&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;30829&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;World&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;2013&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;34389.5959&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;30830&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Yemen&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;2013&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;25.9220&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;30831&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Zambia&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;2013&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3.4472&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;30832&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Zimbabwe&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;2013&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;12.3572&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# rename USA and RUSSIA
+carbon$Country &amp;lt;- gsub(&amp;quot;United States&amp;quot;, &amp;quot;USA&amp;quot;, carbon$Country)
+carbon$Country &amp;lt;- gsub(&amp;quot;Russian Federation&amp;quot;, &amp;quot;Russia&amp;quot;, carbon$Country)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;world-map&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;World Map&lt;/h2&gt;
+&lt;p&gt;World data with latitude and longitude values is easily available using the &lt;code&gt;map_data&lt;/code&gt; function. You need to convert it into a data frame. I removed Antarctica because data for carbon dioxide emissions was not available for Antarctica.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;world &amp;lt;- map_data(&amp;#39;world&amp;#39;) %&amp;gt;% 
+                   data.frame() %&amp;gt;%
+                   select(1:3,5) %&amp;gt;%
+                   filter(region != &amp;quot;Antarctica&amp;quot;) %&amp;gt;%
+                   rename(Country = region)
+
+knitr::kable(head(world,5))&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;right&#34;&gt;long&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;lat&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;group&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Country&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;-69.89912&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;12.45200&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Aruba&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;-69.89571&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;12.42300&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Aruba&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;-69.94219&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;12.43853&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Aruba&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;-70.00415&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;12.50049&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Aruba&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;-70.06612&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;12.54697&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Aruba&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;transformations&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Transformations&lt;/h1&gt;
+&lt;p&gt;I noticed there was a lot of missing values for the years before 1950. So I filtered those years out. I also converted &lt;code&gt;Country&lt;/code&gt; into factors. &lt;em&gt;Please don’t convert the years into factors&lt;/em&gt;. We would take advantage of the numeric nature to loop through the years and create separate images.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;carbon &amp;lt;- carbon %&amp;gt;%
+              filter(Year &amp;gt; 1949) %&amp;gt;%
+              mutate(Country = as.factor(Country))
+              
+
+carbon[is.na(carbon)] &amp;lt;- 0&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;visualization&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Visualization&lt;/h1&gt;
+&lt;p&gt;The following codes would create 64 frame (or plots), one for each Year and save it to the current working directory. It’s pretty straight forward. The first few lines is just a fancy way to create the names for the &lt;code&gt;jpeg&lt;/code&gt;s as they are created. Then I extract the &lt;code&gt;Year&lt;/code&gt; one by one and combine it with the world data. The penultimate step is to create the plot in &lt;code&gt;ggplot2&lt;/code&gt;. The final trick is to use the &lt;code&gt;ggsave&lt;/code&gt; function to save the &lt;code&gt;jpegs&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;After you have saved the plots in the current working directory, you need to download &lt;a href=&#34;https://www.imagemagick.org/script/download.php&#34;&gt;imagemagick&lt;/a&gt; on your device. Then you need to go your command line (cmd for windows users) and after that your need to navigate to the working directory using &lt;code&gt;cd&lt;/code&gt;. After you change the directory, you need to type this:&lt;br /&gt;
+&lt;code&gt;magick convert *.jpeg -delay 10 -loop 0 carbon.gif&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;frames &amp;lt;- length(unique(carbon$Year))
+
+windowsFonts(Times=windowsFont(&amp;quot;Times New Roman&amp;quot;))
+
+for(i in 1:frames){
+  # creating a name for each plot file with leading zeros
+  if (i &amp;lt; 10) {name = paste(&amp;#39;000&amp;#39;,i,&amp;#39;.jpeg&amp;#39;,sep=&amp;#39;&amp;#39;)}
+  if (i &amp;lt; 100 &amp;amp;&amp;amp; i &amp;gt;= 10) {name = paste(&amp;#39;00&amp;#39;,i,&amp;#39;.jpeg&amp;#39;, sep=&amp;#39;&amp;#39;)}
+  if (i &amp;gt;= 100) {name = paste(&amp;#39;0&amp;#39;, i,&amp;#39;.jpeg&amp;#39;, sep=&amp;#39;&amp;#39;)}
+  
+  data &amp;lt;- carbon %&amp;gt;%
+               filter(Year == (1949+i))
+  
+  combine &amp;lt;- left_join(world,data,&amp;quot;Country&amp;quot;)
+  
+  # create plot
+  g &amp;lt;- ggplot(combine, aes(x = long,y = lat,group = group))+
+           geom_polygon(aes(fill = emission))+
+           geom_path()+ 
+           scale_fill_gradientn( name = &amp;quot;Carbon Emmissions Level&amp;quot;,
+                                 colours = rev(heat.colors(10)),
+                                 na.value = &amp;quot;grey90&amp;quot;,
+                                 limits = c(0, 7e3),
+                                 guide = guide_legend( keyheight = unit(3, units = &amp;quot;mm&amp;quot;), 
+                                                       keywidth = unit(12, units = &amp;quot;mm&amp;quot;),
+                                                       label.position = &amp;quot;bottom&amp;quot;, 
+                                                       title.position = &amp;#39;top&amp;#39;, 
+                                                       nrow = 1))+
+           labs(title = paste(&amp;#39;Emissions in the year&amp;#39;,1949+i),
+                subtitle = &amp;quot;Carbon Dioxide Emmission since 1950&amp;quot;, 
+                caption = &amp;quot;World Resources Institute&amp;quot;,
+                x = &amp;quot;Longitude&amp;quot;,y = &amp;quot;Latitude&amp;quot;)+
+           theme(text = element_text(color = &amp;quot;#22211d&amp;quot;), 
+                 plot.background = element_rect(fill = &amp;quot;#f5f5f2&amp;quot;, color = NA), 
+                 panel.background = element_rect(fill = &amp;quot;#f5f5f2&amp;quot;, color = NA), 
+                 legend.background = element_rect(fill = &amp;quot;#f5f5f2&amp;quot;, color = NA),
+                 plot.title = element_text(family = &amp;quot;Times&amp;quot;,
+                                           size = 18, 
+                                           hjust = 0.01, 
+                                           color = &amp;quot;#4e4d47&amp;quot;, 
+                                           margin = margin(b = -0.1, t = 0.4, l = 2, unit = &amp;quot;cm&amp;quot;)),
+                plot.subtitle = element_text(size= 15, 
+                                             hjust = 0.01, 
+                                             color = &amp;quot;#4e4d47&amp;quot;, 
+                                             margin = margin(b = -0.1, t = 0.43, l = 2, unit = &amp;quot;cm&amp;quot;)),
+                plot.caption = element_text( size = 12, 
+                                             color = &amp;quot;#4e4d47&amp;quot;, 
+                                             margin = margin(b = 0.3, r=-99, unit = &amp;quot;cm&amp;quot;) ),
+                legend.position = c(0.7, 0.09))
+  
+  # print and save
+  ggsave(name,width = 40, height = 20, units = &amp;quot;cm&amp;quot;)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;carbon.gif&#34; alt=&#34;Global Carbon Dioxide Emission by Year&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;Global Carbon Dioxide Emission by Year&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Nobel Laureates</title>
       <link>/post/nobel-laureates/</link>
       <pubDate>Sat, 06 Jan 2018 00:00:00 +0000</pubDate>
@@ -218,54 +423,6 @@ ggplot(combine, aes(x = log.count, y = log.iq, size = exp_per_capita, fill = ran
 &lt;li&gt;&lt;p&gt;Some countries however don’t exhibit the relationship for instance Luxembourg and New Zealand.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;There is a strong relationship however between HDI and IQ levels. We can see 3 clear strata. This is also true for expenditure per capita. Countries higher up in the IQ levels have higher expenditures for expenditure.&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;/div&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Hello R Markdown</title>
-      <link>/post/2015-07-23-r-rmarkdown/</link>
-      <pubDate>Thu, 23 Jul 2015 21:13:14 -0500</pubDate>
-      
-      <guid>/post/2015-07-23-r-rmarkdown/</guid>
-      <description>&lt;div id=&#34;r-markdown&#34; class=&#34;section level1&#34;&gt;
-&lt;h1&gt;R Markdown&lt;/h1&gt;
-&lt;p&gt;This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see &lt;a href=&#34;http://rmarkdown.rstudio.com&#34; class=&#34;uri&#34;&gt;http://rmarkdown.rstudio.com&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;You can embed an R code chunk like this:&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;summary(cars)
-##      speed           dist       
-##  Min.   : 4.0   Min.   :  2.00  
-##  1st Qu.:12.0   1st Qu.: 26.00  
-##  Median :15.0   Median : 36.00  
-##  Mean   :15.4   Mean   : 42.98  
-##  3rd Qu.:19.0   3rd Qu.: 56.00  
-##  Max.   :25.0   Max.   :120.00
-fit &amp;lt;- lm(dist ~ speed, data = cars)
-fit
-## 
-## Call:
-## lm(formula = dist ~ speed, data = cars)
-## 
-## Coefficients:
-## (Intercept)        speed  
-##     -17.579        3.932&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;div id=&#34;including-plots&#34; class=&#34;section level1&#34;&gt;
-&lt;h1&gt;Including Plots&lt;/h1&gt;
-&lt;p&gt;You can also embed plots. See Figure &lt;a href=&#34;#fig:pie&#34;&gt;1&lt;/a&gt; for example:&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;par(mar = c(0, 1, 0, 1))
-pie(
-  c(280, 60, 20),
-  c(&amp;#39;Sky&amp;#39;, &amp;#39;Sunny side of pyramid&amp;#39;, &amp;#39;Shady side of pyramid&amp;#39;),
-  col = c(&amp;#39;#0292D8&amp;#39;, &amp;#39;#F7EA39&amp;#39;, &amp;#39;#C4B632&amp;#39;),
-  init.angle = -50, border = NA
-)&lt;/code&gt;&lt;/pre&gt;
-&lt;div class=&#34;figure&#34;&gt;&lt;span id=&#34;fig:pie&#34;&gt;&lt;/span&gt;
-&lt;img src=&#34;/post/2015-07-23-r-rmarkdown_files/figure-html/pie-1.png&#34; alt=&#34;A fancy pie chart.&#34; width=&#34;672&#34; /&gt;
-&lt;p class=&#34;caption&#34;&gt;
-Figure 1: A fancy pie chart.
-&lt;/p&gt;
-&lt;/div&gt;
 &lt;/div&gt;
 </description>
     </item>
