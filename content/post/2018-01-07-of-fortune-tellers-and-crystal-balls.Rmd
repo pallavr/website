@@ -379,7 +379,7 @@ When we select a time series model, there are signs that indicate how good the m
 
 Now we are ready to layout the steps we use to first identify a time series model parameters and then forecast future values. The data used contains 1810 observations in Bowling Green, Ohio of the maximum daily temperature in degrees Celsius, one observation every day from January 1, 2011 - December 31, 2015 (so 5 years of complete data). 
 
-The Bowling Green station has a latitude and longitude of 41.3831?, -83.6111?. The data goes into the GHCN (Global Historical Climatology Network)-Daily database, maintained by the National Climactic Data Center (NCDC), part of the U.S. Department of Commerce.The data was aggregated over every week and the mean maximum weekly temperature was obtained.The final 51 weeks were used as test set, and the rest was used to train the ARIMA model.
+The Bowling Green station has a latitude and longitude of 41.3831, -83.6111. The data goes into the GHCN (Global Historical Climatology Network)-Daily database, maintained by the National Climactic Data Center (NCDC), part of the U.S. Department of Commerce.The data was aggregated over every week and the mean maximum weekly temperature was obtained.The final 51 weeks were used as test set, and the rest was used to train the ARIMA model.
 
 ```{r,echo=FALSE,message=FALSE,warning=FALSE}
 bg <- read_csv("C:/Users/routh/Desktop/Study Materials/My website/Time series/BG_weekly.csv")
