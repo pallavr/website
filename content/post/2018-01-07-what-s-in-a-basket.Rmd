@@ -120,7 +120,7 @@ The apriori is an association algo that was proposed in the early 1900s. It work
 In R you would use the `apriori` function in the `arules` or `arulesViz` package to create a set of rules. It is also worth noting that all objects created using the package are `S4` class objects. This means you can extract the elements using the `@` symbol.
 
 ```{r,warning=FALSE,message=FALSE}
-rules <- apriori(transactions, parameter=list(support=0.01, confidence=0.99))
+rules <- apriori(transactions, parameter=list(support=0.003, confidence=0.85))
 summary(rules)
 ```
 
@@ -136,7 +136,7 @@ inspect(head(sort(rules, by ="lift"),10),linebreak = F)
 
 ## Removing subsets
 
-If we look at the first two rules above we see what subsets mean. These rules are identical with only the LHS and RHS reversed and are therefore redundant. We might want to get rid of these rules. I implemented the codes from this (source)[http://r-statistics.co/Association-Mining-With-R.html] to remove the subsets.
+If we look at the first two rules above we see what subsets mean. These rules are identical with only the LHS and RHS reversed and are therefore redundant. We might want to get rid of these rules. I implemented the codes from this [source](http://r-statistics.co/Association-Mining-With-R.html) to remove the subsets.
 
 ```{r}
 #smaller rule set for the purpose of demonstration
@@ -192,7 +192,7 @@ One may be interested in inspecting the relationship between the computed lift, 
 my3cols <- c("#E7B800", "#2E9FDF", "#FC4E07")
 my2cols <- c("#2E9FDF", "#FC4E07")
 
-quality <- rules@quality[1:1e5,]  # extract the information
+quality <- rules@quality  # extract the information
 
 ggplot(quality, aes(support,confidence))+
   geom_point(col = my2cols[2],alpha = 0.5)+
@@ -204,7 +204,7 @@ ggplot(quality, aes(support,lift, col = confidence))+
   geom_point(alpha = 0.1)+
   scale_color_gradient(low = "#00AFBB", high = "#FC3E07")+
   labs(title = "Lift vs Support")+
-  coord_cartesian(ylim = c(0,300),xlim = c(0,0.005))+
+  coord_cartesian(ylim = c(0,150),xlim = c(0.003,0.01))+
   theme_minimal()
 ```
 

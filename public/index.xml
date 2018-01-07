@@ -1507,12 +1507,12 @@ transactions &amp;lt;- read.transactions(file = &amp;quot;C:/Users/routh/Desktop
 &lt;h1&gt;Apriori&lt;/h1&gt;
 &lt;p&gt;The apriori is an association algo that was proposed in the early 1900s. It works by discovering certain rules (using metrics such as support and confidence) using certain thresholds. A nice overview of the steps in the algorithm is outlined in the &lt;a href=&#34;https://en.wikipedia.org/wiki/Apriori_algorithm&#34;&gt;wikipedia&lt;/a&gt; page.&lt;/p&gt;
 &lt;p&gt;In R you would use the &lt;code&gt;apriori&lt;/code&gt; function in the &lt;code&gt;arules&lt;/code&gt; or &lt;code&gt;arulesViz&lt;/code&gt; package to create a set of rules. It is also worth noting that all objects created using the package are &lt;code&gt;S4&lt;/code&gt; class objects. This means you can extract the elements using the &lt;code&gt;@&lt;/code&gt; symbol.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rules &amp;lt;- apriori(transactions, parameter=list(support=0.01, confidence=0.99))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rules &amp;lt;- apriori(transactions, parameter=list(support=0.003, confidence=0.85))&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;## Apriori
 ## 
 ## Parameter specification:
 ##  confidence minval smax arem  aval originalSupport maxtime support minlen
-##        0.99    0.1    1 none FALSE            TRUE       5    0.01      1
+##        0.85    0.1    1 none FALSE            TRUE       5   0.003      1
 ##  maxlen target   ext
 ##      10  rules FALSE
 ## 
@@ -1520,37 +1520,37 @@ transactions &amp;lt;- read.transactions(file = &amp;quot;C:/Users/routh/Desktop
 ##  filter tree heap memopt load sort verbose
 ##     0.1 TRUE TRUE  FALSE TRUE    2    TRUE
 ## 
-## Absolute minimum support count: 195 
+## Absolute minimum support count: 58 
 ## 
 ## set item appearances ...[0 item(s)] done [0.00s].
 ## set transactions ...[8719 item(s), 19574 transaction(s)] done [0.06s].
-## sorting and recoding items ... [541 item(s)] done [0.01s].
+## sorting and recoding items ... [1737 item(s)] done [0.01s].
 ## creating transaction tree ... done [0.01s].
-## checking subsets of size 1 2 3 4 done [0.02s].
-## writing ... [9 rule(s)] done [0.00s].
-## creating S4 object  ... done [0.00s].&lt;/code&gt;&lt;/pre&gt;
+## checking subsets of size 1 2 3 4 5 6 7 done [0.18s].
+## writing ... [2812 rule(s)] done [0.01s].
+## creating S4 object  ... done [0.01s].&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;summary(rules)&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;## set of 9 rules
+&lt;pre&gt;&lt;code&gt;## set of 2812 rules
 ## 
 ## rule length distribution (lhs + rhs):sizes
-## 2 3 
-## 6 3 
+##   2   3   4   5   6   7 
+##  65 339 989 944 431  44 
 ## 
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##   2.000   2.000   2.000   2.333   3.000   3.000 
+##   2.000   4.000   5.000   4.522   5.000   7.000 
 ## 
 ## summary of quality measures:
-##     support          confidence      lift      
-##  Min.   :0.01185   Min.   :1    Min.   :51.11  
-##  1st Qu.:0.01512   1st Qu.:1    1st Qu.:51.11  
-##  Median :0.01512   Median :1    Median :52.62  
-##  Mean   :0.01454   Mean   :1    Mean   :58.12  
-##  3rd Qu.:0.01512   3rd Qu.:1    3rd Qu.:66.13  
-##  Max.   :0.01512   Max.   :1    Max.   :66.13  
+##     support           confidence          lift        
+##  Min.   :0.003014   Min.   :0.8500   Min.   :  9.027  
+##  1st Qu.:0.003167   1st Qu.:0.8714   1st Qu.: 21.061  
+##  Median :0.003423   Median :0.8986   Median : 24.704  
+##  Mean   :0.003919   Mean   :0.9070   Mean   : 40.604  
+##  3rd Qu.:0.004036   3rd Qu.:0.9365   3rd Qu.: 59.330  
+##  Max.   :0.020691   Max.   :1.0000   Max.   :326.233  
 ## 
 ## mining info:
 ##          data ntransactions support confidence
-##  transactions         19574    0.01       0.99&lt;/code&gt;&lt;/pre&gt;
+##  transactions         19574   0.003       0.85&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;inspect-the-rules&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;Inspect the rules&lt;/h1&gt;
@@ -1578,7 +1578,7 @@ transactions &amp;lt;- read.transactions(file = &amp;quot;C:/Users/routh/Desktop
 ## [9] 1          51.10705&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;removing-subsets&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Removing subsets&lt;/h2&gt;
-&lt;p&gt;If we look at the first two rules above we see what subsets mean. These rules are identical with only the LHS and RHS reversed and are therefore redundant. We might want to get rid of these rules. I implemented the codes from this (source)[&lt;a href=&#34;http://r-statistics.co/Association-Mining-With-R.html&#34; class=&#34;uri&#34;&gt;http://r-statistics.co/Association-Mining-With-R.html&lt;/a&gt;] to remove the subsets.&lt;/p&gt;
+&lt;p&gt;If we look at the first two rules above we see what subsets mean. These rules are identical with only the LHS and RHS reversed and are therefore redundant. We might want to get rid of these rules. I implemented the codes from this &lt;a href=&#34;http://r-statistics.co/Association-Mining-With-R.html&#34;&gt;source&lt;/a&gt; to remove the subsets.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#smaller rule set for the purpose of demonstration
 rules.small &amp;lt;- apriori(transactions, parameter=list(support=0.001, confidence=0.95,maxlen = 2))&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;## Apriori
@@ -1734,21 +1734,19 @@ inspect(rules.new[1:20])&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;my3cols &amp;lt;- c(&amp;quot;#E7B800&amp;quot;, &amp;quot;#2E9FDF&amp;quot;, &amp;quot;#FC4E07&amp;quot;)
 my2cols &amp;lt;- c(&amp;quot;#2E9FDF&amp;quot;, &amp;quot;#FC4E07&amp;quot;)
 
-quality &amp;lt;- rules@quality[1:1e5,]  # extract the information
+quality &amp;lt;- rules@quality  # extract the information
 
 ggplot(quality, aes(support,confidence))+
   geom_point(col = my2cols[2],alpha = 0.5)+
   labs(title = &amp;quot;Support Vs Confidence&amp;quot;)+
   theme_minimal()&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;## Warning: Removed 99991 rows containing missing values (geom_point).&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;/post/2018-01-07-what-s-in-a-basket_files/figure-html/unnamed-chunk-10-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot(quality, aes(support,lift, col = confidence))+
   geom_point(alpha = 0.1)+
   scale_color_gradient(low = &amp;quot;#00AFBB&amp;quot;, high = &amp;quot;#FC3E07&amp;quot;)+
   labs(title = &amp;quot;Lift vs Support&amp;quot;)+
-  coord_cartesian(ylim = c(0,300),xlim = c(0,0.005))+
+  coord_cartesian(ylim = c(0,150),xlim = c(0.003,0.01))+
   theme_minimal()&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;## Warning: Removed 99991 rows containing missing values (geom_point).&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;/post/2018-01-07-what-s-in-a-basket_files/figure-html/unnamed-chunk-10-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The package &lt;code&gt;ArulesViz&lt;/code&gt; provides a host of other visualizations plots which might be worth exploring. Using them is pretty straightforward and you can find them in the official &lt;a href=&#34;https://cran.r-project.org/web/packages/arulesViz/arulesViz.pdf&#34;&gt;documentation&lt;/a&gt;.&lt;/p&gt;
 &lt;/div&gt;
