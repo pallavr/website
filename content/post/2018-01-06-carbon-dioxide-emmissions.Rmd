@@ -149,4 +149,8 @@ for(i in 1:frames){
 ```
 
 
-![Global Carbon Dioxide Emission by Year](carbon.gif)
+You can find the gif [here](https://gfycat.com/gifs/detail/ImaginaryDistortedAlaskajingle)
+
+Beautiful! 
+
+Its not as fancy as the NASA plot but nonetheless, it's pretty accurate. Notice the colors for USA and China. Right towards the end USA manages to reduce the emission levels but China's emission levels keep on rising!
