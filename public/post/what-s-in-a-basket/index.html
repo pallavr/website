@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="theme" content="hugo-academic">
+  <meta name="generator" content="Hugo 0.32.2" />
+  <meta name="author" content="Pallav Routh">
+
+  
+  
+  
+  
+    
+      
+    
+  
+  <meta name="description" content="body {text-align: justify}Ever wondered how online retail purchasers come up with ‘recommendations’? How they already know what to refer after you’ve made a purchase? The powerful Apriori algorithm that based on simple high school probability concepts that’s working behind the scenes to discover these connections. Association mining is based on the Apriori Algorithm. Association mining helps analyse the habits of buyers to find the relationship between different items in a ‘market basket’.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/post/what-s-in-a-basket/">
+
+  
+
+
+  
+
+  
+  
+  <meta name="theme-color" content="#0095eb">
+  
+  
+  
+  
+    
+  
+  
+    
+    
+      
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+      
+    
+  
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha512-6MXa8B6uaO18Hid6blRMetEIoPqHf7Ux1tnyIQdpt9qI5OACx7C+O3IVTr98vwGnlcg0LOLa02i9Y1HpVhlfiw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.1/css/academicons.min.css" integrity="sha512-NThgw3XKQ1absAahW6to7Ey42uycrVvfNfyjqcFNgCmOCQ5AR4AO0SiXrN+8ZtYeappp56lk1WtvjVmEa+VR6A==" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw==" crossorigin="anonymous">
+  
+  
+  
+  
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat:400,700%7cRoboto:400,400italic,700%7cRoboto&#43;Mono">
+  
+  <link rel="stylesheet" href="/styles.css">
+  
+
+  
+
+  
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="Home">
+  <link rel="feed" href="/index.xml" type="application/rss+xml" title="Home">
+  
+
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/post/what-s-in-a-basket/">
+
+  <meta property="twitter:card" content="summary_large_image">
+  
+  <meta property="twitter:site" content="@pallav_routh">
+  <meta property="twitter:creator" content="@pallav_routh">
+  
+  <meta property="og:site_name" content="Home">
+  <meta property="og:url" content="/post/what-s-in-a-basket/">
+  <meta property="og:title" content="What&#39;s In A Basket | Home">
+  <meta property="og:description" content="body {text-align: justify}Ever wondered how online retail purchasers come up with ‘recommendations’? How they already know what to refer after you’ve made a purchase? The powerful Apriori algorithm that based on simple high school probability concepts that’s working behind the scenes to discover these connections. Association mining is based on the Apriori Algorithm. Association mining helps analyse the habits of buyers to find the relationship between different items in a ‘market basket’."><meta property="og:image" content="/img/headers/basket.jpg">
+  <meta property="og:locale" content="en-us">
+  
+  <meta property="article:published_time" content="2018-01-07T00:00:00&#43;00:00">
+  
+  <meta property="article:modified_time" content="2018-01-07T00:00:00&#43;00:00">
+  
+
+  
+
+  <title>What&#39;s In A Basket | Home</title>
+
+</head>
+<body id="top" data-spy="scroll" data-target="#toc" data-offset="71" >
+
+<nav class="navbar navbar-default navbar-fixed-top" id="navbar-main">
+  <div class="container">
+
+    
+    <div class="navbar-header">
+      
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+              data-target=".navbar-collapse" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      
+      <a class="navbar-brand" href="/"><img src="/img/pic.png" alt="Home"></a>
+    </div>
+
+    
+    <div class="collapse navbar-collapse">
+
+      
+      
+      <ul class="nav navbar-nav navbar-right">
+        
+
+        
+
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#about">
+            
+            <span>Home</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#posts">
+            
+            <span>Posts</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#projects">
+            
+            <span>Projects</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#publication">
+            
+            <span>Research</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#teaching">
+            
+            <span>Teaching</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#contact">
+            
+            <span>Contact</span>
+            
+          </a>
+        </li>
+
+        
+        
+      
+
+      
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+<article class="article" itemscope itemtype="http://schema.org/Article">
+
+  
+<div class="article-header">
+  <img src="/img/headers/basket.jpg" class="article-banner" itemprop="image">
+  
+</div>
+
+
+
+  <div class="article-container">
+    <div class="article-inner">
+      <h1 itemprop="name">What&#39;s In A Basket</h1>
+
+      
+
+<div class="article-metadata">
+
+  <span class="article-date">
+    
+    <time datetime="2018-01-07 00:00:00 &#43;0000 UTC" itemprop="datePublished dateModified">
+      Jan 7, 2018
+    </time>
+  </span>
+  <span itemscope itemprop="author publisher" itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Pallav Routh">
+  </span>
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    12 min read
+  </span>
+  
+
+  
+  
+
+  
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fa fa-folder"></i>
+    
+    <a href="/categories/predictive-analytics">predictive analytics</a
+    >
+    
+  </span>
+  
+  
+
+  
+  
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    <li>
+      <a class="twitter"
+         href="https://twitter.com/intent/tweet?text=What%27s%20In%20A%20Basket&amp;url=%2fpost%2fwhat-s-in-a-basket%2f"
+         target="_blank" rel="noopener">
+        <i class="fa fa-twitter"></i>
+      </a>
+    </li>
+    <li>
+      <a class="facebook"
+         href="https://www.facebook.com/sharer.php?u=%2fpost%2fwhat-s-in-a-basket%2f"
+         target="_blank" rel="noopener">
+        <i class="fa fa-facebook"></i>
+      </a>
+    </li>
+    <li>
+      <a class="linkedin"
+         href="https://www.linkedin.com/shareArticle?mini=true&amp;url=%2fpost%2fwhat-s-in-a-basket%2f&amp;title=What%27s%20In%20A%20Basket"
+         target="_blank" rel="noopener">
+        <i class="fa fa-linkedin"></i>
+      </a>
+    </li>
+    <li>
+      <a class="weibo"
+         href="http://service.weibo.com/share/share.php?url=%2fpost%2fwhat-s-in-a-basket%2f&amp;title=What%27s%20In%20A%20Basket"
+         target="_blank" rel="noopener">
+        <i class="fa fa-weibo"></i>
+      </a>
+    </li>
+    <li>
+      <a class="email"
+         href="mailto:?subject=What%27s%20In%20A%20Basket&amp;body=%2fpost%2fwhat-s-in-a-basket%2f">
+        <i class="fa fa-envelope"></i>
+      </a>
+    </li>
+  </ul>
+</div>
+
+
+  
+
+</div>
+
+
+      <div class="article-style" itemprop="articleBody">
+        <style>
+body {
+text-align: justify}
+</style>
+<p>Ever wondered how online retail purchasers come up with <em>‘recommendations’</em>? How they already know what to refer after you’ve made a purchase? The powerful <em>Apriori</em> algorithm that based on simple high school probability concepts that’s working behind the scenes to discover these connections. Association mining is based on the Apriori Algorithm. Association mining helps analyse the habits of buyers to find the relationship between different items in a ‘market basket’. The discovery of these relationships can help to develop a sales strategy by considering the items frequently purchased in sequence by customers. .This tutorial demonstrates the concepts in Market Basket Analysis and how to perform the analysis in R.</p>
+<div id="get-the-libraries" class="section level1">
+<h1>Get the libraries</h1>
+<pre class="r"><code>library(readxl) # reading in file 
+library(readr)
+library(arulesViz) #association viz
+library(ggplot2) # data viz
+library(dplyr) # data manipulation
+library(tidyr) # data manipulation</code></pre>
+</div>
+<div id="market-basket-terminology" class="section level1">
+<h1>Market Basket Terminology</h1>
+<p>Before we begin association mining we need to understand some relevant terminology. A <strong>rule</strong> in association mining refers to sequence in which items are bought. So, the rule A =&gt; B means B was bought after A.</p>
+<ul>
+<li><strong>Support:</strong> It is simply the probability of buying A and B together. Statistically this refers to the intersection of A and B.</li>
+</ul>
+<p><span class="math display">\[ \text{Support} = \frac{\text{Total number of A and B}}{\text{Total number of transactions}} \]</span></p>
+<ul>
+<li><strong>Confidence:</strong> This is the conditional probability of B given A. A high value of confidence therefore means there is a high chance of B being bought after A.</li>
+</ul>
+<p><span class="math display">\[  \text{Confidence} = \frac{\text{Number of Tr. with both A and B}}{\text{Total number of Tr.}} \]</span></p>
+<ul>
+<li><strong>Lift:</strong> It is the confidence divided by the expected confidence. Therefore, a high value of lift mean that there is a higher chance of A and B occurring together.</li>
+</ul>
+<p><span class="math display">\[  \text{Lift} = \frac{\text{Confidence}}{\text{Expected Conf.}} = \frac{\text{Pr(A union B)}}{\text{Pr(A).Pr(B)}}  \]</span></p>
+<p>where expected confidence is <span class="math display">\[ \text{Pr(B)} = \frac{\text{Number of Tr. of B}}{\text{Total Number of Tr.}} \]</span></p>
+<p><strong>Note:</strong> Its worth noting that using Lift to create recommendations is a bad idea. If you consider the transactions A =&gt; B and B =&gt; A, and if you work out the math with the formula above (which is pretty straight-forward), you’d notice that lift and support turns out to be same!. Therefore, if one is interested in making a <em>sequence</em> recommendation you should use confidence instead.</p>
+</div>
+<div id="create-a-transaction-object" class="section level1">
+<h1>Create a transaction object</h1>
+<div id="get-the-data-set" class="section level2">
+<h2>Get the data set</h2>
+<p>We will use a online retail transaction database from a grocery shop in the UK. The data set is available freely <a href="http://archive.ics.uci.edu/ml/datasets/online+retail">UCI</a> depository. Here are the variables in the data set:</p>
+<ul>
+<li><strong>InvoiceNo:</strong> Invoice number. Nominal, a 6-digit integral number uniquely assigned to each transaction. If this code starts with letter ‘c’, it indicates a cancellation.</li>
+<li><strong>StockCode:</strong> Product (item) code. Nominal, a 5-digit integral number uniquely assigned to each distinct product.</li>
+<li><strong>Description:</strong> Product (item) name. Nominal.</li>
+<li><strong>Quantity:</strong> The quantities of each product (item) per transaction. Numeric.</li>
+<li><strong>InvoiceDate:</strong> Invoice Date and time. Numeric, the day and time when each transaction was generated.</li>
+<li><strong>UnitPrice:</strong> Unit price. Numeric, Product price per unit in sterling.</li>
+<li><strong>CustomerID:</strong> Customer number. Nominal, a 5-digit integral number uniquely assigned to each customer.</li>
+<li><strong>Country:</strong> Country name. Nominal, the name of the country where each customer resides.</li>
+</ul>
+</div>
+<div id="preprocess-the-data-set" class="section level2">
+<h2>Preprocess the data set</h2>
+<p>Its helpful if the item desciption and the Invoice date-time is converted in factor and a date-time object respectively.</p>
+<p><strong>Note:</strong> They have been commented out to make compiling easier.</p>
+<pre class="r"><code># Online_Retail &lt;- Online_Retail %&gt;% mutate(Description = as.factor(Description))
+# Online_Retail$Date &lt;- as.Date(Online_Retail$InvoiceDate)
+# Online_Retail$Time &lt;- format(Online_Retail$InvoiceDate,&quot;%H:%M:%S&quot;)
+# Online_Retail$InvoiceNo &lt;- as.numeric(as.character(Online_Retail$InvoiceNo))</code></pre>
+</div>
+<div id="transaction-format" class="section level2">
+<h2>Transaction format</h2>
+<p>Before we can apply the apriori algorithm, we need to transform the data to create <em>“baskets”</em>. After arranging the data by ID you would need to group the items by the ID and by date and then record all the transactions in another column. Each row in this column is now a basket. You could also form smaller baskets by grouping by hour. After you create the baskets you would need export the file in <em>‘.csv’</em> format to the local drive and then import it by coercing it as a <em>transaction class</em> data. The import step is done using the <code>read.transactions</code> function.</p>
+<pre class="r"><code># itemList &lt;- Online_Retail %&gt;%
+               #  arrange(CustomerID) %&gt;%
+               #  group_by(CustomerID,Date)%&gt;%
+               #  summarise(List = paste0(Description, collapse = &quot;,&quot;))%&gt;%
+               #  ungroup()%&gt;%
+               #  select(List) # we just need the column containing the baskets
+
+
+# write.csv(itemList,&quot;itemList.csv&quot;, quote = FALSE, row.names = F)
+ 
+transactions &lt;- read.transactions(file = &quot;C:/Users/routh/Desktop/Study Materials/My website/Market Basket/itemList.csv&quot;,
+                                  format = c(&quot;basket&quot;),  # each row is a basket
+                                  sep = &quot;,&quot;)</code></pre>
+</div>
+</div>
+<div id="apriori" class="section level1">
+<h1>Apriori</h1>
+<p>The apriori is an association algo that was proposed in the early 1900s. It works by discovering certain rules (using metrics such as support and confidence) using certain thresholds. A nice overview of the steps in the algorithm is outlined in the <a href="https://en.wikipedia.org/wiki/Apriori_algorithm">wikipedia</a> page.</p>
+<p>In R you would use the <code>apriori</code> function in the <code>arules</code> or <code>arulesViz</code> package to create a set of rules. It is also worth noting that all objects created using the package are <code>S4</code> class objects. This means you can extract the elements using the <code>@</code> symbol.</p>
+<pre class="r"><code>rules &lt;- apriori(transactions, parameter=list(support=0.01, confidence=0.99))</code></pre>
+<pre><code>## Apriori
+## 
+## Parameter specification:
+##  confidence minval smax arem  aval originalSupport maxtime support minlen
+##        0.99    0.1    1 none FALSE            TRUE       5    0.01      1
+##  maxlen target   ext
+##      10  rules FALSE
+## 
+## Algorithmic control:
+##  filter tree heap memopt load sort verbose
+##     0.1 TRUE TRUE  FALSE TRUE    2    TRUE
+## 
+## Absolute minimum support count: 195 
+## 
+## set item appearances ...[0 item(s)] done [0.00s].
+## set transactions ...[8719 item(s), 19574 transaction(s)] done [0.06s].
+## sorting and recoding items ... [541 item(s)] done [0.01s].
+## creating transaction tree ... done [0.01s].
+## checking subsets of size 1 2 3 4 done [0.02s].
+## writing ... [9 rule(s)] done [0.00s].
+## creating S4 object  ... done [0.00s].</code></pre>
+<pre class="r"><code>summary(rules)</code></pre>
+<pre><code>## set of 9 rules
+## 
+## rule length distribution (lhs + rhs):sizes
+## 2 3 
+## 6 3 
+## 
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   2.000   2.000   2.000   2.333   3.000   3.000 
+## 
+## summary of quality measures:
+##     support          confidence      lift      
+##  Min.   :0.01185   Min.   :1    Min.   :51.11  
+##  1st Qu.:0.01512   1st Qu.:1    1st Qu.:51.11  
+##  Median :0.01512   Median :1    Median :52.62  
+##  Mean   :0.01454   Mean   :1    Mean   :58.12  
+##  3rd Qu.:0.01512   3rd Qu.:1    3rd Qu.:66.13  
+##  Max.   :0.01512   Max.   :1    Max.   :66.13  
+## 
+## mining info:
+##          data ntransactions support confidence
+##  transactions         19574    0.01       0.99</code></pre>
+</div>
+<div id="inspect-the-rules" class="section level1">
+<h1>Inspect the rules</h1>
+<p>The rules are extracted using the <code>inspect</code> function. I sorted them by lift. I like the style of output because it is very intuitive and straight-forward.</p>
+<pre class="r"><code>inspect(head(sort(rules, by =&quot;lift&quot;),10),linebreak = F)</code></pre>
+<pre><code>##     lhs                             rhs                   support   
+## [1] {SET 3 RETROSPOT TEA}        =&gt; {SUGAR}               0.01512210
+## [2] {SUGAR}                      =&gt; {SET 3 RETROSPOT TEA} 0.01512210
+## [3] {COFFEE,SET 3 RETROSPOT TEA} =&gt; {SUGAR}               0.01512210
+## [4] {COFFEE,SUGAR}               =&gt; {SET 3 RETROSPOT TEA} 0.01512210
+## [5] {BACK DOOR}                  =&gt; {KEY FOB}             0.01185246
+## [6] {SHED}                       =&gt; {KEY FOB}             0.01312966
+## [7] {SET 3 RETROSPOT TEA}        =&gt; {COFFEE}              0.01512210
+## [8] {SUGAR}                      =&gt; {COFFEE}              0.01512210
+## [9] {SET 3 RETROSPOT TEA,SUGAR}  =&gt; {COFFEE}              0.01512210
+##     confidence lift    
+## [1] 1          66.12838
+## [2] 1          66.12838
+## [3] 1          66.12838
+## [4] 1          66.12838
+## [5] 1          52.61828
+## [6] 1          52.61828
+## [7] 1          51.10705
+## [8] 1          51.10705
+## [9] 1          51.10705</code></pre>
+<div id="removing-subsets" class="section level2">
+<h2>Removing subsets</h2>
+<p>If we look at the first two rules above we see what subsets mean. These rules are identical with only the LHS and RHS reversed and are therefore redundant. We might want to get rid of these rules. I implemented the codes from this (source)[<a href="http://r-statistics.co/Association-Mining-With-R.html" class="uri">http://r-statistics.co/Association-Mining-With-R.html</a>] to remove the subsets.</p>
+<pre class="r"><code>#smaller rule set for the purpose of demonstration
+rules.small &lt;- apriori(transactions, parameter=list(support=0.001, confidence=0.95,maxlen = 2))</code></pre>
+<pre><code>## Apriori
+## 
+## Parameter specification:
+##  confidence minval smax arem  aval originalSupport maxtime support minlen
+##        0.95    0.1    1 none FALSE            TRUE       5   0.001      1
+##  maxlen target   ext
+##       2  rules FALSE
+## 
+## Algorithmic control:
+##  filter tree heap memopt load sort verbose
+##     0.1 TRUE TRUE  FALSE TRUE    2    TRUE
+## 
+## Absolute minimum support count: 19 
+## 
+## set item appearances ...[0 item(s)] done [0.00s].
+## set transactions ...[8719 item(s), 19574 transaction(s)] done [0.08s].
+## sorting and recoding items ... [2622 item(s)] done [0.01s].
+## creating transaction tree ... done [0.01s].
+## checking subsets of size 1 2</code></pre>
+<pre><code>## Warning in apriori(transactions, parameter = list(support = 0.001,
+## confidence = 0.95, : Mining stopped (maxlen reached). Only patterns up to a
+## length of 2 returned!</code></pre>
+<pre><code>##  done [0.13s].
+## writing ... [52 rule(s)] done [0.02s].
+## creating S4 object  ... done [0.01s].</code></pre>
+<pre class="r"><code>inspect(rules.small[1:20]) # rules 14,15,18 and 19 are redundant</code></pre>
+<pre><code>##      lhs                         rhs                 support    
+## [1]  {BILLBOARD FONTS DESIGN} =&gt; {WRAP}              0.001481557
+## [2]  {BLACK TEA}              =&gt; {SUGAR JARS}        0.002350056
+## [3]  {BLACK TEA}              =&gt; {COFFEE}            0.002350056
+## [4]  {WHITE TEA}              =&gt; {SUGAR JARS}        0.003269643
+## [5]  {WHITE TEA}              =&gt; {COFFEE}            0.003269643
+## [6]  {WOBBLY CHICKEN}         =&gt; {DECORATION}        0.001685910
+## [7]  {WOBBLY CHICKEN}         =&gt; {METAL}             0.001685910
+## [8]  {DECOUPAGE}              =&gt; {GREETING CARD}     0.001379381
+## [9]  {SUGAR JARS}             =&gt; {COFFEE}            0.004700112
+## [10] {WOBBLY RABBIT}          =&gt; {DECORATION}        0.001992439
+## [11] {WOBBLY RABBIT}          =&gt; {METAL}             0.001992439
+## [12] {FUNK MONKEY}            =&gt; {ART LIGHTS}        0.002196792
+## [13] {ART LIGHTS}             =&gt; {FUNK MONKEY}       0.002196792
+## [14] {TRAY}                   =&gt; {BREAKFAST IN BED}  0.003422908
+## [15] {BREAKFAST IN BED}       =&gt; {TRAY}              0.003422908
+## [16] {NURSERY A}              =&gt; {C PAINTED LETTERS} 0.003065291
+## [17] {C PAINTED LETTERS}      =&gt; {NURSERY A}         0.003065291
+## [18] {NURSERY A}              =&gt; {B}                 0.003065291
+## [19] {B}                      =&gt; {NURSERY A}         0.003065291
+## [20] {C PAINTED LETTERS}      =&gt; {B}                 0.003065291
+##      confidence lift     
+## [1]  1          631.41935
+## [2]  1          212.76087
+## [3]  1           51.10705
+## [4]  1          212.76087
+## [5]  1           51.10705
+## [6]  1          343.40351
+## [7]  1          343.40351
+## [8]  1          230.28235
+## [9]  1           51.10705
+## [10] 1          343.40351
+## [11] 1          343.40351
+## [12] 1          455.20930
+## [13] 1          455.20930
+## [14] 1          292.14925
+## [15] 1          292.14925
+## [16] 1          326.23333
+## [17] 1          326.23333
+## [18] 1          326.23333
+## [19] 1          326.23333
+## [20] 1          326.23333</code></pre>
+<pre class="r"><code>subsetRules &lt;- which(colSums(is.subset(rules.small, rules.small)) &gt; 1) # get subset rules in vector
+length(subsetRules)  # 24 redundant pairs</code></pre>
+<pre><code>## [1] 24</code></pre>
+<pre class="r"><code>rules.new &lt;- rules.small[-subsetRules] # remove subset rules.
+inspect(rules.new[1:20])</code></pre>
+<pre><code>##      lhs                         rhs                support     confidence
+## [1]  {BILLBOARD FONTS DESIGN} =&gt; {WRAP}             0.001481557 1         
+## [2]  {BLACK TEA}              =&gt; {SUGAR JARS}       0.002350056 1         
+## [3]  {BLACK TEA}              =&gt; {COFFEE}           0.002350056 1         
+## [4]  {WHITE TEA}              =&gt; {SUGAR JARS}       0.003269643 1         
+## [5]  {WHITE TEA}              =&gt; {COFFEE}           0.003269643 1         
+## [6]  {WOBBLY CHICKEN}         =&gt; {DECORATION}       0.001685910 1         
+## [7]  {WOBBLY CHICKEN}         =&gt; {METAL}            0.001685910 1         
+## [8]  {DECOUPAGE}              =&gt; {GREETING CARD}    0.001379381 1         
+## [9]  {SUGAR JARS}             =&gt; {COFFEE}           0.004700112 1         
+## [10] {WOBBLY RABBIT}          =&gt; {DECORATION}       0.001992439 1         
+## [11] {WOBBLY RABBIT}          =&gt; {METAL}            0.001992439 1         
+## [12] {PINK  SPOTS}            =&gt; {SWISS ROLL TOWEL} 0.001379381 1         
+## [13] {STICKY GORDON}          =&gt; {GREETING CARD}    0.001328293 1         
+## [14] {OVERCROWDED POOL.}      =&gt; {GREETING CARD}    0.001328293 1         
+## [15] {CHOCOLATE  SPOTS}       =&gt; {SWISS ROLL TOWEL} 0.003167467 1         
+## [16] {GARAGE DESIGN}          =&gt; {KEY FOB}          0.005670788 1         
+## [17] {LIGHT PINK}             =&gt; {FEATHER PEN}      0.005006641 1         
+## [18] {ELEPHANT}               =&gt; {BIRTHDAY CARD}    0.006692551 1         
+## [19] {CUPCAKE SINGLE HOOK}    =&gt; {METAL SIGN}       0.004342495 1         
+## [20] {FRONT  DOOR}            =&gt; {KEY FOB}          0.007561050 1         
+##      lift     
+## [1]  631.41935
+## [2]  212.76087
+## [3]   51.10705
+## [4]  212.76087
+## [5]   51.10705
+## [6]  343.40351
+## [7]  343.40351
+## [8]  230.28235
+## [9]   51.10705
+## [10] 343.40351
+## [11] 343.40351
+## [12] 283.68116
+## [13] 230.28235
+## [14] 230.28235
+## [15] 283.68116
+## [16]  52.61828
+## [17]  82.24370
+## [18]  71.17818
+## [19]  84.37069
+## [20]  52.61828</code></pre>
+<p>We can see that the rules no longer appear!</p>
+</div>
+<div id="tuning-the-apriori" class="section level2">
+<h2>Tuning the apriori</h2>
+<p>One can further tune the parameters inside the <code>apriori</code> function. Here are 2 important adjustments:</p>
+<ul>
+<li><p><code>maxlen</code>: The max len is specified within the <code>parameter</code> list. This allows you to specify the maximum length of items to be considered within each basket. This is a good idea to specify because it is not very intuitive to see the relationship between too many items within each basket.</p></li>
+<li><p><code>minlen</code>: Just as you wouldn’t want too many items, you wouldn’t want too few either. One item in a basket does not make sense either. The minlen should be set to 2.</p></li>
+<li><p><code>appearence</code>: This useful option allows you to specify a list where you can filter the rules created by a specific item. This could be useful in creating network plots that will then show these associations.</p></li>
+</ul>
+<p>Here is an example.</p>
+<pre class="r"><code>tuned.aprior &lt;- apriori(transactions, 
+                        # list of parameters that includes max and min length      
+                        parameter=list(support=0.001, confidence=0.1, maxlen = 4, minlen = 2),
+                        # control the appearence
+                        appearance = list(default=&quot;rhs&quot;,lhs=&quot;PARTY BUNTING&quot;),
+                        control = list(verbose=F))</code></pre>
+<p>Note that <code>rhs</code> within the<code>appearence</code> option controls the fact that Party Bunting appears only on the right hand side of the rules. These rules show which items were bought after someone bought Party Bunting. And obviously you can reverse this procedure to inspect what items are bought <em>before</em> Party Bunting.Inspect the elements:</p>
+<pre class="r"><code>inspect(tuned.aprior[1:10])</code></pre>
+<pre><code>##      lhs                rhs                                     support confidence     lift
+## [1]  {PARTY BUNTING} =&gt; {TEA TIME PARTY BUNTING}            0.009246960  0.1324067 7.690591
+## [2]  {PARTY BUNTING} =&gt; {PAPER BUNTING RETROSPOT}           0.008429549  0.1207023 4.130465
+## [3]  {PARTY BUNTING} =&gt; {LUNCH BAG APPLE DESIGN}            0.008123020  0.1163131 2.776479
+## [4]  {PARTY BUNTING} =&gt; {ASSORTED COLOUR BIRD ORNAMENT}     0.009860018  0.1411851 2.179461
+## [5]  {PARTY BUNTING} =&gt; {ALARM CLOCK BAKELIKE RED}          0.007254521  0.1038771 2.449747
+## [6]  {PARTY BUNTING} =&gt; {SPOTTY BUNTING}                    0.019873301  0.2845647 5.814270
+## [7]  {PARTY BUNTING} =&gt; {LUNCH BAG SUKI DESIGN}             0.008429549  0.1207023 2.819363
+## [8]  {PARTY BUNTING} =&gt; {HEART OF WICKER SMALL}             0.007305609  0.1046086 2.237824
+## [9]  {PARTY BUNTING} =&gt; {SET OF 4 PANTRY JELLY MOULDS}      0.007816491  0.1119239 2.649092
+## [10] {PARTY BUNTING} =&gt; {WOODEN PICTURE FRAME WHITE FINISH} 0.008174109  0.1170446 2.679569</code></pre>
+</div>
+</div>
+<div id="visualizing-rules" class="section level1">
+<h1>Visualizing rules</h1>
+<p>One may be interested in inspecting the relationship between the computed lift, confidence and support. Personally, these graphs are not very informative especially when there are thousands of rules. One use of these plots though are that they help coming up with appropriate values of support or confidence while applying the apriori algorithms.</p>
+<pre class="r"><code>my3cols &lt;- c(&quot;#E7B800&quot;, &quot;#2E9FDF&quot;, &quot;#FC4E07&quot;)
+my2cols &lt;- c(&quot;#2E9FDF&quot;, &quot;#FC4E07&quot;)
+
+quality &lt;- rules@quality[1:1e5,]  # extract the information
+
+ggplot(quality, aes(support,confidence))+
+  geom_point(col = my2cols[2],alpha = 0.5)+
+  labs(title = &quot;Support Vs Confidence&quot;)+
+  theme_minimal()</code></pre>
+<pre><code>## Warning: Removed 99991 rows containing missing values (geom_point).</code></pre>
+<p><img src="/post/2018-01-07-what-s-in-a-basket_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code>ggplot(quality, aes(support,lift, col = confidence))+
+  geom_point(alpha = 0.1)+
+  scale_color_gradient(low = &quot;#00AFBB&quot;, high = &quot;#FC3E07&quot;)+
+  labs(title = &quot;Lift vs Support&quot;)+
+  coord_cartesian(ylim = c(0,300),xlim = c(0,0.005))+
+  theme_minimal()</code></pre>
+<pre><code>## Warning: Removed 99991 rows containing missing values (geom_point).</code></pre>
+<p><img src="/post/2018-01-07-what-s-in-a-basket_files/figure-html/unnamed-chunk-10-2.png" width="672" /></p>
+<p>The package <code>ArulesViz</code> provides a host of other visualizations plots which might be worth exploring. Using them is pretty straightforward and you can find them in the official <a href="https://cran.r-project.org/web/packages/arulesViz/arulesViz.pdf">documentation</a>.</p>
+</div>
+<div id="visualizing-assocations" class="section level1">
+<h1>Visualizing Assocations</h1>
+<p>One can also visually inspect the association for instance in the party bunting case.</p>
+<pre class="r"><code>plot(tuned.aprior,method=&quot;graph&quot;,shading=NA)</code></pre>
+<p><img src="/post/2018-01-07-what-s-in-a-basket_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+</div>
+
+      </div>
+
+      
+
+
+<div class="article-tags">
+  
+  <a class="btn btn-primary btn-outline" href="/tags/market-basket">market basket</a>
+  
+  <a class="btn btn-primary btn-outline" href="/tags/ggplot2">ggplot2</a>
+  
+  <a class="btn btn-primary btn-outline" href="/tags/r">R</a>
+  
+</div>
+
+
+
+    </div>
+  </div>
+
+</article>
+
+
+
+<div class="article-container article-widget">
+  <div class="hr-light"></div>
+  <h3>Related</h3>
+  <ul>
+    
+    <li><a href="/post/jack-and-rose/">Jack and Rose</a></li>
+    
+    <li><a href="/project/owens-illinoise-student-case-competition/">Owens Illinois Student Case Competition</a></li>
+    
+    <li><a href="/post/of-fortune-tellers-and-crystal-balls/">Of Fortune Tellers and Crystal Balls</a></li>
+    
+    <li><a href="/post/nobel-laureates/">Nobel Laureates</a></li>
+    
+    <li><a href="/post/carbon-dioxide-emmissions/">Carbon Dioxide Emmissions</a></li>
+    
+  </ul>
+</div>
+
+
+
+
+<div class="article-container">
+  
+
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <p class="powered-by">
+
+      &copy; 2018 &middot; 
+
+      Powered by the
+      <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+      <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+      <span class="pull-right" aria-hidden="true">
+        <a href="#" id="back_to_top">
+          <span class="button_icon">
+            <i class="fa fa-chevron-up fa-2x"></i>
+          </span>
+        </a>
+      </span>
+
+    </p>
+  </div>
+</footer>
+
+
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close btn-large" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Cite</h4>
+      </div>
+      <div>
+        <pre><code class="modal-body tex"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-primary btn-outline js-copy-cite" href="#" target="_blank">
+          <i class="fa fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-primary btn-outline js-download-cite" href="#" target="_blank">
+          <i class="fa fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+    
+
+    
+
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha512-3P8rXCuGJdNZOnUx/03c1jOTnMn3rP63nBip5gOP2qmUh5YAdVAvFZ1E+QLZZbC1rtMrQb+mah3AfYW11RUrWA==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.3/imagesloaded.pkgd.min.js" integrity="sha512-umsR78NN0D23AzgoZ11K7raBD+R6hqKojyBZs1w8WvYlsI+QuKRGBx3LFCwhatzBunCjDuJpDHwxD13sLMbpRA==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha512-iztkobsvnjKfAtTNdHkGVjAYTrrtlC7mGp/54c40wowO7LhURYl3gVzzcEqGl/qKXQltJ2HwMrdLcNUdo+N/RQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.4/isotope.pkgd.min.js" integrity="sha512-VDBOIlDbuC4VWxGJNmuFRQ0Li0SKkDpmGyuhAG5LTDLd/dJ/S0WMVxriR2Y+CyPL5gzjpN4f/6iqWVBJlht0tQ==" crossorigin="anonymous"></script>
+    
+    
+    <script src="/js/hugo-academic.js"></script>
+    
+
+    
+    
+      
+      
+      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
+      
+
+      
+
+      
+
+      <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_CHTML" integrity="sha512-tOav5w1OjvsSJzePRtt2uQPFwBoHt1VZcUq8l8nm5284LEKE9FSJBQryzMBzHxY5P0zRdNqEcpLIRVYFNgu1jw==" crossorigin="anonymous"></script>
+    
+    
+
+  </body>
+</html>
+

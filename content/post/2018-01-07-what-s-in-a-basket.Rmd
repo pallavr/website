@@ -1,0 +1,220 @@
+---
+title: What's In A Basket
+author: ''
+date: '2018-01-07'
+slug: what-s-in-a-basket
+categories:
+  - predictive analytics
+tags:
+  - market basket
+  - ggplot2
+  - R
+header:
+  caption: ''
+  image: 'headers/basket.jpg'
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+Ever wondered how online retail purchasers come up with *'recommendations'*? How they already know what to refer after you've made a purchase? The powerful *Apriori* algorithm that based on simple high school probability concepts that's working behind the scenes to discover these connections. Association mining is based on the Apriori Algorithm. Association mining helps analyse the habits of buyers to find the relationship between different items in a 'market basket'. The discovery of these relationships can help to develop a sales strategy by considering the items frequently purchased in sequence by customers. .This tutorial demonstrates the concepts in Market Basket Analysis and how to perform the analysis in R.
+
+# Get the libraries
+
+```{r,warning=FALSE,message=FALSE}
+library(readxl) # reading in file 
+library(readr)
+library(arulesViz) #association viz
+library(ggplot2) # data viz
+library(dplyr) # data manipulation
+library(tidyr) # data manipulation
+```
+
+# Market Basket Terminology
+
+Before we begin association mining we need to understand some relevant terminology. A **rule** in association mining refers to sequence in which items are bought. So, the rule A => B means B was bought after A.
+
+- **Support:** It is simply the probability of buying A and B together. Statistically this refers to the intersection of A and B.
+
+$$ \text{Support} = \frac{\text{Total number of A and B}}{\text{Total number of transactions}} $$
+
+- **Confidence:** This is the conditional probability of B given A. A high value of confidence therefore means there is a high chance of B being bought after A.
+
+$$  \text{Confidence} = \frac{\text{Number of Tr. with both A and B}}{\text{Total number of Tr.}} $$
+
+- **Lift:** It is the confidence divided by the expected confidence. Therefore, a high value of lift mean that there is a higher chance of A and B occurring together.
+
+$$  \text{Lift} = \frac{\text{Confidence}}{\text{Expected Conf.}} = \frac{\text{Pr(A union B)}}{\text{Pr(A).Pr(B)}}  $$
+
+where expected confidence is $$ \text{Pr(B)} = \frac{\text{Number of Tr. of B}}{\text{Total Number of Tr.}} $$
+
+**Note:** Its worth noting that using Lift to create recommendations is a bad idea. If you consider the transactions A => B and B => A, and if you work out the math with the formula above (which is pretty straight-forward), you'd notice that lift and support turns out to be same!. Therefore, if one is interested in making a *sequence* recommendation you should use confidence instead.
+
+# Create a transaction object
+
+## Get the data set
+
+We will use a online retail transaction database from a grocery shop in the UK. The data set is available freely [UCI](http://archive.ics.uci.edu/ml/datasets/online+retail)
+depository. Here are the variables in the data set:
+
+- **InvoiceNo:** Invoice number. Nominal, a 6-digit integral number uniquely assigned to each transaction. If this code starts with letter 'c', it indicates a cancellation. 
+- **StockCode:** Product (item) code. Nominal, a 5-digit integral number uniquely assigned to each distinct product. 
+- **Description:** Product (item) name. Nominal. 
+- **Quantity:** The quantities of each product (item) per transaction. Numeric.	
+- **InvoiceDate:** Invoice Date and time. Numeric, the day and time when each transaction was generated. 
+- **UnitPrice:** Unit price. Numeric, Product price per unit in sterling. 
+- **CustomerID:** Customer number. Nominal, a 5-digit integral number uniquely assigned to each customer. 
+- **Country:** Country name. Nominal, the name of the country where each customer resides.
+
+```{r,echo=FALSE}
+# Online_Retail <- read_excel("C:/Users/routh/Desktop/Study Materials/My website/Market Basket/Online Retail.xlsx", col_types = c("text", "text", "text", "numeric", "date", "numeric", "numeric","text"))
+```
+
+## Preprocess the data set
+
+Its helpful if the item desciption and the Invoice date-time is converted in factor and a date-time object respectively. 
+
+**Note:** They have been commented out to make compiling easier.
+
+```{r,message=FALSE,warning=FALSE}
+# Online_Retail <- Online_Retail %>% mutate(Description = as.factor(Description))
+# Online_Retail$Date <- as.Date(Online_Retail$InvoiceDate)
+# Online_Retail$Time <- format(Online_Retail$InvoiceDate,"%H:%M:%S")
+# Online_Retail$InvoiceNo <- as.numeric(as.character(Online_Retail$InvoiceNo))
+```
+
+
+## Transaction format
+
+Before we can apply the apriori algorithm, we need to transform the data to create *"baskets"*. After arranging the data by ID you would need to group the items by the ID and by date and then record all the transactions in another column. Each row in this column is now a basket. You could also form smaller baskets by grouping by hour. After you create the baskets you would need export the file in *'.csv'* format to the local drive and then import it by coercing it as a *transaction class* data. The import step is done using the `read.transactions` function.
+
+
+```{r,results='hide',message=FALSE,warning=FALSE}
+# itemList <- Online_Retail %>%
+               #  arrange(CustomerID) %>%
+               #  group_by(CustomerID,Date)%>%
+               #  summarise(List = paste0(Description, collapse = ","))%>%
+               #  ungroup()%>%
+               #  select(List) # we just need the column containing the baskets
+
+
+# write.csv(itemList,"itemList.csv", quote = FALSE, row.names = F)
+ 
+transactions <- read.transactions(file = "C:/Users/routh/Desktop/Study Materials/My website/Market Basket/itemList.csv",
+                                  format = c("basket"),  # each row is a basket
+                                  sep = ",")
+```
+
+
+# Apriori
+
+The apriori is an association algo that was proposed in the early 1900s. It works by discovering certain rules (using metrics such as support and confidence) using certain thresholds. A nice overview of the steps in the algorithm is outlined in the [wikipedia](https://en.wikipedia.org/wiki/Apriori_algorithm) page.
+
+In R you would use the `apriori` function in the `arules` or `arulesViz` package to create a set of rules. It is also worth noting that all objects created using the package are `S4` class objects. This means you can extract the elements using the `@` symbol.
+
+```{r,warning=FALSE,message=FALSE}
+rules <- apriori(transactions, parameter=list(support=0.01, confidence=0.99))
+summary(rules)
+```
+
+
+# Inspect the rules
+
+The rules are extracted using the `inspect` function. I sorted them by lift. I like the style of output because it is very intuitive and straight-forward.
+
+```{r}
+inspect(head(sort(rules, by ="lift"),10),linebreak = F)
+```
+
+
+## Removing subsets
+
+If we look at the first two rules above we see what subsets mean. These rules are identical with only the LHS and RHS reversed and are therefore redundant. We might want to get rid of these rules. I implemented the codes from this (source)[http://r-statistics.co/Association-Mining-With-R.html] to remove the subsets.
+
+```{r}
+#smaller rule set for the purpose of demonstration
+rules.small <- apriori(transactions, parameter=list(support=0.001, confidence=0.95,maxlen = 2))
+inspect(rules.small[1:20]) # rules 14,15,18 and 19 are redundant
+
+
+subsetRules <- which(colSums(is.subset(rules.small, rules.small)) > 1) # get subset rules in vector
+length(subsetRules)  # 24 redundant pairs
+
+rules.new <- rules.small[-subsetRules] # remove subset rules.
+inspect(rules.new[1:20])
+```
+
+We can see that the rules no longer appear!
+
+
+## Tuning the apriori
+
+One can further tune the parameters inside the `apriori` function. Here are 2 important adjustments:
+
+- `maxlen`: The max len is specified within the `parameter` list. This allows you to specify the maximum length of items to be considered within each basket. This is a good idea to specify because it is not very intuitive to see the relationship between too many items within each basket.
+
+- `minlen`: Just as you wouldn't want too many items, you wouldn't want too few either. One item in a basket does not make sense either. The minlen should be set to 2.
+
+- `appearence`: This useful option allows you to specify a list where you can filter the rules created by a specific item. This could be useful in creating network plots that will then show these associations.
+
+Here is an example.
+
+```{r,results='hide'}
+tuned.aprior <- apriori(transactions, 
+                        # list of parameters that includes max and min length      
+                        parameter=list(support=0.001, confidence=0.1, maxlen = 4, minlen = 2),
+                        # control the appearence
+                        appearance = list(default="rhs",lhs="PARTY BUNTING"),
+                        control = list(verbose=F))
+```
+
+
+Note that `rhs` within the`appearence` option controls the fact that Party Bunting appears only on the right hand side of the rules. These rules show which items were bought after someone bought Party Bunting. And obviously you can reverse this procedure to inspect what items are bought *before* Party Bunting.Inspect the elements:
+
+```{r}
+inspect(tuned.aprior[1:10])
+```
+
+
+# Visualizing rules
+
+One may be interested in inspecting the relationship between the computed lift, confidence and support. Personally, these graphs are not very informative especially when there are thousands of rules. One use of these plots though are that they help coming up with appropriate values of support or confidence while applying the apriori algorithms.
+
+```{r}
+
+my3cols <- c("#E7B800", "#2E9FDF", "#FC4E07")
+my2cols <- c("#2E9FDF", "#FC4E07")
+
+quality <- rules@quality[1:1e5,]  # extract the information
+
+ggplot(quality, aes(support,confidence))+
+  geom_point(col = my2cols[2],alpha = 0.5)+
+  labs(title = "Support Vs Confidence")+
+  theme_minimal()
+
+
+ggplot(quality, aes(support,lift, col = confidence))+
+  geom_point(alpha = 0.1)+
+  scale_color_gradient(low = "#00AFBB", high = "#FC3E07")+
+  labs(title = "Lift vs Support")+
+  coord_cartesian(ylim = c(0,300),xlim = c(0,0.005))+
+  theme_minimal()
+```
+
+The package `ArulesViz` provides a host of other visualizations plots which might be worth exploring. Using them is pretty straightforward and you can find them in the official [documentation](https://cran.r-project.org/web/packages/arulesViz/arulesViz.pdf).
+
+# Visualizing Assocations
+
+One can also visually inspect the association for instance in the party bunting case.
+
+```{r}
+plot(tuned.aprior,method="graph",shading=NA)
+```
+

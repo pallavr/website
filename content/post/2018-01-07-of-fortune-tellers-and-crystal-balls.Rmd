@@ -18,6 +18,10 @@ body {
 text-align: justify}
 </style>
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE)
+```
+
 Fortune telling is an ancient form of magic (not dark) and is art of predicting a person's life. They have crystal balls that help them delve into the future. (Un)Fortunately, the plethora of skeptics don't believe the practice simply because it isn't based on scientific facts. But what if I told you that fortune telling is all math? Don't believe me? If you read this chapter you'll realize why the practice of fore-seeing the future isn't exactly a fairy tale. 
 
 # Load the packages

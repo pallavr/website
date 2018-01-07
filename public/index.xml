@@ -1423,6 +1423,345 @@ error(forecast.df$actual, forecast.df$forecasts)&lt;/code&gt;&lt;/pre&gt;
     </item>
     
     <item>
+      <title>What&#39;s In A Basket</title>
+      <link>/post/what-s-in-a-basket/</link>
+      <pubDate>Sun, 07 Jan 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/post/what-s-in-a-basket/</guid>
+      <description>&lt;style&gt;
+body {
+text-align: justify}
+&lt;/style&gt;
+&lt;p&gt;Ever wondered how online retail purchasers come up with &lt;em&gt;‘recommendations’&lt;/em&gt;? How they already know what to refer after you’ve made a purchase? The powerful &lt;em&gt;Apriori&lt;/em&gt; algorithm that based on simple high school probability concepts that’s working behind the scenes to discover these connections. Association mining is based on the Apriori Algorithm. Association mining helps analyse the habits of buyers to find the relationship between different items in a ‘market basket’. The discovery of these relationships can help to develop a sales strategy by considering the items frequently purchased in sequence by customers. .This tutorial demonstrates the concepts in Market Basket Analysis and how to perform the analysis in R.&lt;/p&gt;
+&lt;div id=&#34;get-the-libraries&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Get the libraries&lt;/h1&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(readxl) # reading in file 
+library(readr)
+library(arulesViz) #association viz
+library(ggplot2) # data viz
+library(dplyr) # data manipulation
+library(tidyr) # data manipulation&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;market-basket-terminology&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Market Basket Terminology&lt;/h1&gt;
+&lt;p&gt;Before we begin association mining we need to understand some relevant terminology. A &lt;strong&gt;rule&lt;/strong&gt; in association mining refers to sequence in which items are bought. So, the rule A =&amp;gt; B means B was bought after A.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Support:&lt;/strong&gt; It is simply the probability of buying A and B together. Statistically this refers to the intersection of A and B.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[ \text{Support} = \frac{\text{Total number of A and B}}{\text{Total number of transactions}} \]&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Confidence:&lt;/strong&gt; This is the conditional probability of B given A. A high value of confidence therefore means there is a high chance of B being bought after A.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[  \text{Confidence} = \frac{\text{Number of Tr. with both A and B}}{\text{Total number of Tr.}} \]&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Lift:&lt;/strong&gt; It is the confidence divided by the expected confidence. Therefore, a high value of lift mean that there is a higher chance of A and B occurring together.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[  \text{Lift} = \frac{\text{Confidence}}{\text{Expected Conf.}} = \frac{\text{Pr(A union B)}}{\text{Pr(A).Pr(B)}}  \]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;where expected confidence is &lt;span class=&#34;math display&#34;&gt;\[ \text{Pr(B)} = \frac{\text{Number of Tr. of B}}{\text{Total Number of Tr.}} \]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; Its worth noting that using Lift to create recommendations is a bad idea. If you consider the transactions A =&amp;gt; B and B =&amp;gt; A, and if you work out the math with the formula above (which is pretty straight-forward), you’d notice that lift and support turns out to be same!. Therefore, if one is interested in making a &lt;em&gt;sequence&lt;/em&gt; recommendation you should use confidence instead.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;create-a-transaction-object&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Create a transaction object&lt;/h1&gt;
+&lt;div id=&#34;get-the-data-set&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Get the data set&lt;/h2&gt;
+&lt;p&gt;We will use a online retail transaction database from a grocery shop in the UK. The data set is available freely &lt;a href=&#34;http://archive.ics.uci.edu/ml/datasets/online+retail&#34;&gt;UCI&lt;/a&gt; depository. Here are the variables in the data set:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;InvoiceNo:&lt;/strong&gt; Invoice number. Nominal, a 6-digit integral number uniquely assigned to each transaction. If this code starts with letter ‘c’, it indicates a cancellation.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;StockCode:&lt;/strong&gt; Product (item) code. Nominal, a 5-digit integral number uniquely assigned to each distinct product.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Description:&lt;/strong&gt; Product (item) name. Nominal.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Quantity:&lt;/strong&gt; The quantities of each product (item) per transaction. Numeric.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;InvoiceDate:&lt;/strong&gt; Invoice Date and time. Numeric, the day and time when each transaction was generated.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;UnitPrice:&lt;/strong&gt; Unit price. Numeric, Product price per unit in sterling.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;CustomerID:&lt;/strong&gt; Customer number. Nominal, a 5-digit integral number uniquely assigned to each customer.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Country:&lt;/strong&gt; Country name. Nominal, the name of the country where each customer resides.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;preprocess-the-data-set&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Preprocess the data set&lt;/h2&gt;
+&lt;p&gt;Its helpful if the item desciption and the Invoice date-time is converted in factor and a date-time object respectively.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; They have been commented out to make compiling easier.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Online_Retail &amp;lt;- Online_Retail %&amp;gt;% mutate(Description = as.factor(Description))
+# Online_Retail$Date &amp;lt;- as.Date(Online_Retail$InvoiceDate)
+# Online_Retail$Time &amp;lt;- format(Online_Retail$InvoiceDate,&amp;quot;%H:%M:%S&amp;quot;)
+# Online_Retail$InvoiceNo &amp;lt;- as.numeric(as.character(Online_Retail$InvoiceNo))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;transaction-format&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Transaction format&lt;/h2&gt;
+&lt;p&gt;Before we can apply the apriori algorithm, we need to transform the data to create &lt;em&gt;“baskets”&lt;/em&gt;. After arranging the data by ID you would need to group the items by the ID and by date and then record all the transactions in another column. Each row in this column is now a basket. You could also form smaller baskets by grouping by hour. After you create the baskets you would need export the file in &lt;em&gt;‘.csv’&lt;/em&gt; format to the local drive and then import it by coercing it as a &lt;em&gt;transaction class&lt;/em&gt; data. The import step is done using the &lt;code&gt;read.transactions&lt;/code&gt; function.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# itemList &amp;lt;- Online_Retail %&amp;gt;%
+               #  arrange(CustomerID) %&amp;gt;%
+               #  group_by(CustomerID,Date)%&amp;gt;%
+               #  summarise(List = paste0(Description, collapse = &amp;quot;,&amp;quot;))%&amp;gt;%
+               #  ungroup()%&amp;gt;%
+               #  select(List) # we just need the column containing the baskets
+
+
+# write.csv(itemList,&amp;quot;itemList.csv&amp;quot;, quote = FALSE, row.names = F)
+ 
+transactions &amp;lt;- read.transactions(file = &amp;quot;C:/Users/routh/Desktop/Study Materials/My website/Market Basket/itemList.csv&amp;quot;,
+                                  format = c(&amp;quot;basket&amp;quot;),  # each row is a basket
+                                  sep = &amp;quot;,&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;apriori&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Apriori&lt;/h1&gt;
+&lt;p&gt;The apriori is an association algo that was proposed in the early 1900s. It works by discovering certain rules (using metrics such as support and confidence) using certain thresholds. A nice overview of the steps in the algorithm is outlined in the &lt;a href=&#34;https://en.wikipedia.org/wiki/Apriori_algorithm&#34;&gt;wikipedia&lt;/a&gt; page.&lt;/p&gt;
+&lt;p&gt;In R you would use the &lt;code&gt;apriori&lt;/code&gt; function in the &lt;code&gt;arules&lt;/code&gt; or &lt;code&gt;arulesViz&lt;/code&gt; package to create a set of rules. It is also worth noting that all objects created using the package are &lt;code&gt;S4&lt;/code&gt; class objects. This means you can extract the elements using the &lt;code&gt;@&lt;/code&gt; symbol.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rules &amp;lt;- apriori(transactions, parameter=list(support=0.01, confidence=0.99))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Apriori
+## 
+## Parameter specification:
+##  confidence minval smax arem  aval originalSupport maxtime support minlen
+##        0.99    0.1    1 none FALSE            TRUE       5    0.01      1
+##  maxlen target   ext
+##      10  rules FALSE
+## 
+## Algorithmic control:
+##  filter tree heap memopt load sort verbose
+##     0.1 TRUE TRUE  FALSE TRUE    2    TRUE
+## 
+## Absolute minimum support count: 195 
+## 
+## set item appearances ...[0 item(s)] done [0.00s].
+## set transactions ...[8719 item(s), 19574 transaction(s)] done [0.06s].
+## sorting and recoding items ... [541 item(s)] done [0.01s].
+## creating transaction tree ... done [0.01s].
+## checking subsets of size 1 2 3 4 done [0.02s].
+## writing ... [9 rule(s)] done [0.00s].
+## creating S4 object  ... done [0.00s].&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;summary(rules)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## set of 9 rules
+## 
+## rule length distribution (lhs + rhs):sizes
+## 2 3 
+## 6 3 
+## 
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   2.000   2.000   2.000   2.333   3.000   3.000 
+## 
+## summary of quality measures:
+##     support          confidence      lift      
+##  Min.   :0.01185   Min.   :1    Min.   :51.11  
+##  1st Qu.:0.01512   1st Qu.:1    1st Qu.:51.11  
+##  Median :0.01512   Median :1    Median :52.62  
+##  Mean   :0.01454   Mean   :1    Mean   :58.12  
+##  3rd Qu.:0.01512   3rd Qu.:1    3rd Qu.:66.13  
+##  Max.   :0.01512   Max.   :1    Max.   :66.13  
+## 
+## mining info:
+##          data ntransactions support confidence
+##  transactions         19574    0.01       0.99&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;inspect-the-rules&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Inspect the rules&lt;/h1&gt;
+&lt;p&gt;The rules are extracted using the &lt;code&gt;inspect&lt;/code&gt; function. I sorted them by lift. I like the style of output because it is very intuitive and straight-forward.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;inspect(head(sort(rules, by =&amp;quot;lift&amp;quot;),10),linebreak = F)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##     lhs                             rhs                   support   
+## [1] {SET 3 RETROSPOT TEA}        =&amp;gt; {SUGAR}               0.01512210
+## [2] {SUGAR}                      =&amp;gt; {SET 3 RETROSPOT TEA} 0.01512210
+## [3] {COFFEE,SET 3 RETROSPOT TEA} =&amp;gt; {SUGAR}               0.01512210
+## [4] {COFFEE,SUGAR}               =&amp;gt; {SET 3 RETROSPOT TEA} 0.01512210
+## [5] {BACK DOOR}                  =&amp;gt; {KEY FOB}             0.01185246
+## [6] {SHED}                       =&amp;gt; {KEY FOB}             0.01312966
+## [7] {SET 3 RETROSPOT TEA}        =&amp;gt; {COFFEE}              0.01512210
+## [8] {SUGAR}                      =&amp;gt; {COFFEE}              0.01512210
+## [9] {SET 3 RETROSPOT TEA,SUGAR}  =&amp;gt; {COFFEE}              0.01512210
+##     confidence lift    
+## [1] 1          66.12838
+## [2] 1          66.12838
+## [3] 1          66.12838
+## [4] 1          66.12838
+## [5] 1          52.61828
+## [6] 1          52.61828
+## [7] 1          51.10705
+## [8] 1          51.10705
+## [9] 1          51.10705&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;removing-subsets&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Removing subsets&lt;/h2&gt;
+&lt;p&gt;If we look at the first two rules above we see what subsets mean. These rules are identical with only the LHS and RHS reversed and are therefore redundant. We might want to get rid of these rules. I implemented the codes from this (source)[&lt;a href=&#34;http://r-statistics.co/Association-Mining-With-R.html&#34; class=&#34;uri&#34;&gt;http://r-statistics.co/Association-Mining-With-R.html&lt;/a&gt;] to remove the subsets.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#smaller rule set for the purpose of demonstration
+rules.small &amp;lt;- apriori(transactions, parameter=list(support=0.001, confidence=0.95,maxlen = 2))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Apriori
+## 
+## Parameter specification:
+##  confidence minval smax arem  aval originalSupport maxtime support minlen
+##        0.95    0.1    1 none FALSE            TRUE       5   0.001      1
+##  maxlen target   ext
+##       2  rules FALSE
+## 
+## Algorithmic control:
+##  filter tree heap memopt load sort verbose
+##     0.1 TRUE TRUE  FALSE TRUE    2    TRUE
+## 
+## Absolute minimum support count: 19 
+## 
+## set item appearances ...[0 item(s)] done [0.00s].
+## set transactions ...[8719 item(s), 19574 transaction(s)] done [0.08s].
+## sorting and recoding items ... [2622 item(s)] done [0.01s].
+## creating transaction tree ... done [0.01s].
+## checking subsets of size 1 2&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning in apriori(transactions, parameter = list(support = 0.001,
+## confidence = 0.95, : Mining stopped (maxlen reached). Only patterns up to a
+## length of 2 returned!&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##  done [0.13s].
+## writing ... [52 rule(s)] done [0.02s].
+## creating S4 object  ... done [0.01s].&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;inspect(rules.small[1:20]) # rules 14,15,18 and 19 are redundant&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##      lhs                         rhs                 support    
+## [1]  {BILLBOARD FONTS DESIGN} =&amp;gt; {WRAP}              0.001481557
+## [2]  {BLACK TEA}              =&amp;gt; {SUGAR JARS}        0.002350056
+## [3]  {BLACK TEA}              =&amp;gt; {COFFEE}            0.002350056
+## [4]  {WHITE TEA}              =&amp;gt; {SUGAR JARS}        0.003269643
+## [5]  {WHITE TEA}              =&amp;gt; {COFFEE}            0.003269643
+## [6]  {WOBBLY CHICKEN}         =&amp;gt; {DECORATION}        0.001685910
+## [7]  {WOBBLY CHICKEN}         =&amp;gt; {METAL}             0.001685910
+## [8]  {DECOUPAGE}              =&amp;gt; {GREETING CARD}     0.001379381
+## [9]  {SUGAR JARS}             =&amp;gt; {COFFEE}            0.004700112
+## [10] {WOBBLY RABBIT}          =&amp;gt; {DECORATION}        0.001992439
+## [11] {WOBBLY RABBIT}          =&amp;gt; {METAL}             0.001992439
+## [12] {FUNK MONKEY}            =&amp;gt; {ART LIGHTS}        0.002196792
+## [13] {ART LIGHTS}             =&amp;gt; {FUNK MONKEY}       0.002196792
+## [14] {TRAY}                   =&amp;gt; {BREAKFAST IN BED}  0.003422908
+## [15] {BREAKFAST IN BED}       =&amp;gt; {TRAY}              0.003422908
+## [16] {NURSERY A}              =&amp;gt; {C PAINTED LETTERS} 0.003065291
+## [17] {C PAINTED LETTERS}      =&amp;gt; {NURSERY A}         0.003065291
+## [18] {NURSERY A}              =&amp;gt; {B}                 0.003065291
+## [19] {B}                      =&amp;gt; {NURSERY A}         0.003065291
+## [20] {C PAINTED LETTERS}      =&amp;gt; {B}                 0.003065291
+##      confidence lift     
+## [1]  1          631.41935
+## [2]  1          212.76087
+## [3]  1           51.10705
+## [4]  1          212.76087
+## [5]  1           51.10705
+## [6]  1          343.40351
+## [7]  1          343.40351
+## [8]  1          230.28235
+## [9]  1           51.10705
+## [10] 1          343.40351
+## [11] 1          343.40351
+## [12] 1          455.20930
+## [13] 1          455.20930
+## [14] 1          292.14925
+## [15] 1          292.14925
+## [16] 1          326.23333
+## [17] 1          326.23333
+## [18] 1          326.23333
+## [19] 1          326.23333
+## [20] 1          326.23333&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;subsetRules &amp;lt;- which(colSums(is.subset(rules.small, rules.small)) &amp;gt; 1) # get subset rules in vector
+length(subsetRules)  # 24 redundant pairs&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 24&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rules.new &amp;lt;- rules.small[-subsetRules] # remove subset rules.
+inspect(rules.new[1:20])&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##      lhs                         rhs                support     confidence
+## [1]  {BILLBOARD FONTS DESIGN} =&amp;gt; {WRAP}             0.001481557 1         
+## [2]  {BLACK TEA}              =&amp;gt; {SUGAR JARS}       0.002350056 1         
+## [3]  {BLACK TEA}              =&amp;gt; {COFFEE}           0.002350056 1         
+## [4]  {WHITE TEA}              =&amp;gt; {SUGAR JARS}       0.003269643 1         
+## [5]  {WHITE TEA}              =&amp;gt; {COFFEE}           0.003269643 1         
+## [6]  {WOBBLY CHICKEN}         =&amp;gt; {DECORATION}       0.001685910 1         
+## [7]  {WOBBLY CHICKEN}         =&amp;gt; {METAL}            0.001685910 1         
+## [8]  {DECOUPAGE}              =&amp;gt; {GREETING CARD}    0.001379381 1         
+## [9]  {SUGAR JARS}             =&amp;gt; {COFFEE}           0.004700112 1         
+## [10] {WOBBLY RABBIT}          =&amp;gt; {DECORATION}       0.001992439 1         
+## [11] {WOBBLY RABBIT}          =&amp;gt; {METAL}            0.001992439 1         
+## [12] {PINK  SPOTS}            =&amp;gt; {SWISS ROLL TOWEL} 0.001379381 1         
+## [13] {STICKY GORDON}          =&amp;gt; {GREETING CARD}    0.001328293 1         
+## [14] {OVERCROWDED POOL.}      =&amp;gt; {GREETING CARD}    0.001328293 1         
+## [15] {CHOCOLATE  SPOTS}       =&amp;gt; {SWISS ROLL TOWEL} 0.003167467 1         
+## [16] {GARAGE DESIGN}          =&amp;gt; {KEY FOB}          0.005670788 1         
+## [17] {LIGHT PINK}             =&amp;gt; {FEATHER PEN}      0.005006641 1         
+## [18] {ELEPHANT}               =&amp;gt; {BIRTHDAY CARD}    0.006692551 1         
+## [19] {CUPCAKE SINGLE HOOK}    =&amp;gt; {METAL SIGN}       0.004342495 1         
+## [20] {FRONT  DOOR}            =&amp;gt; {KEY FOB}          0.007561050 1         
+##      lift     
+## [1]  631.41935
+## [2]  212.76087
+## [3]   51.10705
+## [4]  212.76087
+## [5]   51.10705
+## [6]  343.40351
+## [7]  343.40351
+## [8]  230.28235
+## [9]   51.10705
+## [10] 343.40351
+## [11] 343.40351
+## [12] 283.68116
+## [13] 230.28235
+## [14] 230.28235
+## [15] 283.68116
+## [16]  52.61828
+## [17]  82.24370
+## [18]  71.17818
+## [19]  84.37069
+## [20]  52.61828&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can see that the rules no longer appear!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;tuning-the-apriori&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Tuning the apriori&lt;/h2&gt;
+&lt;p&gt;One can further tune the parameters inside the &lt;code&gt;apriori&lt;/code&gt; function. Here are 2 important adjustments:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;code&gt;maxlen&lt;/code&gt;: The max len is specified within the &lt;code&gt;parameter&lt;/code&gt; list. This allows you to specify the maximum length of items to be considered within each basket. This is a good idea to specify because it is not very intuitive to see the relationship between too many items within each basket.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;code&gt;minlen&lt;/code&gt;: Just as you wouldn’t want too many items, you wouldn’t want too few either. One item in a basket does not make sense either. The minlen should be set to 2.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;code&gt;appearence&lt;/code&gt;: This useful option allows you to specify a list where you can filter the rules created by a specific item. This could be useful in creating network plots that will then show these associations.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Here is an example.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;tuned.aprior &amp;lt;- apriori(transactions, 
+                        # list of parameters that includes max and min length      
+                        parameter=list(support=0.001, confidence=0.1, maxlen = 4, minlen = 2),
+                        # control the appearence
+                        appearance = list(default=&amp;quot;rhs&amp;quot;,lhs=&amp;quot;PARTY BUNTING&amp;quot;),
+                        control = list(verbose=F))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note that &lt;code&gt;rhs&lt;/code&gt; within the&lt;code&gt;appearence&lt;/code&gt; option controls the fact that Party Bunting appears only on the right hand side of the rules. These rules show which items were bought after someone bought Party Bunting. And obviously you can reverse this procedure to inspect what items are bought &lt;em&gt;before&lt;/em&gt; Party Bunting.Inspect the elements:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;inspect(tuned.aprior[1:10])&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##      lhs                rhs                                     support confidence     lift
+## [1]  {PARTY BUNTING} =&amp;gt; {TEA TIME PARTY BUNTING}            0.009246960  0.1324067 7.690591
+## [2]  {PARTY BUNTING} =&amp;gt; {PAPER BUNTING RETROSPOT}           0.008429549  0.1207023 4.130465
+## [3]  {PARTY BUNTING} =&amp;gt; {LUNCH BAG APPLE DESIGN}            0.008123020  0.1163131 2.776479
+## [4]  {PARTY BUNTING} =&amp;gt; {ASSORTED COLOUR BIRD ORNAMENT}     0.009860018  0.1411851 2.179461
+## [5]  {PARTY BUNTING} =&amp;gt; {ALARM CLOCK BAKELIKE RED}          0.007254521  0.1038771 2.449747
+## [6]  {PARTY BUNTING} =&amp;gt; {SPOTTY BUNTING}                    0.019873301  0.2845647 5.814270
+## [7]  {PARTY BUNTING} =&amp;gt; {LUNCH BAG SUKI DESIGN}             0.008429549  0.1207023 2.819363
+## [8]  {PARTY BUNTING} =&amp;gt; {HEART OF WICKER SMALL}             0.007305609  0.1046086 2.237824
+## [9]  {PARTY BUNTING} =&amp;gt; {SET OF 4 PANTRY JELLY MOULDS}      0.007816491  0.1119239 2.649092
+## [10] {PARTY BUNTING} =&amp;gt; {WOODEN PICTURE FRAME WHITE FINISH} 0.008174109  0.1170446 2.679569&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;visualizing-rules&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Visualizing rules&lt;/h1&gt;
+&lt;p&gt;One may be interested in inspecting the relationship between the computed lift, confidence and support. Personally, these graphs are not very informative especially when there are thousands of rules. One use of these plots though are that they help coming up with appropriate values of support or confidence while applying the apriori algorithms.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;my3cols &amp;lt;- c(&amp;quot;#E7B800&amp;quot;, &amp;quot;#2E9FDF&amp;quot;, &amp;quot;#FC4E07&amp;quot;)
+my2cols &amp;lt;- c(&amp;quot;#2E9FDF&amp;quot;, &amp;quot;#FC4E07&amp;quot;)
+
+quality &amp;lt;- rules@quality[1:1e5,]  # extract the information
+
+ggplot(quality, aes(support,confidence))+
+  geom_point(col = my2cols[2],alpha = 0.5)+
+  labs(title = &amp;quot;Support Vs Confidence&amp;quot;)+
+  theme_minimal()&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning: Removed 99991 rows containing missing values (geom_point).&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-01-07-what-s-in-a-basket_files/figure-html/unnamed-chunk-10-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot(quality, aes(support,lift, col = confidence))+
+  geom_point(alpha = 0.1)+
+  scale_color_gradient(low = &amp;quot;#00AFBB&amp;quot;, high = &amp;quot;#FC3E07&amp;quot;)+
+  labs(title = &amp;quot;Lift vs Support&amp;quot;)+
+  coord_cartesian(ylim = c(0,300),xlim = c(0,0.005))+
+  theme_minimal()&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning: Removed 99991 rows containing missing values (geom_point).&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-01-07-what-s-in-a-basket_files/figure-html/unnamed-chunk-10-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The package &lt;code&gt;ArulesViz&lt;/code&gt; provides a host of other visualizations plots which might be worth exploring. Using them is pretty straightforward and you can find them in the official &lt;a href=&#34;https://cran.r-project.org/web/packages/arulesViz/arulesViz.pdf&#34;&gt;documentation&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;visualizing-assocations&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Visualizing Assocations&lt;/h1&gt;
+&lt;p&gt;One can also visually inspect the association for instance in the party bunting case.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;plot(tuned.aprior,method=&amp;quot;graph&amp;quot;,shading=NA)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-01-07-what-s-in-a-basket_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Carbon Dioxide Emmissions</title>
       <link>/post/carbon-dioxide-emmissions/</link>
       <pubDate>Sat, 06 Jan 2018 00:00:00 +0000</pubDate>

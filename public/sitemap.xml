@@ -23,6 +23,15 @@
     
     <url>
     
+      <loc>/post/what-s-in-a-basket/</loc>
+      <lastmod>2018-01-07T00:00:00+00:00</lastmod>
+    </url>
+    
+  
+    
+    
+    <url>
+    
       <loc>/post/carbon-dioxide-emmissions/</loc>
       <lastmod>2018-01-06T00:00:00+00:00</lastmod>
     </url>
@@ -164,6 +173,16 @@
     
       <loc>/</loc>
       <lastmod>2016-04-20T00:00:00+00:00</lastmod>
+      <priority>0</priority>
+    </url>
+    
+  
+    
+    
+    <url>
+    
+      <loc>/tags/market-basket/</loc>
+      <lastmod>2018-01-07T00:00:00+00:00</lastmod>
       <priority>0</priority>
     </url>
     

@@ -1,0 +1,11 @@
+base
+readr
+readxl
+dplyr
+tidyr
+ggplot2
+forecast
+fma
+expsmooth
+fpp2
+bindrcpp
