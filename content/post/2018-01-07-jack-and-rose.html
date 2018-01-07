@@ -1,0 +1,945 @@
+---
+title: Jack and Rose
+author: ''
+date: '2018-01-07'
+slug: jack-and-rose
+categories:
+  - predictive analytics
+tags:
+  - regression
+  - R
+  - ggplot2
+header:
+  caption: ''
+  image: 'headers/titanic.jpg'
+---
+
+
+
+<style>
+body {
+text-align: justify}
+</style>
+<div id="get-the-packages" class="section level1">
+<h1>Get the packages</h1>
+<pre class="r"><code>library(readr) # read in a csv/txt file
+library(MASS) # has the data set
+library(dplyr) # for data manipulation
+library(tidyr) # for data manipulation
+library(ggplot2) # for data viz
+library(purrr) # for functional programming</code></pre>
+<p>Jack and Rose from <em>Titanic</em> epitomized the concept of romance in the late 1990s. If you watched this movie you would realize how Jack and Rose are <strong>dependent</strong> on one another for surviving the sinking ship. Sometimes these dependencies can be represented by a straight line. This is what regression represents. The “best fit” regression line quantifies the relationship between two or more variables.</p>
+<p>Multiple regression is one of the oldest ML techniques. The simple yet formidable OLS estimation algorithm dates way back to the <span class="math inline">\(18^{th}\)</span> century. The algorithm works by minimizing the sum of squares between the best fit line and the response variable. Today, the OLS regression is not the most accurate algorithm and therefore has been replaced by more sophisticated ML techniques. Yet, the weakness of this technique is also its strength. No other algorithm is as tractable as regression. Therefore, regression is almost always a starting point in any data analysis task.</p>
+<p>In this tutorial, I will implement this technique in R on the famous <strong>Titanic</strong> data set (link on this page) and discuss how to interpret the outputs. Finally I will use a data set from Kaggle to demonstrate the steps one should take when implementing this technique for prediction purposes.</p>
+</div>
+<div id="birthweights-and-babies" class="section level1">
+<h1>Birthweights and Babies</h1>
+<p>To demonstrate the key codes and concepts for regression I will use the <code>birthwt</code> package from the <code>MASS</code> package. The Birthwt data contains 189 observations, 16 predictors, and an outcome, birth weight, available both as a continuous measure and a binary indicator for low birth weight. The data were collected at Bay state Medical Center, Springfield, Mass during 1986.</p>
+<p>Let’s load the data set and examine the variables.</p>
+<pre class="r"><code>data(&quot;birthwt&quot;)
+glimpse(birthwt)</code></pre>
+<pre><code>## Observations: 189
+## Variables: 10
+## $ low   &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
+## $ age   &lt;int&gt; 19, 33, 20, 21, 18, 21, 22, 17, 29, 26, 19, 19, 22, 30, ...
+## $ lwt   &lt;int&gt; 182, 155, 105, 108, 107, 124, 118, 103, 123, 113, 95, 15...
+## $ race  &lt;int&gt; 2, 3, 1, 1, 1, 3, 1, 3, 1, 1, 3, 3, 3, 3, 1, 1, 2, 1, 3,...
+## $ smoke &lt;int&gt; 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0,...
+## $ ptl   &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,...
+## $ ht    &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,...
+## $ ui    &lt;int&gt; 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,...
+## $ ftv   &lt;int&gt; 0, 3, 1, 2, 0, 0, 1, 1, 1, 0, 0, 1, 0, 2, 0, 0, 0, 3, 0,...
+## $ bwt   &lt;int&gt; 2523, 2551, 2557, 2594, 2600, 2622, 2637, 2637, 2663, 26...</code></pre>
+<pre class="r"><code>knitr::kable(head(birthwt,5))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right">low</th>
+<th align="right">age</th>
+<th align="right">lwt</th>
+<th align="right">race</th>
+<th align="right">smoke</th>
+<th align="right">ptl</th>
+<th align="right">ht</th>
+<th align="right">ui</th>
+<th align="right">ftv</th>
+<th align="right">bwt</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>85</td>
+<td align="right">0</td>
+<td align="right">19</td>
+<td align="right">182</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">2523</td>
+</tr>
+<tr class="even">
+<td>86</td>
+<td align="right">0</td>
+<td align="right">33</td>
+<td align="right">155</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">2551</td>
+</tr>
+<tr class="odd">
+<td>87</td>
+<td align="right">0</td>
+<td align="right">20</td>
+<td align="right">105</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">2557</td>
+</tr>
+<tr class="even">
+<td>88</td>
+<td align="right">0</td>
+<td align="right">21</td>
+<td align="right">108</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">2594</td>
+</tr>
+<tr class="odd">
+<td>89</td>
+<td align="right">0</td>
+<td align="right">18</td>
+<td align="right">107</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">2600</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>low:</strong>Indicator of birth weight less than 2.5kg</li>
+<li><strong>age:</strong>Mother’s age in years</li>
+<li><strong>lwt:</strong>Mother’s weight in pounds at last menstrual period</li>
+<li><strong>race:</strong>Indicator functions for mother’s race; “3” is reference group</li>
+<li><strong>smoke:</strong>Smoking status during pregnancy</li>
+<li><strong>ptl:</strong>Indicator functions for one or for two or more previous premature labors</li>
+<li><strong>ht:</strong>History of hypertension</li>
+<li><strong>ui:</strong>Presence of uterine irritability</li>
+<li><strong>ftv:</strong>Indicator functions for one, for two, or for three or more physician visits during the first trimester, respectively. No visits is the reference category</li>
+<li><strong>bwt:</strong>Birth weight in kilograms</li>
+</ul>
+<p>Lets visualize the variable distributions</p>
+<pre class="r"><code>GGally::ggpairs(birthwt)</code></pre>
+<p><img src="/post/2018-01-07-jack-and-rose_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>The <code>ggpairs</code> function is a nice way to visualize the inter-relationships between variables. It allows for early detection of correlated variables and irregular distributions. In this data set I don’t see any variables that are extremely heavily correlated or any distributions that are severely skewed.</p>
+</div>
+<div id="simple-linear-regression" class="section level1">
+<h1>Simple Linear Regression</h1>
+<p>Linear regression in R is performed with the <code>lm</code> function. The set-up is very intuitive.</p>
+<pre class="r"><code>sim.lm &lt;- lm(formula = bwt ~ lwt,  # regression formulae
+             data = birthwt) # data set
+
+# summarise the model
+summary(sim.lm)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = bwt ~ lwt, data = birthwt)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -2192.12  -497.97    -3.84   508.32  2075.60 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 2369.624    228.493  10.371   &lt;2e-16 ***
+## lwt            4.429      1.713   2.585   0.0105 *  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 718.4 on 187 degrees of freedom
+## Multiple R-squared:  0.0345, Adjusted R-squared:  0.02933 
+## F-statistic: 6.681 on 1 and 187 DF,  p-value: 0.0105</code></pre>
+<div id="inference" class="section level2">
+<h2>Inference</h2>
+<p>Often we are interested in finding the confidence interval for the coefficients of the model.</p>
+<pre class="r"><code>confint(sim.lm, level = 0.95)</code></pre>
+<pre><code>##                   2.5 %     97.5 %
+## (Intercept) 1918.867879 2820.37916
+## lwt            1.048845    7.80937</code></pre>
+</div>
+</div>
+<div id="multiple-linear-regression" class="section level1">
+<h1>Multiple Linear Regression</h1>
+<p>The multiple linear regression set up is very similar to the simple regression. The predictors are connected with the <code>+</code> operator within the formula argument.</p>
+<pre class="r"><code>mutl.lm &lt;- lm(formula = bwt ~ lwt + age + race + ftv,
+              data = birthwt)</code></pre>
+<div id="interpret-the-output" class="section level2">
+<h2>Interpret the output</h2>
+<p>The output of the lm function can be summarized with a <code>summary</code> call.</p>
+<pre class="r"><code>summary(mutl.lm)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = bwt ~ lwt + age + race + ftv, data = birthwt)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -2070.82  -458.44    21.08   526.18  1862.93 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 2605.812    344.367   7.567 1.77e-12 ***
+## lwt            3.604      1.755   2.054   0.0414 *  
+## age            4.391     10.272   0.427   0.6696    
+## race        -129.322     58.144  -2.224   0.0274 *  
+## ftv            9.772     50.640   0.193   0.8472    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 713.3 on 184 degrees of freedom
+## Multiple R-squared:  0.06349,    Adjusted R-squared:  0.04313 
+## F-statistic: 3.118 on 4 and 184 DF,  p-value: 0.01638</code></pre>
+<ol style="list-style-type: decimal">
+<li><p>The five stat summary of the residuals are displayed. We see the minimum and maximum deviations are close to each other but are very large. This is an early indication of weak model performance in terms of fitting the best fit line.</p></li>
+<li>The coefficient table:
+<ul>
+<li><strong>Estimate:</strong> Gives the estimates of the coefficients of the predictors that when multiplied with the values of the predictors give the fitted values of response value. These are also called the <em>slopes</em> while the first term is the <em>intercept</em>. A <em>3.6</em> coefficient for <code>lwt</code> means for every one unit rise of lwt, birth weight would <em>increase</em> by 3.6 units <em>on average keeping everything else constant</em>.</li>
+<li><strong>Std. Error:</strong> It is the standard error when computing the coefficients. The computation arises because the coefficients are essentially expected values for the predictors. The standard error therefore, tells us the variance or standard deviation when computing the expected values.</li>
+<li><strong>t value:</strong> Indicates how far the coefficient estimate is from the ‘0’ on the standardized scale. The further we are the better. That would translate into a low p-value.</li>
+<li><strong>Pr(&gt;|t|):</strong> It is the probability of observing a value larger than <em>t</em>. A small p value indicates that it is unlikely that there is any relationship between predictor and response variable. The <strong>significance codes</strong> at the bottom of the table indicates the level of significance in comparison to the standard cutoff of 5%.</li>
+<li><strong>Residual Standard Error:</strong> Roughly speaking, RSE is the measure of how far the fitted line will deviate from the fitted best fit regression line. Consequently, a smaller value is preferred.</li>
+<li><strong>R-square and Adjusted R-square:</strong> It is measure of how well the variation in the response variables are modeled by the existing predictor variables. The adjusted version adjusts for the increase in the number of predictors.</li>
+<li><strong>F-statistic:</strong> The F-stat is test statistic computed for measuring the overall stability of the model. The p-value next to the F-stat needs to be lower than the cutoff to ensure the model fit is legitimate.</li>
+</ul></li>
+</ol>
+</div>
+<div id="assumtions" class="section level2">
+<h2>Assumtions</h2>
+<p>While developing the least squares algorithm, the creators made several assumptions. We need to check for the correctness of these assumptions religiously every time we build a model especially when the aim is to predict. This also contributes to the disadvantages of using regression.</p>
+<ol style="list-style-type: decimal">
+<li>The parameters should be <strong>linear</strong>.</li>
+</ol>
+<p>This is true because our regression model is:</p>
+<p><span class="math display">\[  birthweight = \beta_0 + \beta_1lwt + \beta_2age + \beta_3race + \beta_4ftv    \]</span></p>
+<p>All dependent variables have singular powers.</p>
+<ol start="2" style="list-style-type: decimal">
+<li>Mean of residuals</li>
+</ol>
+<p>The mean of residuals should be close to zero.</p>
+<pre class="r"><code>mean(mutl.lm$residuals)</code></pre>
+<pre><code>## [1] 3.723095e-14</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li><strong>Equal variance</strong> of residuals</li>
+</ol>
+<p>We need to check the residuals vs. fitted values for signs of patterns (specifically a “cone” shaped pattern)</p>
+<pre class="r"><code>tmp &lt;- data.frame(residual = mutl.lm$residuals, fitted = mutl.lm$fitted.values)
+
+ggplot(tmp, aes(x = fitted, y = residual))+
+  geom_point(col = &quot;#2E9FDF&quot;)+
+  labs(title = &quot;Residuals vs Fitted Values&quot;)+
+  theme_minimal()</code></pre>
+<p><img src="/post/2018-01-07-jack-and-rose_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<ol start="4" style="list-style-type: decimal">
+<li><strong>Normality assumption</strong></li>
+</ol>
+<p>All residuals should be normally distributed. Visually it can be checked using the Q-Q plot.</p>
+<pre class="r"><code>qqplot.data &lt;- function (vec) # argument: vector of numbers
+{
+  # following four lines from base R&#39;s qqline()
+  y &lt;- quantile(vec[!is.na(vec)], c(0.25, 0.75))
+  x &lt;- qnorm(c(0.25, 0.75))
+  slope &lt;- diff(y)/diff(x)
+  int &lt;- y[1L] - slope * x[1L]
+
+  d &lt;- data.frame(resids = vec)
+
+  ggplot(d, aes(sample = resids)) + 
+    stat_qq() + 
+    geom_abline(slope = slope, intercept = int) +
+    labs(title = &quot;Normal Q-Q plot&quot;)+
+    theme_minimal()
+
+}
+
+resid &lt;- mutl.lm$residuals
+qqplot.data(resid)</code></pre>
+<p><img src="/post/2018-01-07-jack-and-rose_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>All the residuals are on the straight line. This indicates normality is met.</p>
+<p>A test statistic that confirms normality is the Durbin Watson Test Stat.</p>
+<pre class="r"><code>lmtest::dwtest(mutl.lm)</code></pre>
+<pre><code>## 
+##  Durbin-Watson test
+## 
+## data:  mutl.lm
+## DW = 0.28675, p-value &lt; 2.2e-16
+## alternative hypothesis: true autocorrelation is greater than 0</code></pre>
+</div>
+<div id="comparing-models" class="section level2">
+<h2>Comparing Models</h2>
+<p>Does addition of extra variables improve the model? This can be checked with an ANOVA test. The low p value indicates the second model is ‘significant’.</p>
+<pre class="r"><code>anova(sim.lm,mutl.lm)</code></pre>
+<pre><code>## Analysis of Variance Table
+## 
+## Model 1: bwt ~ lwt
+## Model 2: bwt ~ lwt + age + race + ftv
+##   Res.Df      RSS Df Sum of Sq      F Pr(&gt;F)
+## 1    187 96521017                           
+## 2    184 93622816  3   2898201 1.8986 0.1314</code></pre>
+</div>
+<div id="variance-inflation-factor" class="section level2">
+<h2>Variance Inflation Factor</h2>
+<p>The <code>vif</code> checks for multi-collinearity. MC can be a real villain for regressional fits. It could render variables to be insignificant and hamper the R-squared values. One way to counter VIFs are using the variables in an interaction terms. Informally speaking, this would also require extensive domain knowledge to understand why an interaction would be valid. A VIF around 1 is good while if it is greater than 10, it could indicates serious correlations between variable pairs.</p>
+<pre class="r"><code>car::vif(mutl.lm)</code></pre>
+<pre><code>##      lwt      age     race      ftv 
+## 1.063922 1.094536 1.053463 1.063170</code></pre>
+</div>
+<div id="interactions" class="section level2">
+<h2>Interactions</h2>
+<p>Here I demonstrate how interactions are included within the <code>lm</code> framework. Let’s examine the possibility of interaction between ftv and age.</p>
+<pre class="r"><code>mutl.lm.int &lt;- lm(formula = bwt ~ lwt + age*ftv + race,  # also considers the variable by themselves alone
+                  data = birthwt)
+
+summary(mutl.lm.int)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = bwt ~ lwt + age * ftv + race, data = birthwt)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -2125.17  -488.93     7.98   499.74  1859.13 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 2891.918    391.641   7.384 5.24e-12 ***
+## lwt            3.635      1.749   2.078   0.0391 *  
+## age           -8.439     13.282  -0.635   0.5260    
+## ftv         -326.177    227.299  -1.435   0.1530    
+## race        -128.740     57.942  -2.222   0.0275 *  
+## age:ftv       13.923      9.185   1.516   0.1313    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 710.8 on 183 degrees of freedom
+## Multiple R-squared:  0.0751, Adjusted R-squared:  0.04983 
+## F-statistic: 2.972 on 5 and 183 DF,  p-value: 0.01324</code></pre>
+<pre class="r"><code>mutl.lm.int.2 &lt;- lm(formula = bwt ~ lwt + age:ftv + race,  # only considers the interaction terms
+                  data = birthwt)
+
+summary(mutl.lm.int.2)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = bwt ~ lwt + age:ftv + race, data = birthwt)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -2082.65  -469.29    35.85   530.68  1927.90 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 2692.612    267.808  10.054   &lt;2e-16 ***
+## lwt            3.603      1.737   2.074   0.0395 *  
+## race        -130.183     57.537  -2.263   0.0248 *  
+## age:ftv        1.256      1.912   0.657   0.5119    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 711.1 on 185 degrees of freedom
+## Multiple R-squared:  0.06435,    Adjusted R-squared:  0.04918 
+## F-statistic: 4.241 on 3 and 185 DF,  p-value: 0.006311</code></pre>
+</div>
+<div id="categorical-predictors" class="section level2">
+<h2>Categorical Predictors</h2>
+<p>Sometimes the predictors are not continuous. They could be categorical or nominal variables. In R you would need to manually convert the class of the variables to <code>factor</code> if they are already not.</p>
+<ol style="list-style-type: decimal">
+<li>Coerce the predictor into a vector of named (or unnamed factor)</li>
+</ol>
+<pre class="r"><code># make sure you convert it into a factor first
+birthwt$smoke &lt;- factor(birthwt$smoke)
+
+mutl.lm.factor &lt;- lm(formula = bwt ~ smoke,
+                     data = birthwt)
+
+summary(mutl.lm.factor)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = bwt ~ smoke, data = birthwt)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -2062.9  -475.9    34.3   545.1  1934.3 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  3055.70      66.93  45.653  &lt; 2e-16 ***
+## smoke1       -283.78     106.97  -2.653  0.00867 ** 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 717.8 on 187 degrees of freedom
+## Multiple R-squared:  0.03627,    Adjusted R-squared:  0.03112 
+## F-statistic: 7.038 on 1 and 187 DF,  p-value: 0.008667</code></pre>
+<p>Care should be taken while interpreting a categorical variable. When they are binary for instance in the above example, when the value of <code>smoke</code> is 1 the response will increase or decrease by an amount of (Intercept+Coefficient) <em>on average keeping everything else constant</em>. On the other hand when <code>smoke</code> is 0, the amount increase/decrease is recorded only by the (Intercept) term.</p>
+<ol start="2" style="list-style-type: decimal">
+<li>Create dummy/indicator variables</li>
+</ol>
+<p>Lets create 3 columns: one an indicator for age less than 20, another for 21-29 age group and lastly another for greater than 30</p>
+<pre class="r"><code>birthwt &lt;- mutate(birthwt, under.20 = ifelse(age &lt; 21,1,0),
+                           between.20.30 = ifelse(age &lt; 30 &amp; age &gt; 20,1,0),
+                           over.30 = ifelse(age &gt; 29,1,0))
+
+mutl.lm.indicator &lt;- lm(formula = bwt ~ smoke + under.20 + between.20.30 + over.30,
+                        data = birthwt)
+
+summary(mutl.lm.indicator)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = bwt ~ smoke + under.20 + between.20.30 + over.30, 
+##     data = birthwt)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -1981.23  -536.47    32.71   565.53  1701.46 
+## 
+## Coefficients: (1 not defined because of singularities)
+##               Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)     3288.5      143.0  22.999  &lt; 2e-16 ***
+## smoke1          -288.2      106.8  -2.698  0.00762 ** 
+## under.20        -215.1      162.3  -1.325  0.18672    
+## between.20.30   -310.1      156.1  -1.986  0.04846 *  
+## over.30             NA         NA      NA       NA    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 714 on 185 degrees of freedom
+## Multiple R-squared:  0.05666,    Adjusted R-squared:  0.04137 
+## F-statistic: 3.704 on 3 and 185 DF,  p-value: 0.01274</code></pre>
+<p>Indicator variables have there own coefficients in the summary table.Clearly this is not a great example of indicator variables used in regression.</p>
+</div>
+</div>
+<div id="logistic-regression" class="section level1">
+<h1>Logistic Regression</h1>
+<p>It is inappropriate to treat the categorical response (such as a binary response of yes/no) as continuous and perform multiple linear regression. Consider this plot where I treat <code>low</code> as continuous and fit a best fit line:</p>
+<pre class="r"><code>birthwt %&gt;%
+  ggplot(aes(y = low,x = age))+
+  geom_point(col = &quot;#FC4E07&quot;)+
+  stat_smooth(method = &quot;lm&quot;, col = &quot;black&quot;,se=F)+
+  theme_minimal()+
+  labs(title = &quot;Low Birthweight vs Age&quot;, x = &quot;Low&quot;, y = &quot;Age&quot;)</code></pre>
+<p><img src="/post/2018-01-07-jack-and-rose_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p>The best fit line would eventually fall below 0 as age would increase and would lead a to response (the value of <code>low</code>) value lower than 0 which then becomes unrealistic. Logistic regression models is one class of models under ‘Generalized Linear Model’. Logistic models are called so because they transform the response through a <strong>logit</strong> function. Logit belong to a vast array of <em>link</em> functions that are different for different linear models.</p>
+<p>Logit is short for log of the odds. Mathematically this means:</p>
+<p><span class="math display">\[  log\{\frac{\text{Pr} (y|x)}{1-\text{Pr}(y|x)}\} =  \beta_0 + \beta_1x \]</span></p>
+<p>Alternatively,</p>
+<p><span class="math display">\[    \frac{\text{Pr} (y|x)}{1-\text{Pr}(y|x)} = e^{\beta_0 + \beta_1x}  \]</span></p>
+<p><span class="math display">\[ y = \frac{e^{\beta_0 + \beta_1x}}{1+e^{\beta_0 + \beta_1x}} \]</span> This then becomes our response variable. The only drawback of using a logistic or other generalized linear models is when interpreting the coefficients of the predictors. We would have to adjust by transforming from the log scale. This sometimes makes interpretation complicated.</p>
+<div id="fitting-the-model" class="section level2">
+<h2>Fitting the model</h2>
+<p>We use the <code>glm</code> function to fit a logistic regression model. Notice the family is specified as binomial. This reflects the binary nature of the response variable.</p>
+<pre class="r"><code>bwt &lt;- birthwt[,-11:-13]
+logistic.lm &lt;- glm(low ~ ., family = binomial, data = bwt)
+summary(logistic.lm)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = low ~ ., family = binomial, data = bwt)
+## 
+## Deviance Residuals: 
+##        Min          1Q      Median          3Q         Max  
+## -1.890e-04  -2.100e-08  -2.100e-08   2.100e-08   1.593e-04  
+## 
+## Coefficients:
+##               Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept)  1.161e+03  2.074e+05   0.006    0.996
+## age          3.223e-01  1.787e+03   0.000    1.000
+## lwt         -1.733e-01  3.202e+02  -0.001    1.000
+## race         6.494e-01  3.165e+04   0.000    1.000
+## smoke1      -1.746e+01  7.668e+04   0.000    1.000
+## ptl          1.267e+02  3.406e+05   0.000    1.000
+## ht           3.636e+01  1.237e+05   0.000    1.000
+## ui          -6.183e+01  7.547e+04  -0.001    0.999
+## ftv         -8.925e+00  1.624e+04  -0.001    1.000
+## bwt         -4.466e-01  6.468e+01  -0.007    0.994
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 2.3467e+02  on 188  degrees of freedom
+## Residual deviance: 1.0537e-07  on 179  degrees of freedom
+## AIC: 20
+## 
+## Number of Fisher Scoring iterations: 25</code></pre>
+</div>
+<div id="interpreting-the-coefficients" class="section level2">
+<h2>Interpreting the coefficients</h2>
+<p>The summary table is very similar to the multiple regression summary table. However you should be careful while interpreting the coefficients. You have to remember they are in logit scale. You can rescale them using a function as I did here and then interpret that value as a percent increase or decrease. For instance I will rescale the age coefficent:</p>
+<pre class="r"><code>logit.rescale &lt;- function(x){
+  (1 - (exp(x)/(1+exp(x))))*100
+}
+
+(logit.rescale(3.223e-01))</code></pre>
+<pre><code>## [1] 42.01153</code></pre>
+<p>This means for every unit increase in age, the chances of low birthweight increase by 42%.</p>
+</div>
+<div id="variable-selection" class="section level2">
+<h2>Variable Selection</h2>
+<p>Before moving onto how to predict using a real life data set, its worth understanding how to select variables when there are a large list of variables to be considered for a model fit. The concept of variable selection is connected to the <em>principle of parsimony</em> in statistics. The principle advocates the use of a simpler model (with fewer predictor vars) when fitting or predicting. In practice this is sometimes useful because it reduces the burden of interpreting multiple variables. It is especially useful when a simpler model is more accurate in prediction than a complex model. There are number of strategies for selecting the ‘best’ model. The first one is using ANOVA after manually building the models. The next two strategies uses R to automate the iteration over multiple models and helps identify the best model.</p>
+<ol style="list-style-type: decimal">
+<li><strong>All possible regression model</strong></li>
+</ol>
+<p>As the name suggests this technique considers all possible combination of predictors while building the model. Then we use ceratin statistics such as the Bayesian Info Criteria or Residual Sum of Squares to decide on which predictors to keep and which ones to reject.</p>
+<pre class="r"><code>all.subset &lt;- leaps::regsubsets(low ~.,
+                                data = bwt,
+                                nbest = 20) # number of subsets to consider
+
+all.subset.summary &lt;- summary(all.subset) # store the summary into an object
+
+tmp &lt;- data.frame(all.subset.summary$which,
+                        all.subset.summary[c(&quot;rss&quot;,&quot;cp&quot;,&quot;bic&quot;)],
+                                                    id = 1:nrow(all.subset.summary$which))
+colnames(tmp)[1] &lt;- &quot;Intercept&quot;
+
+tmp %&gt;%
+    gather(variable, present, -rss, -cp, -bic, -id) %&gt;% 
+    gather(type, value, -id, -variable, -present)%&gt;%
+    ggplot(aes(variable, factor(round(value)))) +
+      geom_tile(aes(fill = present),col = &quot;black&quot;) +
+      facet_wrap(~ type, scales = &quot;free&quot;) +
+      scale_fill_manual(&quot;&quot;, values = c(&quot;TRUE&quot; = &quot;#FC4E07&quot;, &quot;FALSE&quot; = &quot;white&quot;), guide = FALSE) +
+      theme_minimal()+
+      labs(x = &quot;&quot;, y = &quot;&quot;)+
+      theme(axis.text.x = element_text(angle = 90))</code></pre>
+<p><img src="/post/2018-01-07-jack-and-rose_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<p>We can summarize the results of the procedure with the picture above. We could any one of the plots above to decide an appropriate model to use. For instance if we look at the RSS facet, we can see for a particular value of RSS which variables are included. The lowest RSS value of 33, has all variables except race and the first level of ftv.</p>
+<ol start="2" style="list-style-type: decimal">
+<li><strong>Automated stepwise regression</strong></li>
+</ol>
+<p>This school of variable selection is based on taking ‘steps’ towards a better model. We start with a basic model (one with just the intercept term) and slowly build to the full model with all covariates. At each step, a predictor is added and checked if it is significant in the model and if it betters a statistic (such as BIC/AIC). If it does, then the variable is introduced in the model else it is rejected.</p>
+<pre class="r"><code>null.model &lt;- glm(low ~ 1, family = binomial, data = bwt)
+full.model &lt;- logistic.lm
+
+# forward regression
+step(null.model, scope=list(lower=null.model, upper=full.model), direction=&quot;forward&quot;)</code></pre>
+<pre><code>## Start:  AIC=236.67
+## low ~ 1
+## 
+##         Df Deviance    AIC
+## + bwt    1     0.00   4.00
+## + ptl    1   227.89 231.89
+## + lwt    1   228.69 232.69
+## + ui     1   229.60 233.60
+## + smoke  1   229.81 233.81
+## + ht     1   230.65 234.65
+## + race   1   231.10 235.10
+## + age    1   231.91 235.91
+## &lt;none&gt;       234.67 236.67
+## + ftv    1   233.90 237.90
+## 
+## Step:  AIC=4
+## low ~ bwt
+## 
+##         Df   Deviance AIC
+## &lt;none&gt;     4.9323e-07   4
+## + ui     1 1.7864e-07   6
+## + lwt    1 2.3991e-07   6
+## + ptl    1 4.9184e-07   6
+## + ht     1 4.9216e-07   6
+## + smoke  1 4.9276e-07   6
+## + race   1 4.9415e-07   6
+## + ftv    1 4.9577e-07   6
+## + age    1 4.9704e-07   6</code></pre>
+<pre><code>## 
+## Call:  glm(formula = low ~ bwt, family = binomial, data = bwt)
+## 
+## Coefficients:
+## (Intercept)          bwt  
+##    2975.975       -1.186  
+## 
+## Degrees of Freedom: 188 Total (i.e. Null);  187 Residual
+## Null Deviance:       234.7 
+## Residual Deviance: 4.932e-07     AIC: 4</code></pre>
+<p>The other option is to go <code>backward</code> from the full model to the simple model and reverse the selection strategy we discussed before. We could also go in either direction, using the option <code>both</code> in the <code>step</code> function above which mixes up the forward and backward step. It slows down the process although sometimes comes up with better answers because it considers more permutations.</p>
+</div>
+</div>
+<div id="prediction" class="section level1">
+<h1>Prediction</h1>
+<p>We are finally ready to apply the steps above in an actual example. We will use the very popular <code>Titanic</code> data set from <a href="https://www.kaggle.com/c/titanic">Kaggle</a>. I will just use the training data to further show the preprocessing steps before prediction.</p>
+<p>The sinking of the <a href="https://en.wikipedia.org/wiki/RMS_Titanic">RMS Titanic</a> is one of the most infamous shipwrecks in history. On April 15, 1912, during her maiden voyage, the Titanic sank after colliding with an iceberg, killing 1502 out of 2224 passengers and crew. This sensational tragedy shocked the international community and led to better safety regulations for ships. In the iconic movie <em>Titanic,(1997)</em>, the creaters depict how different factors (such the passenger class) decide who gets on the life boats. It painted a horrific and emotional picture of how the human lives depended on the wealth and social status of the passengers.</p>
+<p>One of the reasons that the shipwreck led to such loss of life was that there were not enough lifeboats for the passengers and crew. Although there was some element of luck involved in surviving the sinking, some groups of people were more likely to survive than others, such as women, children, and the upper-class.</p>
+<p>The variables in the data set are:</p>
+<ul>
+<li><strong>survival:</strong> Survival 0 = No, 1 = Yes</li>
+<li><strong>pclass:</strong> Ticket class 1 = 1st, 2 = 2nd, 3 = 3rd</li>
+<li><strong>sex:</strong> Sex of passesnger<br />
+</li>
+<li><strong>Age:</strong> Age in years<br />
+</li>
+<li><strong>sibsp:</strong> number of siblings / spouses aboard the Titanic<br />
+</li>
+<li><strong>parch:</strong> number of parents / children aboard the Titanic</li>
+<li><strong>ticket:</strong> Ticket number<br />
+</li>
+<li><strong>fare:</strong> Passenger fare<br />
+</li>
+<li><strong>cabin:</strong> Cabin number<br />
+</li>
+<li><strong>embarked:</strong> Port of Embarkation</li>
+</ul>
+<p>The challenge is the build a logitic regression model to predict the survival status of individuals aboard Titanic that fateful night.</p>
+<div id="preprocessing" class="section level2">
+<h2>Preprocessing</h2>
+<ol style="list-style-type: decimal">
+<li><strong>Load the data</strong></li>
+</ol>
+<pre class="r"><code>data &lt;- read_csv(&quot;C:/Users/routh/Desktop/Study Materials/My website/Regression/train.csv&quot;)</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li><strong>Analyze the structure</strong></li>
+</ol>
+<pre class="r"><code>glimpse(data)</code></pre>
+<pre><code>## Observations: 891
+## Variables: 12
+## $ PassengerId &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,...
+## $ Survived    &lt;int&gt; 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0,...
+## $ Pclass      &lt;int&gt; 3, 1, 3, 1, 3, 3, 1, 3, 3, 2, 3, 1, 3, 3, 3, 2, 3,...
+## $ Name        &lt;chr&gt; &quot;Braund, Mr. Owen Harris&quot;, &quot;Cumings, Mrs. John Bra...
+## $ Sex         &lt;chr&gt; &quot;male&quot;, &quot;female&quot;, &quot;female&quot;, &quot;female&quot;, &quot;male&quot;, &quot;mal...
+## $ Age         &lt;dbl&gt; 22, 38, 26, 35, 35, NA, 54, 2, 27, 14, 4, 58, 20, ...
+## $ SibSp       &lt;int&gt; 1, 1, 0, 1, 0, 0, 0, 3, 0, 1, 1, 0, 0, 1, 0, 0, 4,...
+## $ Parch       &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 1, 0, 0, 5, 0, 0, 1,...
+## $ Ticket      &lt;chr&gt; &quot;A/5 21171&quot;, &quot;PC 17599&quot;, &quot;STON/O2. 3101282&quot;, &quot;1138...
+## $ Fare        &lt;dbl&gt; 7.2500, 71.2833, 7.9250, 53.1000, 8.0500, 8.4583, ...
+## $ Cabin       &lt;chr&gt; NA, &quot;C85&quot;, NA, &quot;C123&quot;, NA, NA, &quot;E46&quot;, NA, NA, NA, ...
+## $ Embarked    &lt;chr&gt; &quot;S&quot;, &quot;C&quot;, &quot;S&quot;, &quot;S&quot;, &quot;S&quot;, &quot;Q&quot;, &quot;S&quot;, &quot;S&quot;, &quot;S&quot;, &quot;C&quot;, ...</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li><strong>Look at the summary of the data set</strong></li>
+</ol>
+<pre class="r"><code>summary(data)</code></pre>
+<pre><code>##   PassengerId       Survived          Pclass          Name          
+##  Min.   :  1.0   Min.   :0.0000   Min.   :1.000   Length:891        
+##  1st Qu.:223.5   1st Qu.:0.0000   1st Qu.:2.000   Class :character  
+##  Median :446.0   Median :0.0000   Median :3.000   Mode  :character  
+##  Mean   :446.0   Mean   :0.3838   Mean   :2.309                     
+##  3rd Qu.:668.5   3rd Qu.:1.0000   3rd Qu.:3.000                     
+##  Max.   :891.0   Max.   :1.0000   Max.   :3.000                     
+##                                                                     
+##      Sex                 Age            SibSp           Parch       
+##  Length:891         Min.   : 0.42   Min.   :0.000   Min.   :0.0000  
+##  Class :character   1st Qu.:20.12   1st Qu.:0.000   1st Qu.:0.0000  
+##  Mode  :character   Median :28.00   Median :0.000   Median :0.0000  
+##                     Mean   :29.70   Mean   :0.523   Mean   :0.3816  
+##                     3rd Qu.:38.00   3rd Qu.:1.000   3rd Qu.:0.0000  
+##                     Max.   :80.00   Max.   :8.000   Max.   :6.0000  
+##                     NA&#39;s   :177                                     
+##     Ticket               Fare           Cabin             Embarked        
+##  Length:891         Min.   :  0.00   Length:891         Length:891        
+##  Class :character   1st Qu.:  7.91   Class :character   Class :character  
+##  Mode  :character   Median : 14.45   Mode  :character   Mode  :character  
+##                     Mean   : 32.20                                        
+##                     3rd Qu.: 31.00                                        
+##                     Max.   :512.33                                        
+## </code></pre>
+<p>We would need to rectify the classes for a few variable to reflect their ordinal or nominal nature more appropriately.</p>
+<ol start="4" style="list-style-type: decimal">
+<li><strong>Variable transformations and Imputations</strong></li>
+</ol>
+<ul>
+<li>First we transform some of the variable types from numeric to factor to reflect their binary/multinomial nature.</li>
+</ul>
+<pre class="r"><code>data &lt;- data %&gt;% dplyr::select(PassengerId,Survived,Pclass,
+                                   Age,SibSp,Parch,Embarked,Fare,Sex)%&gt;%
+                      mutate(PassengerId = as.character(PassengerId),
+                          Survived = factor(Survived),
+                          Pclass = factor(Pclass),
+                          Sex = factor(Sex),
+                          Age = as.numeric(Age),
+                          SibSp = factor(SibSp),
+                          Parch = factor(Parch),
+                          Embarked = factor(Embarked))</code></pre>
+<ul>
+<li>We check for missing values</li>
+</ul>
+<pre class="r"><code>colSums(is.na(data))</code></pre>
+<pre><code>## PassengerId    Survived      Pclass         Age       SibSp       Parch 
+##           0           0           0         177           0           0 
+##    Embarked        Fare         Sex 
+##           2           0           0</code></pre>
+<ul>
+<li>Impute missing Age with median and then omit the 2 observations of embarked</li>
+</ul>
+<pre class="r"><code>data &lt;- data %&gt;% 
+     mutate_at(vars(Age), ~ifelse(is.na(.), median(., na.rm = TRUE), .)) %&gt;%
+     na.omit()
+
+colSums(is.na(data))</code></pre>
+<pre><code>## PassengerId    Survived      Pclass         Age       SibSp       Parch 
+##           0           0           0           0           0           0 
+##    Embarked        Fare         Sex 
+##           0           0           0</code></pre>
+</div>
+<div id="visualize-distributions" class="section level2">
+<h2>Visualize distributions</h2>
+<pre class="r"><code>my3cols &lt;- c(&quot;#E7B800&quot;, &quot;#2E9FDF&quot;, &quot;#FC4E07&quot;)
+my2cols &lt;- c(&quot;#2E9FDF&quot;, &quot;#FC4E07&quot;)
+
+g1 &lt;- data %&gt;%
+      group_by(Survived)%&gt;%
+      summarise(count = n())%&gt;%
+      ggplot(aes(x = Survived, y = count, fill = Survived))+
+      geom_bar(stat = &quot;identity&quot;,col = &quot;black&quot;)+
+      scale_fill_manual(values = my2cols)+
+      theme_minimal()+
+      labs(title = &quot;Survived Proportions&quot;)
+
+g2 &lt;- data %&gt;%
+      group_by(Pclass)%&gt;%
+      summarise(count = n())%&gt;%
+      ggplot(aes(x = Pclass, y = count, fill = Pclass))+
+      geom_bar(stat = &quot;identity&quot;,col = &quot;black&quot;)+
+      scale_fill_manual(values = my3cols)+
+      theme_minimal()+
+      labs(title = &quot;Class Distribution&quot;)
+
+g3 &lt;- data %&gt;%
+      group_by(SibSp)%&gt;%
+      summarise(count = n())%&gt;%
+      ggplot(aes(x = SibSp, y = count, fill = SibSp))+
+      geom_bar(stat = &quot;identity&quot;,col = &quot;black&quot;)+
+      scale_fill_brewer(palette = &quot;Set2&quot;)+
+      theme_minimal()+
+      labs(title = &quot;Siblings Distribution&quot;)
+
+g4 &lt;- data %&gt;%
+      group_by(Sex)%&gt;%
+      summarise(count = n())%&gt;%
+      ggplot(aes(x = Sex, y = count, fill = Sex))+
+      geom_bar(stat = &quot;identity&quot;,col = &quot;black&quot;)+
+      scale_fill_manual(values = my3cols)+
+      theme_minimal()+
+      labs(title = &quot;Sex Distribution&quot;)
+
+g5 &lt;- data %&gt;%
+      ggplot(aes(x = Age))+
+      geom_density(fill = &quot;#FC4E07&quot;, col = &quot;black&quot;)+
+      scale_fill_manual(values = my3cols)+
+      theme_minimal()+
+      labs(title = &quot;Age distribution&quot;)
+
+g6 &lt;- data %&gt;%
+      ggplot(aes(Age,Fare,col = Pclass ,shape = Sex))+
+      geom_point()+
+      scale_color_manual(values = my3cols)+
+      theme_minimal()+
+      labs(title = &quot;Fare vs Age&quot;)+
+      coord_cartesian(ylim = c(0,300))
+
+gridExtra::grid.arrange(g1,g2,g3,g4,g5,g6, ncol = 3, nrow = 2)</code></pre>
+<p><img src="/post/2018-01-07-jack-and-rose_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
+</div>
+<div id="randomize-the-dataset" class="section level2">
+<h2>Randomize the dataset</h2>
+<p>Randomizing the data set is important to make sure its free from bias when building the model. This is achieved by randomizing the row numbers of the data set and then ordering the original data by the random index. Randomizing leads to bias free results and accurately analyze the effect of predictors on response.</p>
+<pre class="r"><code># for reproducibility
+set.seed(42)
+# obtain a random sample of row ids
+rows &lt;- sample(nrow(data))
+# order the data set with the vector above
+data &lt;- data[rows,]</code></pre>
+</div>
+<div id="split-into-train-and-test-lets-try-a-7030-split" class="section level2">
+<h2>Split into train and test: Lets try a 70:30 split</h2>
+<pre class="r"><code># create a split point
+split &lt;- round(nrow(data)*0.7)
+# train
+train &lt;- data[1:split,]
+# test
+test &lt;- data[(split+1):nrow(data),]</code></pre>
+</div>
+<div id="fit-the-model-on-train" class="section level2">
+<h2>Fit the model on train</h2>
+<pre class="r"><code>fit &lt;- glm(Survived ~.,
+               data = train[,-1], family = &quot;binomial&quot;)
+
+summary(fit)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = Survived ~ ., family = &quot;binomial&quot;, data = train[, 
+##     -1])
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.7358  -0.6141  -0.4212   0.5908   2.3965  
+## 
+## Coefficients:
+##               Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)  3.876e+00  5.689e-01   6.813 9.54e-12 ***
+## Pclass2     -1.131e+00  3.499e-01  -3.232 0.001229 ** 
+## Pclass3     -2.136e+00  3.435e-01  -6.219 5.00e-10 ***
+## Age         -3.350e-02  9.780e-03  -3.425 0.000614 ***
+## SibSp1      -1.145e-01  2.748e-01  -0.417 0.676960    
+## SibSp2      -4.409e-01  6.744e-01  -0.654 0.513272    
+## SibSp3      -2.238e+00  8.095e-01  -2.765 0.005695 ** 
+## SibSp4      -2.554e+00  1.164e+00  -2.193 0.028279 *  
+## SibSp5      -1.523e+01  1.380e+03  -0.011 0.991197    
+## SibSp8      -1.614e+01  8.924e+02  -0.018 0.985569    
+## Parch1       6.015e-01  3.672e-01   1.638 0.101374    
+## Parch2       2.214e-01  4.541e-01   0.488 0.625867    
+## Parch3      -6.360e-01  1.461e+00  -0.435 0.663291    
+## Parch4      -1.635e+01  1.300e+03  -0.013 0.989961    
+## Parch5      -1.560e+01  1.408e+03  -0.011 0.991161    
+## Parch6      -1.648e+01  2.400e+03  -0.007 0.994520    
+## EmbarkedQ    3.681e-01  4.705e-01   0.782 0.433935    
+## EmbarkedS   -3.035e-01  2.860e-01  -1.061 0.288706    
+## Fare         6.962e-04  2.591e-03   0.269 0.788149    
+## Sexmale     -2.748e+00  2.504e-01 -10.975  &lt; 2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 831.40  on 621  degrees of freedom
+## Residual deviance: 528.36  on 602  degrees of freedom
+## AIC: 568.36
+## 
+## Number of Fisher Scoring iterations: 15</code></pre>
+<p>As expected, sex is significant in predicting survival. Females we given priority during the rescue attempts. The class of passenger and the age were also significant. Older individuals and first class passengers were given priority over the other classes.</p>
+<p>One could also use the <em>stepwise</em> regression procedure for variable selection before moving onto predictions.</p>
+</div>
+<div id="predict-with-the-model-above" class="section level2">
+<h2>Predict with the model above</h2>
+<pre class="r"><code>predictions &lt;- predict.glm(fit, newdata = test, type = c(&quot;response&quot;))
+
+# visualise the predictions
+
+predict.df &lt;- data.frame(
+      PassengerId = test$PassengerId,
+      predictions = predictions,
+      predict.status = ifelse(predictions &gt; 0.5,1,0),
+      actual.status = test$Survived
+)
+
+predict.df %&gt;% 
+   left_join(test,&quot;PassengerId&quot;) %&gt;%
+   ggplot(aes(x = Age, y = predictions, col = Pclass))+
+   geom_point()+
+   facet_grid(.~Sex)+
+   labs(y = &quot;Predictions&quot;, title = &quot;Visualizing Predictions&quot;)+
+   scale_color_manual(values = my3cols)+
+   theme_minimal()</code></pre>
+<p><img src="/post/2018-01-07-jack-and-rose_files/figure-html/unnamed-chunk-32-1.png" width="672" /></p>
+<p>Females predicted survival rates are higher than men. Within each sex, older men probably died more when Titanic sank. But in general as age increased the predicted survival probability fell. Finally class 1 have higher survival rates. They were probably first to be rescued followed by 2 and then 3.</p>
+</div>
+<div id="using-a-naive-classification-boundary" class="section level2">
+<h2>Using a naive classification boundary</h2>
+<p>Next, we use a naive decision rule to classify the predicted probability. Lets use 0.5 as the cutoff value. The 2x2 confusion matrix and the accuracy value is computed below:</p>
+<pre class="r"><code>t &lt;- with(predict.df,table(predict.status,actual.status))
+(t)</code></pre>
+<pre><code>##               actual.status
+## predict.status   0   1
+##              0 137  27
+##              1  32  71</code></pre>
+<pre class="r"><code>print(paste(&#39;Accuracy:&#39;,round((t[1]+t[4])/(t[1]+t[2]+t[3]+t[4]),2)))</code></pre>
+<pre><code>## [1] &quot;Accuracy: 0.78&quot;</code></pre>
+</div>
+<div id="roc-charts" class="section level2">
+<h2>ROC charts</h2>
+<p>A ROC chart is useful when finding the balance between true positive and true negative is manually impossible. The ROC plots all the values for true positive and true negative for different cutoff points. A weak classifier will have the ROC line passing diagonally across the plot whereas a strong classifier will have a prominent ‘elbow’ with at least one point where the TPR is sufficiently high and the FPR will be sufficiently low.</p>
+<p>The following function (adapted from this <a href="https://www.r-bloggers.com/simple-roc-plots-with-ggplot2-part-1/">link</a>) calculates the AUC (Area under curve) as well as the ROC data which can then be used inside the ggplot2 framework.</p>
+<pre class="r"><code>rocdata &lt;- function(grp, pred){
+  # Produces x and y co-ordinates for ROC curve plot
+  # Arguments: grp - labels classifying subject status
+  #            pred - values of each observation
+  # Output: List with 2 components:
+  #         roc = data.frame with x and y co-ordinates of plot
+  #         stats = data.frame containing: area under ROC curve, p value, upper and lower 95% confidence interval
+ 
+  grp &lt;- as.factor(grp)
+  if (length(pred) != length(grp)) {
+    stop(&quot;The number of classifiers must match the number of data points&quot;)
+  } 
+ 
+  if (length(levels(grp)) != 2) {
+    stop(&quot;There must only be 2 values for the classifier&quot;)
+  }
+ 
+  cut &lt;- unique(pred)
+  tp &lt;- sapply(cut, function(x) length(which(pred &gt; x &amp; grp == levels(grp)[2])))
+  fn &lt;- sapply(cut, function(x) length(which(pred &lt; x &amp; grp == levels(grp)[2])))
+  fp &lt;- sapply(cut, function(x) length(which(pred &gt; x &amp; grp == levels(grp)[1])))
+  tn &lt;- sapply(cut, function(x) length(which(pred &lt; x &amp; grp == levels(grp)[1])))
+  tpr &lt;- tp / (tp + fn)
+  fpr &lt;- fp / (fp + tn)
+  roc = data.frame(x = fpr, y = tpr)
+  roc &lt;- roc[order(roc$x, roc$y),]
+ 
+  i &lt;- 2:nrow(roc)
+  auc &lt;- (roc$x[i] - roc$x[i - 1]) %*% (roc$y[i] + roc$y[i - 1])/2
+ 
+  pos &lt;- pred[grp == levels(grp)[2]]
+  neg &lt;- pred[grp == levels(grp)[1]]
+  q1 &lt;- auc/(2-auc)
+  q2 &lt;- (2*auc^2)/(1+auc)
+  se.auc &lt;- sqrt(((auc * (1 - auc)) + ((length(pos) -1)*(q1 - auc^2)) + ((length(neg) -1)*(q2 - auc^2)))/(length(pos)*length(neg)))
+  ci.upper &lt;- auc + (se.auc * 0.96)
+  ci.lower &lt;- auc - (se.auc * 0.96)
+ 
+  se.auc.null &lt;- sqrt((1 + length(pos) + length(neg))/(12*length(pos)*length(neg)))
+  z &lt;- (auc - 0.5)/se.auc.null
+  p &lt;- 2*pnorm(-abs(z))
+ 
+  stats &lt;- data.frame (auc = auc,
+                       p.value = p,
+                       ci.upper = ci.upper,
+                       ci.lower = ci.lower
+                       )
+ 
+  return (list(roc = roc, stats = stats))
+}
+
+# Get ROC data
+
+obj.roc &lt;- rocdata(grp = predict.df$actual.status, pred = predict.df$predictions)$roc
+roc.data &lt;- data.frame(false_positive = obj.roc$x, true_positive = obj.roc$y,cutoff = round(unique(predictions),4))
+
+# create the ROC chart
+
+ggplot(roc.data,aes(x = false_positive, y = true_positive))+
+  geom_point()+
+  theme_minimal()</code></pre>
+<p><img src="/post/2018-01-07-jack-and-rose_files/figure-html/unnamed-chunk-34-1.png" width="672" /></p>
+<p>We notice in the ROC plot above that a cutoff point of 0.6 gives us a around 79% accuracy. This can be verified as below</p>
+<pre class="r"><code>roc.data[roc.data$cutoff == 0.5937,]</code></pre>
+<pre><code>##     false_positive true_positive cutoff
+## 128      0.2916667     0.8265306 0.5937</code></pre>
+<pre class="r"><code>predict.df &lt;- data.frame(
+      predictions = predictions,
+      predict.status = ifelse(predictions &gt; 0.6,1,0),
+      actual.status = test$Survived
+)
+
+
+t &lt;- with(predict.df,table(predict.status,actual.status))
+(t)</code></pre>
+<pre><code>##               actual.status
+## predict.status   0   1
+##              0 144  31
+##              1  25  67</code></pre>
+<pre class="r"><code>print(paste(&#39;Accuracy:&#39;,round((t[1]+t[4])/(t[1]+t[2]+t[3]+t[4]),3)))</code></pre>
+<pre><code>## [1] &quot;Accuracy: 0.79&quot;</code></pre>
+<p>This is how a ROC chart helps us understand the trade off between true positive and true negative and come up with better cutoff points.</p>
+</div>
+</div>

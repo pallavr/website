@@ -1,0 +1,669 @@
+---
+title: Jack and Rose
+author: ''
+date: '2018-01-07'
+slug: jack-and-rose
+categories:
+  - predictive analytics
+tags:
+  - regression
+  - R
+  - ggplot2
+header:
+  caption: ''
+  image: 'headers/titanic.jpg'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<style>
+body {
+text-align: justify}
+</style>
+
+# Get the packages
+
+```{r, message=FALSE, warning=FALSE}
+library(readr) # read in a csv/txt file
+library(MASS) # has the data set
+library(dplyr) # for data manipulation
+library(tidyr) # for data manipulation
+library(ggplot2) # for data viz
+library(purrr) # for functional programming
+```
+
+Jack and Rose from *Titanic* epitomized the concept of romance in the late 1990s. If you watched this movie you would realize how Jack and Rose are **dependent** on one another for surviving the sinking ship. Sometimes these dependencies can be represented by a straight line. This is what regression represents. The "best fit" regression line quantifies the relationship between two or more variables.
+
+Multiple regression is one of the oldest ML techniques. The simple yet formidable OLS estimation algorithm dates way back to the $18^{th}$ century. The algorithm works by minimizing the sum of squares between the best fit line and the response variable. Today, the OLS regression is not the most accurate algorithm and therefore has been replaced by more sophisticated ML techniques. Yet, the weakness of this technique is also its strength. No other algorithm is as tractable as regression. Therefore, regression is almost always a starting point in any data analysis task. 
+
+In this tutorial, I will implement this technique in R on the famous **Titanic** data set (link on this page) and discuss how to interpret the outputs. Finally I will use a data set from Kaggle to demonstrate the steps one should take when implementing this technique for prediction purposes.
+
+
+# Birthweights and Babies
+
+To demonstrate the key codes and concepts for regression I will use the `birthwt` package from the `MASS` package. The Birthwt data contains 189 observations, 16 predictors, and an outcome, birth weight, available both as a continuous measure and a binary indicator for low birth weight. The data were collected at Bay state Medical Center, Springfield, Mass during 1986.
+
+Let's load the data set and examine the variables.
+
+```{r}
+data("birthwt")
+glimpse(birthwt)
+knitr::kable(head(birthwt,5))
+```
+
+- **low:**Indicator of birth weight less than 2.5kg
+- **age:**Mother's age in years
+- **lwt:**Mother's weight in pounds at last menstrual period
+- **race:**Indicator functions for mother's race; "3" is reference group
+- **smoke:**Smoking status during pregnancy
+- **ptl:**Indicator functions for one or for two or more previous premature labors
+- **ht:**History of hypertension
+- **ui:**Presence of uterine irritability
+- **ftv:**Indicator functions for one, for two, or for three or more physician visits during the first trimester, respectively. No visits is the reference category
+- **bwt:**Birth weight in kilograms
+
+Lets visualize the variable distributions
+
+```{r}
+GGally::ggpairs(birthwt)
+```
+
+The `ggpairs` function is a nice way to visualize the inter-relationships between variables. It allows for early detection of correlated variables and irregular distributions. In this data set I don't see any variables that are extremely heavily correlated or any distributions that are severely skewed.
+
+
+# Simple Linear Regression
+
+Linear regression in R is performed with the `lm` function. The set-up is very intuitive.
+
+```{r}
+sim.lm <- lm(formula = bwt ~ lwt,  # regression formulae
+             data = birthwt) # data set
+
+# summarise the model
+summary(sim.lm)
+```
+
+## Inference
+
+Often we are interested in finding the confidence interval for the coefficients of the model. 
+
+```{r}
+confint(sim.lm, level = 0.95)
+```
+
+# Multiple Linear Regression
+
+The multiple linear regression set up is very similar to the simple regression. The predictors are connected with the `+` operator within the formula argument.
+
+```{r}
+mutl.lm <- lm(formula = bwt ~ lwt + age + race + ftv,
+              data = birthwt)
+```
+
+## Interpret the output 
+
+The output of the lm function can be summarized with a `summary` call.
+
+```{r}
+summary(mutl.lm)
+```
+
+1. The five stat summary of the residuals are displayed. We see the minimum and maximum deviations are close to each other but are very large. This is an early indication of weak model performance in terms of fitting the best fit line.
+
+2. The coefficient table:
+    - **Estimate:** Gives the estimates of the coefficients of the predictors that when multiplied with the values of the predictors give the fitted values of response value. These are also called the *slopes* while the first term is the *intercept*. A *3.6* coefficient for `lwt` means for every one unit rise of lwt, birth weight would *increase* by 3.6 units *on average keeping everything else constant*. 
+    - **Std. Error:** It is the standard error when computing the coefficients. The computation arises because the coefficients are essentially expected values for the predictors. The standard error therefore, tells us the variance or standard deviation when computing the expected values.
+    - **t value:** Indicates how far the coefficient estimate is from the '0' on the standardized scale. The further we are the better. That would translate into a low p-value.
+    - **Pr(>|t|):** It is the probability of observing a value larger than *t*. A small p value indicates that it is unlikely that there is any relationship between predictor and response variable. The **significance codes** at the bottom of the table indicates the level of significance in comparison to the standard cutoff of 5%.
+    - **Residual Standard Error:** Roughly speaking, RSE is the measure of how far the fitted line will deviate from the fitted best fit regression line. Consequently, a smaller value is preferred.
+    - **R-square and Adjusted R-square:** It is measure of how well the variation in the response variables are modeled by the existing predictor variables. The adjusted version adjusts for the increase in the number of predictors.
+    - **F-statistic:** The F-stat is test statistic computed for measuring the overall stability of the model. The p-value next to the F-stat needs to be lower than the cutoff to ensure the model fit is legitimate.
+
+
+## Assumtions
+
+While developing the least squares algorithm, the creators made several assumptions. We need to check for the correctness of these assumptions religiously every time we build a model especially when the aim is to predict. This also contributes to the disadvantages of using regression. 
+
+1. The parameters should be **linear**.
+
+This is true because our regression model is:
+
+$$  birthweight = \beta_0 + \beta_1lwt + \beta_2age + \beta_3race + \beta_4ftv    $$
+
+All dependent variables have singular powers.
+
+2. Mean of residuals
+
+The mean of residuals should be close to zero.
+
+```{r}
+mean(mutl.lm$residuals)
+```
+
+3. **Equal variance** of residuals
+
+We need to check the residuals vs. fitted values for signs of patterns (specifically a "cone" shaped pattern)
+
+```{r}
+tmp <- data.frame(residual = mutl.lm$residuals, fitted = mutl.lm$fitted.values)
+
+ggplot(tmp, aes(x = fitted, y = residual))+
+  geom_point(col = "#2E9FDF")+
+  labs(title = "Residuals vs Fitted Values")+
+  theme_minimal()
+```
+
+4. **Normality assumption**
+
+All residuals should be normally distributed. Visually it can be checked using the Q-Q plot.
+
+```{r}
+qqplot.data <- function (vec) # argument: vector of numbers
+{
+  # following four lines from base R's qqline()
+  y <- quantile(vec[!is.na(vec)], c(0.25, 0.75))
+  x <- qnorm(c(0.25, 0.75))
+  slope <- diff(y)/diff(x)
+  int <- y[1L] - slope * x[1L]
+
+  d <- data.frame(resids = vec)
+
+  ggplot(d, aes(sample = resids)) + 
+    stat_qq() + 
+    geom_abline(slope = slope, intercept = int) +
+    labs(title = "Normal Q-Q plot")+
+    theme_minimal()
+
+}
+
+resid <- mutl.lm$residuals
+qqplot.data(resid)
+```
+
+All the residuals are on the straight line. This indicates normality is met.
+
+A test statistic that confirms normality is the Durbin Watson Test Stat.
+
+```{r}
+lmtest::dwtest(mutl.lm)
+```
+
+
+## Comparing Models
+
+Does addition of extra variables improve the model? This can be checked with an ANOVA test. The low p value indicates the second model is 'significant'.
+
+```{r}
+anova(sim.lm,mutl.lm)
+```
+
+## Variance Inflation Factor
+
+The `vif` checks for multi-collinearity. MC can be a real villain for regressional fits. It could render variables to be insignificant and hamper the R-squared values. One way to counter VIFs are using the variables in an interaction terms. Informally speaking, this would also require extensive domain knowledge to understand why an interaction would be valid. A VIF around 1 is good while if it is greater than 10, it could indicates serious correlations between variable pairs. 
+
+```{r}
+car::vif(mutl.lm)
+```
+
+## Interactions
+
+Here I demonstrate how interactions are included within the `lm` framework. Let's examine the possibility of interaction between ftv and age.
+
+```{r}
+mutl.lm.int <- lm(formula = bwt ~ lwt + age*ftv + race,  # also considers the variable by themselves alone
+                  data = birthwt)
+
+summary(mutl.lm.int)
+
+mutl.lm.int.2 <- lm(formula = bwt ~ lwt + age:ftv + race,  # only considers the interaction terms
+                  data = birthwt)
+
+summary(mutl.lm.int.2)
+```
+
+
+## Categorical Predictors
+
+Sometimes the predictors are not continuous. They could be categorical or nominal variables. In R you would need to manually convert the class of the variables to `factor` if they are already not.
+
+1. Coerce the predictor into a vector of named (or unnamed factor)
+
+```{r}
+# make sure you convert it into a factor first
+birthwt$smoke <- factor(birthwt$smoke)
+
+mutl.lm.factor <- lm(formula = bwt ~ smoke,
+                     data = birthwt)
+
+summary(mutl.lm.factor)
+```
+
+Care should be taken while interpreting a categorical variable. When they are binary for instance in the above example, when the value of `smoke` is 1 the response will increase or decrease by an amount of (Intercept+Coefficient) *on average keeping everything else constant*. On the other hand when `smoke` is 0, the amount increase/decrease is recorded only by the (Intercept) term.
+
+2. Create dummy/indicator variables
+
+Lets create 3 columns: one an indicator for age less than 20, another for 21-29 age group and lastly another for greater than 30
+
+```{r,warning=FALSE,message=FALSE}
+birthwt <- mutate(birthwt, under.20 = ifelse(age < 21,1,0),
+                           between.20.30 = ifelse(age < 30 & age > 20,1,0),
+                           over.30 = ifelse(age > 29,1,0))
+
+mutl.lm.indicator <- lm(formula = bwt ~ smoke + under.20 + between.20.30 + over.30,
+                        data = birthwt)
+
+summary(mutl.lm.indicator)
+```
+
+Indicator variables have there own coefficients in the summary table.Clearly this is not a great example of indicator variables used in regression.
+
+# Logistic Regression
+
+It is inappropriate to treat the categorical response (such as a binary response of yes/no) as continuous and perform multiple linear regression. Consider this plot where I treat `low` as continuous and fit a best fit line:
+
+```{r}
+birthwt %>%
+  ggplot(aes(y = low,x = age))+
+  geom_point(col = "#FC4E07")+
+  stat_smooth(method = "lm", col = "black",se=F)+
+  theme_minimal()+
+  labs(title = "Low Birthweight vs Age", x = "Low", y = "Age")
+```
+
+The best fit line would eventually fall below 0 as age would increase and would lead a to response (the value of `low`) value lower than 0 which then becomes unrealistic. Logistic regression models is one class of models under 'Generalized Linear Model'. Logistic models are called so because they transform the response through a **logit** function. Logit belong to a vast array of *link* functions that are different for different linear models.
+
+Logit is short for log of the odds. Mathematically this means:
+
+$$  log\{\frac{\text{Pr} (y|x)}{1-\text{Pr}(y|x)}\} =  \beta_0 + \beta_1x $$
+
+Alternatively,
+
+$$    \frac{\text{Pr} (y|x)}{1-\text{Pr}(y|x)} = e^{\beta_0 + \beta_1x}  $$
+
+$$ y = \frac{e^{\beta_0 + \beta_1x}}{1+e^{\beta_0 + \beta_1x}} $$
+This then becomes our response variable. The only drawback of using a logistic or other generalized linear models is when interpreting the coefficients of the predictors. We would have to adjust by transforming from the log scale. This sometimes makes interpretation complicated.
+
+## Fitting the model
+
+We use the `glm` function to fit a logistic regression model. Notice the family is specified as binomial. This reflects the binary nature of the response variable.
+
+```{r,warning=FALSE,message=FALSE}
+bwt <- birthwt[,-11:-13]
+logistic.lm <- glm(low ~ ., family = binomial, data = bwt)
+summary(logistic.lm)
+```
+
+## Interpreting the coefficients
+
+The summary table is very similar to the multiple regression summary table. However you should be careful while interpreting the coefficients. You have to remember they are in logit scale. You can rescale them using a function as I did here and then interpret that value as a percent increase or decrease. For instance I will rescale the age coefficent:
+
+```{r}
+logit.rescale <- function(x){
+  (1 - (exp(x)/(1+exp(x))))*100
+}
+
+(logit.rescale(3.223e-01))
+```
+
+This means for every unit increase in age, the chances of low birthweight increase by 42%.
+
+## Variable Selection
+
+Before moving onto how to predict using a real life data set, its worth understanding how to select variables when there are a large list of variables to be considered for a model fit. The concept of variable selection is connected to the *principle of parsimony* in statistics. The principle advocates the use of a simpler model (with fewer predictor vars) when fitting or predicting. In practice this is sometimes useful because it reduces the burden of interpreting multiple variables. It is especially useful when a simpler model is more accurate in prediction than a complex model. There are number of strategies for selecting the 'best' model. The first one is using ANOVA after manually building the models. The next two strategies uses R to automate the iteration over multiple models and helps identify the best model.
+
+1. **All possible regression model**
+
+As the name suggests this technique considers all possible combination of predictors while building the model. Then we use ceratin statistics such as the Bayesian Info Criteria or Residual Sum of Squares to decide on which predictors to keep and which ones to reject.
+
+```{r, message=FALSE, warning=FALSE}
+all.subset <- leaps::regsubsets(low ~.,
+                                data = bwt,
+                                nbest = 20) # number of subsets to consider
+
+all.subset.summary <- summary(all.subset) # store the summary into an object
+
+tmp <- data.frame(all.subset.summary$which,
+                        all.subset.summary[c("rss","cp","bic")],
+                                                    id = 1:nrow(all.subset.summary$which))
+colnames(tmp)[1] <- "Intercept"
+
+tmp %>%
+    gather(variable, present, -rss, -cp, -bic, -id) %>% 
+    gather(type, value, -id, -variable, -present)%>%
+    ggplot(aes(variable, factor(round(value)))) +
+      geom_tile(aes(fill = present),col = "black") +
+      facet_wrap(~ type, scales = "free") +
+      scale_fill_manual("", values = c("TRUE" = "#FC4E07", "FALSE" = "white"), guide = FALSE) +
+      theme_minimal()+
+      labs(x = "", y = "")+
+      theme(axis.text.x = element_text(angle = 90))
+```
+
+We can summarize the results of the procedure with the picture above. We could any one of the plots above to decide an appropriate model to use. For instance if we look at the RSS facet, we can see for a particular value of RSS which variables are included. The lowest RSS value of 33, has all variables except race and the first level of ftv.
+
+2. **Automated stepwise regression**
+
+This school of variable selection is based on taking 'steps' towards a better model. We start with a basic model (one with just the intercept term) and slowly build to the full model with all covariates. At each step, a predictor is added and checked if it is significant in the model and if it betters a statistic (such as BIC/AIC). If it does, then the variable is introduced in the model else it is rejected.
+
+```{r,warning=FALSE,message=FALSE}
+null.model <- glm(low ~ 1, family = binomial, data = bwt)
+full.model <- logistic.lm
+
+# forward regression
+step(null.model, scope=list(lower=null.model, upper=full.model), direction="forward")
+```
+
+The other option is to go `backward` from the full model to the simple model and reverse the selection strategy we discussed before. We could also go in either direction, using the option `both` in the `step` function above which mixes up the forward and backward step. It slows down the process although sometimes comes up with better answers because it considers more permutations.
+
+
+
+# Prediction
+
+We are finally ready to apply the steps above in an actual example. We will use the very popular `Titanic` data set from [Kaggle](https://www.kaggle.com/c/titanic). I will just use the training data to further show the preprocessing steps before prediction. 
+
+The sinking of the [RMS Titanic](https://en.wikipedia.org/wiki/RMS_Titanic) is one of the most infamous shipwrecks in history.  On April 15, 1912, during her maiden voyage, the Titanic sank after colliding with an iceberg, killing 1502 out of 2224 passengers and crew. This sensational tragedy shocked the international community and led to better safety regulations for ships. In the iconic movie *Titanic,(1997)*, the creaters depict how different factors (such the passenger class) decide who gets on the life boats. It painted a horrific and emotional picture of how the human lives depended on the wealth and social status of the passengers.
+
+One of the reasons that the shipwreck led to such loss of life was that there were not enough lifeboats for the passengers and crew. Although there was some element of luck involved in surviving the sinking, some groups of people were more likely to survive than others, such as women, children, and the upper-class.
+
+The variables in the data set are:
+
+- **survival:**	Survival	0 = No, 1 = Yes
+- **pclass:**	Ticket class	1 = 1st, 2 = 2nd, 3 = 3rd
+- **sex:**	Sex of passesnger	
+- **Age:**	Age in years	
+- **sibsp:** number of siblings / spouses aboard the Titanic	
+- **parch:**	number of parents / children aboard the Titanic	
+- **ticket:**	Ticket number	
+- **fare:**	Passenger fare	
+- **cabin:**	Cabin number	
+- **embarked:**	Port of Embarkation
+
+The challenge is the build a logitic regression model to predict the survival status of individuals aboard Titanic that fateful night. 
+
+## Preprocessing
+
+1. **Load the data**
+
+```{r,message=FALSE,warning=FALSE}
+data <- read_csv("C:/Users/routh/Desktop/Study Materials/My website/Regression/train.csv")
+```
+
+2. **Analyze the structure**
+
+```{r}
+glimpse(data)
+```
+
+3. **Look at the summary of the data set**
+
+```{r}
+summary(data)
+```
+
+We would need to rectify the classes for a few variable to reflect their ordinal or nominal nature more appropriately.
+
+4. **Variable transformations and Imputations**
+
+- First we transform some of the variable types from numeric to factor to reflect their binary/multinomial nature.
+
+```{r}
+data <- data %>% dplyr::select(PassengerId,Survived,Pclass,
+                                   Age,SibSp,Parch,Embarked,Fare,Sex)%>%
+                      mutate(PassengerId = as.character(PassengerId),
+                          Survived = factor(Survived),
+                          Pclass = factor(Pclass),
+                          Sex = factor(Sex),
+                          Age = as.numeric(Age),
+                          SibSp = factor(SibSp),
+                          Parch = factor(Parch),
+                          Embarked = factor(Embarked))
+            
+```
+
+- We check for missing values
+
+```{r}
+colSums(is.na(data))
+```
+
+- Impute missing Age with median and then omit the 2 observations of embarked
+
+```{r}
+data <- data %>% 
+     mutate_at(vars(Age), ~ifelse(is.na(.), median(., na.rm = TRUE), .)) %>%
+     na.omit()
+
+colSums(is.na(data))
+```
+
+
+## Visualize distributions
+
+```{r}
+my3cols <- c("#E7B800", "#2E9FDF", "#FC4E07")
+my2cols <- c("#2E9FDF", "#FC4E07")
+
+g1 <- data %>%
+      group_by(Survived)%>%
+      summarise(count = n())%>%
+      ggplot(aes(x = Survived, y = count, fill = Survived))+
+      geom_bar(stat = "identity",col = "black")+
+      scale_fill_manual(values = my2cols)+
+      theme_minimal()+
+      labs(title = "Survived Proportions")
+
+g2 <- data %>%
+      group_by(Pclass)%>%
+      summarise(count = n())%>%
+      ggplot(aes(x = Pclass, y = count, fill = Pclass))+
+      geom_bar(stat = "identity",col = "black")+
+      scale_fill_manual(values = my3cols)+
+      theme_minimal()+
+      labs(title = "Class Distribution")
+
+g3 <- data %>%
+      group_by(SibSp)%>%
+      summarise(count = n())%>%
+      ggplot(aes(x = SibSp, y = count, fill = SibSp))+
+      geom_bar(stat = "identity",col = "black")+
+      scale_fill_brewer(palette = "Set2")+
+      theme_minimal()+
+      labs(title = "Siblings Distribution")
+
+g4 <- data %>%
+      group_by(Sex)%>%
+      summarise(count = n())%>%
+      ggplot(aes(x = Sex, y = count, fill = Sex))+
+      geom_bar(stat = "identity",col = "black")+
+      scale_fill_manual(values = my3cols)+
+      theme_minimal()+
+      labs(title = "Sex Distribution")
+
+g5 <- data %>%
+      ggplot(aes(x = Age))+
+      geom_density(fill = "#FC4E07", col = "black")+
+      scale_fill_manual(values = my3cols)+
+      theme_minimal()+
+      labs(title = "Age distribution")
+
+g6 <- data %>%
+      ggplot(aes(Age,Fare,col = Pclass ,shape = Sex))+
+      geom_point()+
+      scale_color_manual(values = my3cols)+
+      theme_minimal()+
+      labs(title = "Fare vs Age")+
+      coord_cartesian(ylim = c(0,300))
+
+gridExtra::grid.arrange(g1,g2,g3,g4,g5,g6, ncol = 3, nrow = 2)
+    
+```
+
+
+## Randomize the dataset
+
+Randomizing the data set is important to make sure its free from bias when building the model. This is achieved by randomizing the row numbers of the data set and then ordering the original data by the random index. Randomizing leads to bias free results and accurately analyze the effect of predictors on response.
+
+```{r}
+# for reproducibility
+set.seed(42)
+# obtain a random sample of row ids
+rows <- sample(nrow(data))
+# order the data set with the vector above
+data <- data[rows,]
+```
+
+
+## Split into train and test: Lets try a 70:30 split
+
+```{r}
+# create a split point
+split <- round(nrow(data)*0.7)
+# train
+train <- data[1:split,]
+# test
+test <- data[(split+1):nrow(data),]
+```
+
+
+## Fit the model on train
+
+```{r}
+fit <- glm(Survived ~.,
+               data = train[,-1], family = "binomial")
+
+summary(fit)
+```
+
+As expected, sex is significant in predicting survival. Females we given priority during the rescue attempts. The class of passenger and the age were also significant. Older individuals and first class passengers were given priority over the other classes. 
+
+One could also use the *stepwise* regression procedure for variable selection before moving onto predictions.
+
+## Predict with the model above
+
+```{r,message=FALSE,warning=FALSE}
+predictions <- predict.glm(fit, newdata = test, type = c("response"))
+
+# visualise the predictions
+
+predict.df <- data.frame(
+      PassengerId = test$PassengerId,
+      predictions = predictions,
+      predict.status = ifelse(predictions > 0.5,1,0),
+      actual.status = test$Survived
+)
+
+predict.df %>% 
+   left_join(test,"PassengerId") %>%
+   ggplot(aes(x = Age, y = predictions, col = Pclass))+
+   geom_point()+
+   facet_grid(.~Sex)+
+   labs(y = "Predictions", title = "Visualizing Predictions")+
+   scale_color_manual(values = my3cols)+
+   theme_minimal()
+```
+
+Females predicted survival rates are higher than men. Within each sex, older men probably died more when Titanic sank. But in general as age increased the predicted survival probability fell. Finally class 1 have higher survival rates. They were probably first to be rescued followed by 2 and then 3.
+
+## Using a naive classification boundary
+
+Next, we use a naive decision rule to classify the predicted probability. Lets use 0.5 as the cutoff value. The 2x2 confusion matrix and the accuracy value is computed below:
+
+```{r}
+t <- with(predict.df,table(predict.status,actual.status))
+(t)
+print(paste('Accuracy:',round((t[1]+t[4])/(t[1]+t[2]+t[3]+t[4]),2)))
+```
+
+
+## ROC charts
+
+A ROC chart is useful when finding the balance between true positive and true negative is manually impossible. The ROC plots all the values for true positive and true negative for different cutoff points. A weak classifier will have the ROC line passing diagonally across the plot whereas a strong classifier will have a prominent 'elbow' with at least one point where the TPR is sufficiently high and the FPR will be sufficiently low.
+
+The following function (adapted from this [link ](https://www.r-bloggers.com/simple-roc-plots-with-ggplot2-part-1/)) calculates the AUC (Area under curve) as well as the ROC data which can then be used inside the ggplot2 framework.
+
+```{r}
+
+rocdata <- function(grp, pred){
+  # Produces x and y co-ordinates for ROC curve plot
+  # Arguments: grp - labels classifying subject status
+  #            pred - values of each observation
+  # Output: List with 2 components:
+  #         roc = data.frame with x and y co-ordinates of plot
+  #         stats = data.frame containing: area under ROC curve, p value, upper and lower 95% confidence interval
+ 
+  grp <- as.factor(grp)
+  if (length(pred) != length(grp)) {
+    stop("The number of classifiers must match the number of data points")
+  } 
+ 
+  if (length(levels(grp)) != 2) {
+    stop("There must only be 2 values for the classifier")
+  }
+ 
+  cut <- unique(pred)
+  tp <- sapply(cut, function(x) length(which(pred > x & grp == levels(grp)[2])))
+  fn <- sapply(cut, function(x) length(which(pred < x & grp == levels(grp)[2])))
+  fp <- sapply(cut, function(x) length(which(pred > x & grp == levels(grp)[1])))
+  tn <- sapply(cut, function(x) length(which(pred < x & grp == levels(grp)[1])))
+  tpr <- tp / (tp + fn)
+  fpr <- fp / (fp + tn)
+  roc = data.frame(x = fpr, y = tpr)
+  roc <- roc[order(roc$x, roc$y),]
+ 
+  i <- 2:nrow(roc)
+  auc <- (roc$x[i] - roc$x[i - 1]) %*% (roc$y[i] + roc$y[i - 1])/2
+ 
+  pos <- pred[grp == levels(grp)[2]]
+  neg <- pred[grp == levels(grp)[1]]
+  q1 <- auc/(2-auc)
+  q2 <- (2*auc^2)/(1+auc)
+  se.auc <- sqrt(((auc * (1 - auc)) + ((length(pos) -1)*(q1 - auc^2)) + ((length(neg) -1)*(q2 - auc^2)))/(length(pos)*length(neg)))
+  ci.upper <- auc + (se.auc * 0.96)
+  ci.lower <- auc - (se.auc * 0.96)
+ 
+  se.auc.null <- sqrt((1 + length(pos) + length(neg))/(12*length(pos)*length(neg)))
+  z <- (auc - 0.5)/se.auc.null
+  p <- 2*pnorm(-abs(z))
+ 
+  stats <- data.frame (auc = auc,
+                       p.value = p,
+                       ci.upper = ci.upper,
+                       ci.lower = ci.lower
+                       )
+ 
+  return (list(roc = roc, stats = stats))
+}
+
+# Get ROC data
+
+obj.roc <- rocdata(grp = predict.df$actual.status, pred = predict.df$predictions)$roc
+roc.data <- data.frame(false_positive = obj.roc$x, true_positive = obj.roc$y,cutoff = round(unique(predictions),4))
+
+# create the ROC chart
+
+ggplot(roc.data,aes(x = false_positive, y = true_positive))+
+  geom_point()+
+  theme_minimal()
+
+```
+
+We notice in the ROC plot above that a cutoff point of 0.6 gives us a around 79% accuracy. This can be verified as below
+
+```{r}
+roc.data[roc.data$cutoff == 0.5937,]
+
+predict.df <- data.frame(
+      predictions = predictions,
+      predict.status = ifelse(predictions > 0.6,1,0),
+      actual.status = test$Survived
+)
+
+
+t <- with(predict.df,table(predict.status,actual.status))
+(t)
+print(paste('Accuracy:',round((t[1]+t[4])/(t[1]+t[2]+t[3]+t[4]),3)))
+```
+
+This is how a ROC chart helps us understand the trade off between true positive and true negative and come up with better cutoff points.

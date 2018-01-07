@@ -16,9 +16,14 @@
       <pubDate>Sun, 31 Dec 2017 00:00:00 +0000</pubDate>
       
       <guid>/project/ggplot2-lecture/</guid>
-      <description>&lt;p&gt;Never thought I&amp;rsquo;d have the opportunity to deliver a lecture on ggplot2 but thanks to &lt;a href=&#34;https://www.bgsu.edu/business/students/student-organizations/basic--business-analytics-student-informs-chapter-.html&#34; target=&#34;_blank&#34;&gt;BASIC&lt;/a&gt; I got the opportunity. There was healthy crowd which initially did make me nervous but I was able to focus on the task at hand and teach the basics of the wonderful package.&lt;/p&gt;
+      <description>&lt;style&gt;
+body {
+text-align: justify}
+&lt;/style&gt;
 
-&lt;p&gt;It was an hour long lecture where I covered the basics of ggplot2: the &amp;lsquo;layer&amp;rsquo; composition of a ggplot, the hist, bar and point geom along with an advanced topic of &amp;lsquo;tidying&amp;rsquo; the data. Overall it was a fun experience and I was able to learn a lot from it myself. I hope the lecture was able to motivate fellow falcons to move away from base plotting system in R and explore the powerful ggplot2.&lt;/p&gt;
+&lt;p&gt;Never thought I&amp;rsquo;d have the opportunity to deliver a lecture on ggplot2 but thanks to &lt;a href=&#34;https://www.bgsu.edu/business/students/student-organizations/basic--business-analytics-student-informs-chapter-.html&#34; target=&#34;_blank&#34;&gt;BASIC&lt;/a&gt; I got the opportunity. There was healthy crowd which initially did make me nervous but I was able to focus on the task at hand and teach the basics of the wonderful package.&lt;/p&gt;
+
+&lt;p&gt;It was an hour long lecture where I covered the basics of ggplot2: the &amp;lsquo;layer&amp;rsquo; composition of a ggplot, the hist, bar and point geom along with an advanced topic of &amp;lsquo;tidying&amp;rsquo; the data. Overall it was a fun experience and I was able to learn a lot from it myself. I hope the lecture was able to motivate fellow falcons to move away from base plotting system in R and explore the powerful ggplot2. Here is the &lt;a href=&#34;https://github.com/pallavr/ggplot2&#34; target=&#34;_blank&#34;&gt;link&lt;/a&gt; to the presentation.&lt;/p&gt;
 </description>
     </item>
     
