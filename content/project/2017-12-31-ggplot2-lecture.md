@@ -3,7 +3,7 @@ title: GGPLOT2 Lecture
 author: ''
 date: '2017-12-31'
 slug: ggplot2-lecture
-image_preview: 'headers/symp.jpg'
+image_preview: 'headers/ggplot2.jpg'
 categories:
   - visualization
 tags:
@@ -11,7 +11,7 @@ tags:
   - animation
 header:
   caption: ''
-  image: 'headers/symp.jpg'
+  image: 'headers/ggplot2.jpg'
 ---
 
 Never thought I'd have the opportunity to deliver a lecture on ggplot2 but thanks to [BASIC](https://www.bgsu.edu/business/students/student-organizations/basic--business-analytics-student-informs-chapter-.html) I got the opportunity. There was healthy crowd which initially did make me nervous but I was able to focus on the task at hand and teach the basics of the wonderful package. 
