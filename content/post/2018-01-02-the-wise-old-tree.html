@@ -1,0 +1,359 @@
+---
+title: The Wise Old Tree
+author: ''
+date: '2018-01-02'
+slug: the-wise-old-tree
+categories:
+  - predictive analytics
+tags:
+  - Decision Tree
+  - ggplot2
+header:
+  image: "headers/tree.jpg"
+---
+
+
+
+<style>
+body {
+text-align: justify}
+</style>
+<p>Gandalf is one of the primary fictional character in J.R.R Tolkien <em>Lord of the Ring</em>. He is a wise old character who people turn to for council on matters that are tough to decide. A decision tree is like Gandalf.The greatest gift of decision trees is it makes extremely hard decisions easy to interpret. It’s what statisticians call <em>white box</em>. We know exactly whats going on when a tree makes a decision. In this tutorial I will explain the mathematics behind the working of a decision tree and how to build a functioning decision tree in R that can predict.</p>
+<div id="the-packages" class="section level1">
+<h1>The packages</h1>
+<pre class="r"><code>library(readr) # read in data
+library(dplyr) # data manipulation
+library(tidyr) # data manipulation
+library(ggplot2) # for data viz
+library(rpart) # decision tree
+library(party) # decision tree</code></pre>
+</div>
+<div id="the-data" class="section level1">
+<h1>The data</h1>
+<p>I will be using the <em>Pokemon</em> data set from <a href="https://www.kaggle.com/abcsds/pokemon">Kaggle</a>. Pokemon is a media franchise owned by Nintendo. It became famous when the game was turned into a animation series where an ambitious young boy tries to capture creatures/Pokemon who help him win Pokemon-battles. In his quest to become the best Pokemon trainer, he comes across a variety of Pokemon but it was always his dream to capture the legendary Pokemon <em>MewTwo</em>. A Pokemon is legendary when it’s extremely powerful (measured by its attacking or defense style) and is extremely rare.</p>
+<p>The Pokemon data set comes with all the Pokemon and their type and stats. We will use a decision tree to decide if the Pokemon is legendary or not. This would also help us realize what factors contribute to deciding if a Pokemon is legendary.</p>
+<pre class="r"><code>pokemon &lt;- read_csv(&quot;C:/Users/routh/Desktop/Study Materials/My website/Trees/Pokemon.csv&quot;, col_types = cols(`#` = col_skip()))</code></pre>
+</div>
+<div id="data-inspection" class="section level1">
+<h1>Data Inspection</h1>
+<p>Here are the columns in the data with their descriptions:</p>
+<ul>
+<li><strong>Name:</strong> Name of each Pokemon</li>
+<li><strong>Type 1:</strong> Each Pokemon has a type, this determines weakness/resistance to attacks</li>
+<li><strong>Type 2:</strong> Some Pokemon are dual type and have 2</li>
+<li><strong>Total:</strong> sum of all stats that come after this, a general guide to how strong a Pokemon is</li>
+<li><strong>HP:</strong> hit points, or health, defines how much damage a Pokemon can withstand before fainting</li>
+<li><strong>Attack:</strong> the base modifier for normal attacks (eg. Scratch, Punch)</li>
+<li><strong>Defense:</strong> the base damage resistance against normal attacks</li>
+<li><strong>SP Atk:</strong> special attack, the base modifier for special attacks (e.g. fire blast, bubble beam)</li>
+<li><strong>SP Def:</strong> the base damage resistance against special attacks</li>
+<li><strong>Speed:</strong> determines which Pokemon attacks first each round</li>
+<li><strong>Generation:</strong> the generation the pokemon belongs to.</li>
+</ul>
+<pre class="r"><code>summary(pokemon)</code></pre>
+<pre><code>##      Name              Type 1             Type 2              Total      
+##  Length:800         Length:800         Length:800         Min.   :180.0  
+##  Class :character   Class :character   Class :character   1st Qu.:330.0  
+##  Mode  :character   Mode  :character   Mode  :character   Median :450.0  
+##                                                           Mean   :435.1  
+##                                                           3rd Qu.:515.0  
+##                                                           Max.   :780.0  
+##        HP             Attack       Defense          Sp. Atk      
+##  Min.   :  1.00   Min.   :  5   Min.   :  5.00   Min.   : 10.00  
+##  1st Qu.: 50.00   1st Qu.: 55   1st Qu.: 50.00   1st Qu.: 49.75  
+##  Median : 65.00   Median : 75   Median : 70.00   Median : 65.00  
+##  Mean   : 69.26   Mean   : 79   Mean   : 73.84   Mean   : 72.82  
+##  3rd Qu.: 80.00   3rd Qu.:100   3rd Qu.: 90.00   3rd Qu.: 95.00  
+##  Max.   :255.00   Max.   :190   Max.   :230.00   Max.   :194.00  
+##     Sp. Def          Speed          Generation     Legendary        
+##  Min.   : 20.0   Min.   :  5.00   Min.   :1.000   Length:800        
+##  1st Qu.: 50.0   1st Qu.: 45.00   1st Qu.:2.000   Class :character  
+##  Median : 70.0   Median : 65.00   Median :3.000   Mode  :character  
+##  Mean   : 71.9   Mean   : 68.28   Mean   :3.324                     
+##  3rd Qu.: 90.0   3rd Qu.: 90.00   3rd Qu.:5.000                     
+##  Max.   :230.0   Max.   :180.00   Max.   :6.000</code></pre>
+<pre class="r"><code>glimpse(pokemon)</code></pre>
+<pre><code>## Observations: 800
+## Variables: 12
+## $ Name       &lt;chr&gt; &quot;Bulbasaur&quot;, &quot;Ivysaur&quot;, &quot;Venusaur&quot;, &quot;VenusaurMega V...
+## $ `Type 1`   &lt;chr&gt; &quot;Grass&quot;, &quot;Grass&quot;, &quot;Grass&quot;, &quot;Grass&quot;, &quot;Fire&quot;, &quot;Fire&quot;,...
+## $ `Type 2`   &lt;chr&gt; &quot;Poison&quot;, &quot;Poison&quot;, &quot;Poison&quot;, &quot;Poison&quot;, NA, NA, &quot;Fl...
+## $ Total      &lt;int&gt; 318, 405, 525, 625, 309, 405, 534, 634, 634, 314, 4...
+## $ HP         &lt;int&gt; 45, 60, 80, 80, 39, 58, 78, 78, 78, 44, 59, 79, 79,...
+## $ Attack     &lt;int&gt; 49, 62, 82, 100, 52, 64, 84, 130, 104, 48, 63, 83, ...
+## $ Defense    &lt;int&gt; 49, 63, 83, 123, 43, 58, 78, 111, 78, 65, 80, 100, ...
+## $ `Sp. Atk`  &lt;int&gt; 65, 80, 100, 122, 60, 80, 109, 130, 159, 50, 65, 85...
+## $ `Sp. Def`  &lt;int&gt; 65, 80, 100, 120, 50, 65, 85, 85, 115, 64, 80, 105,...
+## $ Speed      &lt;int&gt; 45, 60, 80, 80, 65, 80, 100, 100, 100, 43, 58, 78, ...
+## $ Generation &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+## $ Legendary  &lt;chr&gt; &quot;False&quot;, &quot;False&quot;, &quot;False&quot;, &quot;False&quot;, &quot;False&quot;, &quot;False...</code></pre>
+</div>
+<div id="data-transformations" class="section level1">
+<h1>Data transformations</h1>
+<p>In a classification task, we need to convert response <code>Legendary</code> to a factor along with <code>Generation</code>. I will also create a variable <code>Dual</code> to indicate if a Pokemon has dual nature. After that we can get rid of the irrelevant columns.</p>
+<pre class="r"><code>pokemon &lt;- pokemon %&gt;%
+              mutate(Legendary = as.factor(Legendary),
+                     Generation = as.factor(Generation),
+                     Dual = factor(ifelse(is.na(`Type 1`) | is.na(`Type 2`),0,1))) %&gt;%
+              rename(sp.attack = `Sp. Atk`, sp.defence = `Sp. Def`) %&gt;%
+              select(4:13)</code></pre>
+</div>
+<div id="the-mechanics" class="section level1">
+<h1>The Mechanics</h1>
+<p>Before moving on to how to build and predict a decision tree in R, we need to understand how a decision tree operates, the important terminologies, how to make it work better and most importantly how it decides what to chose.</p>
+<div id="terminology" class="section level2">
+<h2>Terminology:</h2>
+<p>Decision Trees or <strong>CART</strong> (Classification and Regression Trees) have the following elements:</p>
+<p>Take a look at this <a href="https://clearpredictions.com/Images/Decision_Tree_2.png">picture</a>.</p>
+<ul>
+<li><p>A <strong>root node</strong> is where the first split in decision occurs. A <strong>decision or internal</strong> node is the rest of the nodes following the root node where a decision is made. Finally the <strong>terminal or leaf</strong> node is where the outcome (based on the previous decisions) are finalized.</p></li>
+<li><p>The initial splitting node is the <strong>parent</strong> node to it’s <strong>children</strong> nodes. The children form the branches of the whole tree</p></li>
+</ul>
+</div>
+<div id="splitting-criterion" class="section level2">
+<h2>Splitting Criterion</h2>
+<p>We know that splitting occurs at every node. But what splits? Or more important how does it split? The split occurs on the values of the predictor variables. A node <em>splits into</em> two values (which is why it’s also called a binary tree). Technically though, the node can split into more than two values but most trees have binary splits.That brings us to the first kind of tree called the <strong>Recursive Partitioning Tree (RP)</strong>. It does exactly what the name suggests. Refer to this nice <a href="http://cdn.iopscience.com/images/1749-4699/5/1/015004/Full/csd422281fig1.jpg">picture</a></p>
+<p>If you would think about a decision tree with 2 variables, what a RP does is it partitions the space (containing values of the response) again and again until each small little partition has one kind of values of the response. That’s it! that’s all the decision tree does. Brilliant yet simple! But there is one final hurdle - how does it decide what variable to pick first or at what value of a predictor variable it should ideally split on?</p>
+<p>To answer the first question, in an RP tree, there are a number of <em>criterions</em> that can be used to split a node. <em>Information Gain</em> is a popular splitting criterion that uses <em>entropy</em>. Entropy is a fundamental concept of <em>Information Theory</em>. Tbh, <a href="https://en.wikipedia.org/wiki/Information_theory">Info Theory</a> is a huge topic by itself and (much) beyond the scope of this tutorial (and myself) for sure. Intuitively, entropy is <em>how much information is missing</em>. If you asked me where I am from and I answer, “India”; there is lots of “entropy” in this answer. Translate this to DTs and splits, an entropy for a variable is how much information you are loosing if you pick to split on a variable out of many. Mathematically, this is:</p>
+<p><span class="math display">\[    E = \sum_{i=1}^c - p_i log_2(p_i)     \]</span></p>
+<p>Lets understand with an example. Lets say the repose variable is if I go out today or not. Arbitrarily, out of 14 instances (Lets say), I assign 9 to yes (I go out) and 5 to no. So what is the entropy for these decision?</p>
+<pre class="r"><code>entropy &lt;- function(vector){
+  p = vector/sum(vector) # gives you the p_i&#39;s
+  sum(-(p*log2(p))) # the sum
+}
+
+entropy(c(9,5))</code></pre>
+<pre><code>## [1] 0.940286</code></pre>
+<p>Now lets ramp it up a little. Now I decide to go out depending on (a) If it is sunny or not or (b) if I’m feeling lazy or not. Here the two 2x2 table to help you visualize:</p>
+<pre class="r"><code>set.seed(4)
+fake.data.sunny &lt;- data.frame(sunny = sample(c(1,0),14,replace = T),
+                              go.out = sample(c(1,0),14,replace = T))
+
+with(fake.data.sunny,table(sunny,go.out))</code></pre>
+<pre><code>##      go.out
+## sunny 0 1
+##     0 6 1
+##     1 4 3</code></pre>
+<pre class="r"><code>fake.data.lazy &lt;- data.frame(lazy = sample(c(1,0),14,replace = T),
+                             go.out = sample(c(1,0),14,replace = T))
+
+with(fake.data.lazy,table(lazy,go.out))</code></pre>
+<pre><code>##     go.out
+## lazy 0 1
+##    0 7 1
+##    1 3 3</code></pre>
+<p>Entropy for two attributes (go out and sunny or go out and lazy) is given by:</p>
+<p><span class="math display">\[ Entropy(Target|Variable) = \sum Entropy(Var)*Probability(Var)   \]</span></p>
+<p>This helpful function computes the entropy for a variable:</p>
+<pre class="r"><code>entropy.var &lt;- function(...){  # enter a list of vectors
+  list.vector = list(...)
+  p = purrr::map_dbl(list.vector,~sum(.x))
+  prop = p/sum(p)
+  sum(prop*(purrr::map_dbl(list.vector,entropy)),na.rm = T)
+}
+
+# for sunny
+entropy.var(c(6,1),c(4,3))  # 6+1 &amp; 4+3</code></pre>
+<pre><code>## [1] 0.7884505</code></pre>
+<pre class="r"><code># for lazy
+entropy.var(c(7,1),c(3,3)) </code></pre>
+<pre><code>## [1] 0.7391797</code></pre>
+<p>Therefore <strong>Information Gain</strong> is:</p>
+<p><span class="math display">\[ Gain(Target|Variable) = Entrpoy(Target) - Entropy(Target|Variable)  \]</span></p>
+<p>For sunny it would be <span class="math inline">\(0.94 - 0.788 = 0.15\)</span> and for lazy it would be <span class="math inline">\(0.94 - 0.739 = 0.2\)</span>. If a decision tree now *selects the variable with the largest information gain. In this case, me going out or not would depend on if I was feeling lazy first (so true) and then if it was sunny.</p>
+<p>To answer the second question of what value it chose to split on? We can use Information Gain here too. For every value of a variable, an Information Gain is calculated and then the maximum IG is the best possible IG for that variable. This best possible IG is calculated for all variables. After that we would choose the variable with the <em>highest maximum</em> IG and then the best split point for that variable is chosen as the point of split.</p>
+<p>Now, CARTs can also be used to build <strong>regression trees</strong>, where the outcomes are not categorical. The splitting criterion for such trees is the <strong>MSE</strong> for a particular predictor (p) on the response variable instead, where MSE is:</p>
+<p><span class="math display">\[  MSE_p = 1/n\sum_{i=1}^n (\hat{Y_{i,p}} - Y_{i,p})    \]</span></p>
+<p>Where <span class="math inline">\(\hat{Y}\)</span> is the mean response value for that region or partition. Obviously here, the variable with the <em>lowest</em> MSE is then chosen as the splitting variable and the value of predictor with minimum possible MSE is chosen as the split point.</p>
+<p><strong>Note:</strong> The second kind of tree is called <strong>Conditional Partitioning</strong>. Instead of using IG as splitting criterion, this tree is grown using hypothesis tests at every node and the variable that is most significant is chosen as the candidate variable to split on.</p>
+</div>
+<div id="prunning" class="section level2">
+<h2>Prunning</h2>
+<p>A DT grown using the process above may produce good predictions on the training set, but is likely to overfit the data, leading to poor test set performance. A way to overcome the variance (overfitting) is to grow a smaller tree at the cost of lower bias.</p>
+<p>One possible way to tackle this is to build the tree only so long as the decrease in the RSS or increase in IG due to each split exceeds some (high) threshold. This strategy will result in smaller trees, but is too short-sighted since a seemingly worthless split early on in the tree might be followed by a very good split-that later on.</p>
+<p>Another way is to grow the tree to full depth and the <em>prune</em> it back to create a <em>subtree</em> in a way that gives the lowest possible test error rate. Later on we will see how to calculate the CV error for a tree. If we record the CV error for all possible subtrees we can select the subtree with lowest error. However this might be a inefficient procedure especially for a larger tree with alot of internal nodes. We essentially tell <code>rpart</code> to see if a split is improving the fit by an amount (specified by the <strong>CP or cost complexity</strong> criterion). If it doesn’t the algorithm will not pursue further splitting.</p>
+</div>
+</div>
+<div id="prediction" class="section level1">
+<h1>Prediction</h1>
+<p>Finally we are ready to implement this procedure in R. We will use the Pokemon data to predict if a Pokemon with specific features is Legendary or not.</p>
+<div id="split-into-train-test" class="section level2">
+<h2>Split into train-test</h2>
+<pre class="r"><code>train_test_split &lt;- function(data,percent,seed){
+  set.seed(seed)
+  rows = sample(nrow(data))
+  data &lt;- data[rows,]
+  split = round(nrow(data)*percent)
+  list(train = data[1:split,], test =  data[(split+1):nrow(data),])
+}
+
+
+list &lt;- train_test_split(pokemon,0.7,123)
+train &lt;- list$train; test &lt;- list$test</code></pre>
+</div>
+<div id="recursive-partitioning" class="section level2">
+<h2>Recursive partitioning</h2>
+<p>The recursive partitioning is implemented using the <code>rpart</code> function in the <code>party</code> package. You can also specify the categorical nature of response in <code>method</code> argument. The <code>fancyRpartPlot</code> in the rattle package helps visualize the tree.</p>
+<pre class="r"><code>rtree.fit &lt;- rpart(formula = Legendary ~.,
+                   method = &quot;class&quot;,
+                   data = train) 
+
+rattle::fancyRpartPlot(rtree.fit)</code></pre>
+<p><img src="/post/2018-01-02-the-wise-old-tree_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>This is R’s representation of the decision tree. We can see that not all variables were used to grow the tree. The most important variable was total points. Let’s take the first node. 92% of observations are not Legendary with the total points less than 580. The label (True/False) above these proportions indicates the way the nodes are voting while the numbers below indicates the composition of the node.</p>
+<p>Let’s move on to the next node. If the total is less than 580, you move <em>left</em> and you reach the second node. Here 86% (of the total) of Pokemon are not Legendary. The tree stops because this node correctly votes all these Pokemon as non legendary (indicated by the 1 against 0). If we move to node 3 however, where the total is greater than 580, out of the 14% (do the math 86+14 = 100% of the data, which shows the binary partition) of the passengers, about 42% was correctly voted as the 58% was incorrectly voted as non legendary. Therefore, this node splits again. This process continues until all nodes (see the nodes below) are as pure as possible. Theoretically one could keep on going until all nodes are 100% pure.</p>
+</div>
+<div id="controlled-split" class="section level2">
+<h2>Controlled split</h2>
+<p>You can further control the splitting process using the <code>rpart.control</code> option and <code>parms</code> option. Here is a demonstration:</p>
+<pre class="r"><code>control &lt;- rpart.control(minsplit = 5, # min #obs to attempt splitting
+                         minbucket = 15, 
+                         cp = 0.07,
+                         maxcompete = 4,
+                         xval = 5, # number of cross validations
+                         maxdepth = 15) # how deep should the tree grow on any node
+
+control.tree &lt;-  rpart(formula = Legendary ~.,
+                   method = &quot;class&quot;,
+                   data = train,
+                   parms = list(prior = c(0.2,0.8), split = &quot;information&quot;),  # default is gini
+                   control = control) 
+
+rattle::fancyRpartPlot(control.tree)</code></pre>
+<p><img src="/post/2018-01-02-the-wise-old-tree_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+</div>
+<div id="conditional-partitioning" class="section level2">
+<h2>Conditional partitioning</h2>
+<p>Conditional partitioning are implemented using the <code>ctree</code> function.</p>
+<pre class="r"><code>ctree.fit &lt;- ctree(formula = Legendary ~.,
+                   data = train)</code></pre>
+</div>
+<div id="legendary-or-not" class="section level2">
+<h2>Legendary or not?</h2>
+<p>Predictions on the test set are done using the generic <code>predict</code> function.</p>
+<ul>
+<li>Recursive Tree Fit</li>
+</ul>
+<pre class="r"><code>recursive.prediction &lt;- predict(rtree.fit, newdata = test, type = &quot;class&quot;)</code></pre>
+<ul>
+<li>Conditional Tree Fit</li>
+</ul>
+<pre class="r"><code>conditional.prediction &lt;- predict(ctree.fit, newdata = test)</code></pre>
+</div>
+<div id="prediction-accuracy" class="section level2">
+<h2>Prediction accuracy</h2>
+<p>Its pretty straightforward to compute the prediction accuracy. In this case, the accuracy in prediction is very high (0.94).</p>
+<pre class="r"><code>predict.df &lt;- data.frame(
+  predictions = recursive.prediction,
+  actual = test$Legendary
+)
+
+(t &lt;- table(predict.df))</code></pre>
+<pre><code>##            actual
+## predictions False True
+##       False   214    8
+##       True      6   12</code></pre>
+<pre class="r"><code>print(paste(&#39;Accuracy:&#39;,round((t[1]+t[4])/(t[1]+t[2]+t[3]+t[4]),2)))</code></pre>
+<pre><code>## [1] &quot;Accuracy: 0.94&quot;</code></pre>
+<p><strong>Using ROC plot</strong></p>
+<p>If the outcome is probabilistic we could build a ROC curve to measure the accuracy. This version makes probabilistic predictions and the ROC is plotted to measure Area under the curve. The <code>prediction</code> and <code>performance</code> function from the <code>ROCR</code> package is used to measure the TPR and FPR. In this case we see how good the classification was by the strong ROC curve.</p>
+<pre class="r"><code>rtree.fit.prob &lt;- rpart(formula = Legendary ~.,
+                   method = &quot;anova&quot;,
+                   data = train)
+recursive.prediction.prob &lt;- predict(rtree.fit, newdata = test)
+
+
+rtree_roc &lt;- rtree.fit.prob %&gt;%
+      predict(newdata = test) %&gt;%
+      ROCR::prediction(test$Legendary) %&gt;%
+      ROCR::performance(&quot;tpr&quot;, &quot;fpr&quot;)
+
+roc_df &lt;- data.frame(
+  FPR = rtree_roc@x.values[[1]],
+  TPR = rtree_roc@y.values[[1]],
+  cutoff = rtree_roc@alpha.values[[1]]
+)
+
+ggplot(roc_df,aes(x = FPR, y = TPR))+
+  geom_point()+
+  geom_line()+
+  theme_minimal()</code></pre>
+<p><img src="/post/2018-01-02-the-wise-old-tree_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<div id="pruning" class="section level3">
+<h3>Pruning</h3>
+<p>Finally one can also prune using the <code>prune</code> function.</p>
+<pre class="r"><code>my3cols &lt;- c(&quot;#E7B800&quot;, &quot;#2E9FDF&quot;, &quot;#FC4E07&quot;)
+my2cols &lt;- c(&quot;#2E9FDF&quot;, &quot;#FC4E07&quot;)
+
+cp &lt;- data.frame(rtree.fit$cptable)
+best.cp &lt;- cp[which.min(cp$xerror),&quot;CP&quot;]
+
+cp %&gt;%
+  select(CP,nsplit,xerror,rel.error)%&gt;%
+  gather(key,value,-nsplit)%&gt;%
+  ggplot(aes(x = nsplit, y = value, col = key))+
+  geom_point(size = 2)+
+  geom_line(size = 1.1)+
+  scale_color_manual(values = my3cols)+
+  theme_minimal()</code></pre>
+<p><img src="/post/2018-01-02-the-wise-old-tree_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p>The results show that 3 splits gives us the minimum xerror (related to the <a href="https://en.wikipedia.org/wiki/PRESS_statistic">PRESS</a> error) at a CP value of 0.06 approximately. We can prune the tree using this CP value. If we choose to use relative error instead, we would choose 6 splits and a CP of 0.01 instead. Different error measures gives us different CP values and different number of splits.We will create the pruned tree by supplying the minimum CP value based on xerror and get the prediction accuracy.</p>
+<pre class="r"><code>prune.tree &lt;- prune(rtree.fit, cp = best.cp)
+
+rattle::fancyRpartPlot(prune.tree)</code></pre>
+<p><img src="/post/2018-01-02-the-wise-old-tree_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<pre class="r"><code>predictions.prune &lt;- predict(prune.tree, newdata = test, type = &quot;class&quot;)
+
+predict.df.prune &lt;- data.frame(
+  predictions = predictions.prune,
+  actual = test$Legendary
+)
+
+(t &lt;- table(predict.df))</code></pre>
+<pre><code>##            actual
+## predictions False True
+##       False   214    8
+##       True      6   12</code></pre>
+<pre class="r"><code>print(paste(&#39;Accuracy:&#39;,round((t[1]+t[4])/(t[1]+t[2]+t[3]+t[4]),2)))</code></pre>
+<pre><code>## [1] &quot;Accuracy: 0.94&quot;</code></pre>
+<p>In this case, prunning doesn’t really improve the accuracy in prediction.</p>
+<p><strong>Using Cross-Validation</strong></p>
+<p>Resampling methods such as Cross-Validation can also be used on the training data to pick out a CP value to prune and fit the best tree. The most convenient way to perform cross-validation is to use the <code>train</code> function from the <code>caret</code> package. The call to the object output the best CP (which in this case is picked according to the accuracy of 1-missclassification rate) value that can then be used to prune the tree.</p>
+<pre class="r"><code>tc &lt;- caret::trainControl(&quot;cv&quot;,50,classProbs = T)
+
+train.rpart &lt;- caret::train(Legendary ~., 
+                             data = train, 
+                             method=&quot;rpart&quot;,
+                             trControl=tc, 
+                             tuneLength = 10, 
+                             parms=list(split=&#39;information&#39;))
+
+train.rpart</code></pre>
+<pre><code>## CART 
+## 
+## 560 samples
+##   9 predictor
+##   2 classes: &#39;False&#39;, &#39;True&#39; 
+## 
+## No pre-processing
+## Resampling: Cross-Validated (50 fold) 
+## Summary of sample sizes: 549, 549, 549, 550, 549, 549, ... 
+## Resampling results across tuning parameters:
+## 
+##   cp          Accuracy   Kappa    
+##   0.00000000  0.9359091  0.5002696
+##   0.02962963  0.9322424  0.4419367
+##   0.05925926  0.9392121  0.5448884
+##   0.08888889  0.9410303  0.5786528
+##   0.11851852  0.9448182  0.6275213
+##   0.14814815  0.9448182  0.6404524
+##   0.17777778  0.9464848  0.6612857
+##   0.20740741  0.9358788  0.7028026
+##   0.23703704  0.9393636  0.7327317
+##   0.26666667  0.8984545  0.2406340
+## 
+## Accuracy was used to select the optimal model using  the largest value.
+## The final value used for the model was cp = 0.1777778.</code></pre>
+</div>
+</div>
+</div>

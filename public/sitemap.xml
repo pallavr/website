@@ -32,6 +32,15 @@
     
     <url>
     
+      <loc>/post/the-wise-old-tree/</loc>
+      <lastmod>2018-01-02T00:00:00+00:00</lastmod>
+    </url>
+    
+  
+    
+    
+    <url>
+    
       <loc>/project/ggplot2-lecture/</loc>
       <lastmod>2017-12-31T00:00:00+00:00</lastmod>
     </url>
@@ -106,6 +115,16 @@
     <url>
     
       <loc>/categories/</loc>
+      <priority>0</priority>
+    </url>
+    
+  
+    
+    
+    <url>
+    
+      <loc>/tags/decision-tree/</loc>
+      <lastmod>2018-01-02T00:00:00+00:00</lastmod>
       <priority>0</priority>
     </url>
     
