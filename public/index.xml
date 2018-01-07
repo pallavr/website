@@ -1428,7 +1428,11 @@ error(forecast.df$actual, forecast.df$forecasts)&lt;/code&gt;&lt;/pre&gt;
       <pubDate>Sun, 07 Jan 2018 00:00:00 +0000</pubDate>
       
       <guid>/post/optimization-with-gurobi/</guid>
-      <description>&lt;p&gt;The problem we are solving is the &lt;strong&gt;Brisbane Earth Moving Problem&lt;/strong&gt; from the book &lt;strong&gt;Optimization in Operations Research (2nd Edition)&lt;/strong&gt; by &lt;em&gt;Rardin&lt;/em&gt;.&lt;/p&gt;
+      <description>&lt;style&gt;
+body {
+text-align: justify}
+&lt;/style&gt;
+&lt;p&gt;The problem we are solving is the &lt;strong&gt;Brisbane Earth Moving Problem&lt;/strong&gt; from the book &lt;strong&gt;Optimization in Operations Research (2nd Edition)&lt;/strong&gt; by &lt;em&gt;Rardin&lt;/em&gt;.&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;A major expansion of the Brisbane airport will require moving substantial quantities of earth from 4 sites where it is surplus to 7 locations where it is needed. The following table shows the haul distances (hundreds of meters) between points, as well as the quantity available at each surplus site. Quantities needed are 247 cubic meters at the extension, 394 at the dry pond, 265 along roads, 105 in the parking area, 90 at the fire station, 85 in the industrial park, and 145 along the perimeter road. The site engineer wishes to compute a minimum total distance times volume plan for accomplishing the required earth moving.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;The parameters of the problem are (1) the volume of earth avaialable at the supply site, (2) the volume of earth required at the need sites and (3) the distance between the supply and the need sites&lt;/p&gt;
 &lt;ul&gt;
@@ -1524,14 +1528,14 @@ m.optimize()
 ##   Objective range  [2e+00, 3e+01]
 ##   Bounds range     [0e+00, 0e+00]
 ##   RHS range        [9e+01, 7e+02]
-## Presolve time: 0.05s
+## Presolve time: 0.06s
 ## Presolved: 11 rows, 28 columns, 56 nonzeros
 ## 
 ## Iteration    Objective       Primal Inf.    Dual Inf.      Time
 ##        0    1.3980000e+04   1.752000e+03   0.000000e+00      0s
 ##        6    1.7592000e+04   0.000000e+00   0.000000e+00      0s
 ## 
-## Solved in 6 iterations and 0.10 seconds
+## Solved in 6 iterations and 0.16 seconds
 ## Optimal objective  1.759200000e+04&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;python&#34;&gt;&lt;code&gt;if m.status == GRB.status.OPTIMAL:
     print(&amp;#39;\nMinimum objective is :&amp;#39;,m.objval)

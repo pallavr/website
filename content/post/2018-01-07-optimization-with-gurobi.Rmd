@@ -14,6 +14,15 @@ header:
   image: 'headers/networked.jpg'
 ---
 
+<style>
+body {
+text-align: justify}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE)
+```
+
 The problem we are solving is the **Brisbane Earth Moving Problem** from the book **Optimization in Operations Research (2nd Edition)** by *Rardin*.
 
 *A major expansion of the Brisbane airport will require moving substantial quantities of earth from 4 sites where it is surplus to 7 locations where it is needed. The following table shows the haul distances (hundreds of meters) between points, as well as the quantity available at each surplus site. Quantities needed are 247 cubic meters at the extension, 394 at the dry pond, 265 along roads, 105 in the parking area, 90 at the fire station, 85 in the industrial park, and 145 along the perimeter road. The site engineer wishes to compute a minimum total distance times volume plan for accomplishing the required earth moving.*

@@ -17,7 +17,7 @@
       
     
   
-  <meta name="description" content="The problem we are solving is the Brisbane Earth Moving Problem from the book Optimization in Operations Research (2nd Edition) by Rardin.
+  <meta name="description" content="body {text-align: justify}The problem we are solving is the Brisbane Earth Moving Problem from the book Optimization in Operations Research (2nd Edition) by Rardin.
 A major expansion of the Brisbane airport will require moving substantial quantities of earth from 4 sites where it is surplus to 7 locations where it is needed. The following table shows the haul distances (hundreds of meters) between points, as well as the quantity available at each surplus site.">
 
   
@@ -79,7 +79,7 @@ A major expansion of the Brisbane airport will require moving substantial quanti
   <meta property="og:site_name" content="Home">
   <meta property="og:url" content="/post/optimization-with-gurobi/">
   <meta property="og:title" content="Optimization with Gurobi | Home">
-  <meta property="og:description" content="The problem we are solving is the Brisbane Earth Moving Problem from the book Optimization in Operations Research (2nd Edition) by Rardin.
+  <meta property="og:description" content="body {text-align: justify}The problem we are solving is the Brisbane Earth Moving Problem from the book Optimization in Operations Research (2nd Edition) by Rardin.
 A major expansion of the Brisbane airport will require moving substantial quantities of earth from 4 sites where it is surplus to 7 locations where it is needed. The following table shows the haul distances (hundreds of meters) between points, as well as the quantity available at each surplus site."><meta property="og:image" content="/img/headers/networked.jpg">
   <meta property="og:locale" content="en-us">
   
@@ -331,7 +331,11 @@ A major expansion of the Brisbane airport will require moving substantial quanti
 
 
       <div class="article-style" itemprop="articleBody">
-        <p>The problem we are solving is the <strong>Brisbane Earth Moving Problem</strong> from the book <strong>Optimization in Operations Research (2nd Edition)</strong> by <em>Rardin</em>.</p>
+        <style>
+body {
+text-align: justify}
+</style>
+<p>The problem we are solving is the <strong>Brisbane Earth Moving Problem</strong> from the book <strong>Optimization in Operations Research (2nd Edition)</strong> by <em>Rardin</em>.</p>
 <p><em>A major expansion of the Brisbane airport will require moving substantial quantities of earth from 4 sites where it is surplus to 7 locations where it is needed. The following table shows the haul distances (hundreds of meters) between points, as well as the quantity available at each surplus site. Quantities needed are 247 cubic meters at the extension, 394 at the dry pond, 265 along roads, 105 in the parking area, 90 at the fire station, 85 in the industrial park, and 145 along the perimeter road. The site engineer wishes to compute a minimum total distance times volume plan for accomplishing the required earth moving.</em></p>
 <p>The parameters of the problem are (1) the volume of earth avaialable at the supply site, (2) the volume of earth required at the need sites and (3) the distance between the supply and the need sites</p>
 <ul>
@@ -427,14 +431,14 @@ m.optimize()
 ##   Objective range  [2e+00, 3e+01]
 ##   Bounds range     [0e+00, 0e+00]
 ##   RHS range        [9e+01, 7e+02]
-## Presolve time: 0.05s
+## Presolve time: 0.06s
 ## Presolved: 11 rows, 28 columns, 56 nonzeros
 ## 
 ## Iteration    Objective       Primal Inf.    Dual Inf.      Time
 ##        0    1.3980000e+04   1.752000e+03   0.000000e+00      0s
 ##        6    1.7592000e+04   0.000000e+00   0.000000e+00      0s
 ## 
-## Solved in 6 iterations and 0.10 seconds
+## Solved in 6 iterations and 0.16 seconds
 ## Optimal objective  1.759200000e+04</code></pre>
 <pre class="python"><code>if m.status == GRB.status.OPTIMAL:
     print(&#39;\nMinimum objective is :&#39;,m.objval)
