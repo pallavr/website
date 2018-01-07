@@ -1,0 +1,142 @@
+---
+title: Optimization with Gurobi
+author: ''
+date: '2018-01-07'
+slug: optimization-with-gurobi
+categories:
+  - prescriptive analytics
+tags:
+  - Linear programming
+  - Python
+  - Network Flow
+header:
+  caption: ''
+  image: 'headers/networked.jpg'
+---
+
+The problem we are solving is the **Brisbane Earth Moving Problem** from the book **Optimization in Operations Research (2nd Edition)** by *Rardin*.
+
+*A major expansion of the Brisbane airport will require moving substantial quantities of earth from 4 sites where it is surplus to 7 locations where it is needed. The following table shows the haul distances (hundreds of meters) between points, as well as the quantity available at each surplus site. Quantities needed are 247 cubic meters at the extension, 394 at the dry pond, 265 along roads, 105 in the parking area, 90 at the fire station, 85 in the industrial park, and 145 along the perimeter road. The site engineer wishes to compute a minimum total distance times volume plan for accomplishing the required earth moving.*
+
+The parameters of the problem are (1) the volume of earth avaialable at the supply site, (2) the volume of earth required at the need sites and (3) the distance between the supply and the need sites
+
+- Let  $s_i$  represent the supply sites where $i = 1,...,4$
+- Let  $n_j$  represent the need/demand sites where $j = 1,....,7$
+- Let  $d_{i,j}$  represent the distance between a particular  $s_i$  and  $n_j$
+
+Given the above parameters the **objective function** can be represented as:
+
+$$ \text{min} \quad \sum_{i=1}^{4} \sum_{j=1}^4 d_{i,j}∗v_{i,j} $$
+
+**Subject to:**
+
+Assuring full amount being moved from every surplus site can be collectively represented by the following indexed equality:  
+$$ \sum^7_{j = 1} v_{i,j} = s_i \quad \forall \quad i = 1,..,4$$
+
+Assuring the required amount being moved to each needed location can be represented by the following indexed equality:  
+$$ \sum^4_{i = 1} v_{i,j} = n_j \quad \forall \quad j = 1,..,7$$
+
+Since the volume of earth moved has to zero or positive, we can write the following variable-type constraint:  
+$$ v_{i,j} \geq 0 \quad \forall \quad i=1,..,4 \quad \textrm{and} \quad j = 1,..,7 $$
+
+Here's the solution in Python using Gurobi
+
+```{python}
+# import from gurobi library
+from gurobipy import *
+
+## create dimensions of the problem
+
+#create list of surplus sites
+surplus = ['Apron','Term','Cargo','Access'] #will be indexed by i
+
+#create list of need sites
+need = ['Extension','Dry Pond','Roads','Parking','Fire Station',
+                                     'Industrial Park','Perimeter Road'] #will be indexed by j
+                                     
+## create indexed data
+
+#the distance between the surplus and need 
+distance_matrix = {
+    ('Apron','Extension'):26,
+    ('Apron','Dry Pond'):12,
+    ('Apron','Roads'):10,
+    ('Apron','Parking'):18,
+    ('Apron','Fire Station'):11,
+    ('Apron','Industrial Park'):8,
+    ('Apron','Perimeter Road'):20,
+    ('Term','Extension'):28,
+    ('Term','Dry Pond'):14,
+    ('Term','Roads'):12,
+    ('Term','Parking'):20,
+    ('Term','Fire Station'):13,
+    ('Term','Industrial Park'):10,
+    ('Term','Perimeter Road'):22,
+    ('Cargo','Extension'):20,
+    ('Cargo','Dry Pond'):26,
+    ('Cargo','Roads'):20,
+    ('Cargo','Parking'):2,
+    ('Cargo','Fire Station'):6,
+    ('Cargo','Industrial Park'):22,
+    ('Cargo','Perimeter Road'):18,
+    ('Access','Extension'):26,
+    ('Access','Dry Pond'):10,
+    ('Access','Roads'):4,
+    ('Access','Parking'):16,
+    ('Access','Fire Station'):24,
+    ('Access','Industrial Park'):14,
+    ('Access','Perimeter Road'):21,
+}
+
+#available volume at the surplus sites
+quantity_available = {'Apron':660,'Term':301,'Cargo':271,'Access':99}
+
+#the requirements at the need sites
+requirements = {'Extension':247,'Dry Pond':394,'Roads':265,'Parking':105,'Fire Station':90,
+                                                        'Industrial Park':85,'Perimeter Road':145}
+                                                        
+## create model
+m = Model('Brisbane Airport')
+
+## create decision variables
+
+#let flow represent the cubic meters moved from surplus i to site j
+flow = {}
+for i in surplus:
+    for j in need:
+        flow[i,j] = m.addVar(lb = 0, vtype = GRB.CONTINUOUS, name='flow_%s_%s' % (i, j))
+        
+
+m.update()
+
+#set the objective
+obj = quicksum ( flow[i,j]*distance_matrix[i,j] for i in surplus for j in need )
+m.setObjective(obj)
+
+# Add supply constraints
+for i in surplus:
+    m.addConstr(quicksum(flow[i,j] for j in need) == quantity_available[i], 'supply_%s' % (i))
+
+    
+# Add demand constraints
+for j in need:
+    m.addConstr(quicksum(flow[i,j] for i in surplus) == requirements[j], 'demand_%s' % (j))
+  
+# optimize  
+m.optimize()
+
+## Print solution
+
+# The objective value
+if m.status == GRB.status.OPTIMAL:
+    print('\nMinimum objective is :',m.objval)
+
+# The optimal flows
+if m.status == GRB.status.OPTIMAL:
+    print ('\nOptimal flows :')
+    for i in surplus:
+        for j in need:
+            if flow[i,j].x > 0:
+                print (i, '->', j, ':', flow[i,j].x)
+```
+
