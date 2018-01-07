@@ -20,6 +20,9 @@
 body {
 text-align: justify}
 &lt;/style&gt;
+&lt;p&gt;Jack and Rose from &lt;em&gt;Titanic&lt;/em&gt; epitomized the concept of romance in the late 1990s. If you watched this movie you would realize how Jack and Rose are &lt;strong&gt;dependent&lt;/strong&gt; on one another for surviving the sinking ship. Sometimes these dependencies can be represented by a straight line. This is what regression represents. The “best fit” regression line quantifies the relationship between two or more variables.&lt;/p&gt;
+&lt;p&gt;Multiple regression is one of the oldest ML techniques. The simple yet formidable OLS estimation algorithm dates way back to the &lt;span class=&#34;math inline&#34;&gt;\(18^{th}\)&lt;/span&gt; century. The algorithm works by minimizing the sum of squares between the best fit line and the response variable. Today, the OLS regression is not the most accurate algorithm and therefore has been replaced by more sophisticated ML techniques. Yet, the weakness of this technique is also its strength. No other algorithm is as tractable as regression. Therefore, regression is almost always a starting point in any data analysis task.&lt;/p&gt;
+&lt;p&gt;In this tutorial, I will implement this technique in R on the famous &lt;strong&gt;Titanic&lt;/strong&gt; data set (link on this page) and discuss how to interpret the outputs. Finally I will use a data set from Kaggle to demonstrate the steps one should take when implementing this technique for prediction purposes.&lt;/p&gt;
 &lt;div id=&#34;get-the-packages&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;Get the packages&lt;/h1&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(readr) # read in a csv/txt file
@@ -28,9 +31,6 @@ library(dplyr) # for data manipulation
 library(tidyr) # for data manipulation
 library(ggplot2) # for data viz
 library(purrr) # for functional programming&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Jack and Rose from &lt;em&gt;Titanic&lt;/em&gt; epitomized the concept of romance in the late 1990s. If you watched this movie you would realize how Jack and Rose are &lt;strong&gt;dependent&lt;/strong&gt; on one another for surviving the sinking ship. Sometimes these dependencies can be represented by a straight line. This is what regression represents. The “best fit” regression line quantifies the relationship between two or more variables.&lt;/p&gt;
-&lt;p&gt;Multiple regression is one of the oldest ML techniques. The simple yet formidable OLS estimation algorithm dates way back to the &lt;span class=&#34;math inline&#34;&gt;\(18^{th}\)&lt;/span&gt; century. The algorithm works by minimizing the sum of squares between the best fit line and the response variable. Today, the OLS regression is not the most accurate algorithm and therefore has been replaced by more sophisticated ML techniques. Yet, the weakness of this technique is also its strength. No other algorithm is as tractable as regression. Therefore, regression is almost always a starting point in any data analysis task.&lt;/p&gt;
-&lt;p&gt;In this tutorial, I will implement this technique in R on the famous &lt;strong&gt;Titanic&lt;/strong&gt; data set (link on this page) and discuss how to interpret the outputs. Finally I will use a data set from Kaggle to demonstrate the steps one should take when implementing this technique for prediction purposes.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;birthweights-and-babies&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;Birthweights and Babies&lt;/h1&gt;
