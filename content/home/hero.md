@@ -4,7 +4,7 @@ widget = "hero"
 active = true
 date = 2017-10-15
 
- title = "Predict.Prescribe.Visualize"
+ title = "Predict.Prescribe.Visualize."
 
 # Order that this section will appear in.
 weight = 3
