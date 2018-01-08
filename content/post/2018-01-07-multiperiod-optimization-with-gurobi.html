@@ -1,0 +1,121 @@
+---
+title: Multiperiod Optimization with Gurobi
+author: ''
+date: '2018-01-07'
+slug: multiperiod-optimization-with-gurobi
+categories:
+  - prescriptive analytics
+tags:
+  - Linear programming
+  - Multiperiod Optimization
+header:
+  caption: ''
+  image: 'headers/window.jpg'
+---
+
+
+
+<style>
+body {
+text-align: justify}
+</style>
+<p>This is a simple example of multiperiod programming. The question was also derived from <strong>Optimization in Operations Research</strong> by <em>Rardin</em>. The question reads:</p>
+<p><em>Ace Green Windows (AGW) manufactures environmentally efficient windows as replacements of those in existing homes. It has just received a contract for the next 6 months, requiring 100, 250, 190, 140, 220, and 110 units in months 1 through 6, respectively. Production costs for windows vary with time due to the specialized materials. AGW estimates production will cost $250, $450,$350, $400, $520, and $500 per unit in periods 1 through 6, respectively. To take advantage of cost variations, AGW may produce more windows than the contract requires in some months and hold up to 375 of them in inventory for later months. But holding inventory costs $30 per window per month. Assume there is no beginning inventory.</em></p>
+<p>For simplicity let’s assume that the months are from January to June. This creates the dimension of the problem. Let it be indexed by . Let the requirements for each month be denoted by <span class="math inline">\(d_t\)</span>. Let the cost of production for each month be denoted by <span class="math inline">\(p_t\)</span>.</p>
+<p>The time-phased linear optimization model can be written as:</p>
+<p><span class="math display">\[\sum_{t = Jan}^{Jun} p_t x_t + 30 \sum_{t = Jan}^{Jun} h_t\]</span></p>
+<p><strong>Subject to:</strong></p>
+<p><span class="math display">\[ h_{t-1} + x_t = d_t + h_t \quad \forall \quad t = 1,..6;  ....(1) \]</span></p>
+<p><span class="math display">\[ h_t \leq 375 \quad \forall \quad t = 1,..6; ....(2)\]</span></p>
+<p><span class="math display">\[ h_t, x_t \geq 0 \quad ....(3)\]</span></p>
+<p>The first constraint defines the relationship between closing inventory from last period, current production and the current inventory with the present demand. The second constraint follows from the instruction in the question allowing an upper bound on the holding inventory to go beyond the required for every month. Lastly, we assume both are non negative.</p>
+<p>We should take care while interpreting the first constraint in the opening and closing months. For January <span class="math inline">\(h_{t-1}\)</span> is just 0 while for the closing month in June, the <span class="math inline">\(h_t\)</span> is zero thereby reassuring the remaining inventory from May and current production from June equals current requirement for June and there are no left-over windows.</p>
+<p>Here’s the solution in Python:</p>
+<pre class="python"><code>from gurobipy import *
+m = Model(&#39;Window Inventory&#39;)
+#create dimensions of the problem
+calender = [&#39;Jan&#39;,&#39;Feb&#39;,&#39;Mar&#39;,&#39;Apr&#39;,&#39;May&#39;,&#39;Jun&#39;] #will be indexed by t
+#monthly requirements
+requirements = {&#39;Jan&#39;:100,
+                &#39;Feb&#39;:250,
+                &#39;Mar&#39;:190,
+                &#39;Apr&#39;:140,
+                &#39;May&#39;:220,
+                &#39;Jun&#39;:110}
+# production costs
+prod_cost =    {&#39;Jan&#39;:250,
+                &#39;Feb&#39;:450,
+                &#39;Mar&#39;:350,
+                &#39;Apr&#39;:400,
+                &#39;May&#39;:520,
+                &#39;Jun&#39;:500}
+                
+                
+#create decision variables
+#units produced in month t
+produced = {}
+for t in calender:
+    produced[t] = m.addVar(lb = 0, vtype = GRB.CONTINUOUS, name = &#39;produced_%s&#39;%(t))
+# units held at time t
+held = {}
+for t in calender:
+    held[t] = m.addVar(lb = 0, ub = 375, vtype = GRB.CONTINUOUS, name = &#39;held_%s&#39;%(t))
+    
+m.update()
+#set the objective
+obj1 = quicksum( produced[t]*prod_cost[t] for t in calender )
+obj2 = 30*quicksum( held[t] for t in calender )
+obj = obj1 + obj2
+m.setObjective(obj)
+#define constraints
+#beginning inventory + production amount - ending inventory = demand
+#begining inventory + production amount = demand + ending inventory
+#initial balance
+m.addConstr(produced[&#39;Jan&#39;] == requirements[&#39;Jan&#39;]+held[&#39;Jan&#39;], &#39;inital&#39;)
+#closing balance
+m.addConstr(produced[&#39;Jun&#39;]+held[&#39;May&#39;] == requirements[&#39;Jun&#39;], &#39;closing&#39;)
+# remaining balances
+for t in calender:
+    if t != calender[0] and t != calender[5]:
+        m.addConstr(held[calender[calender.index(t) -1]]+produced[t] == requirements[t]+held[t], &#39;remaining&#39;)
+        
+m.optimize()</code></pre>
+<pre><code>## Optimize a model with 6 rows, 12 columns and 16 nonzeros
+## Coefficient statistics:
+##   Matrix range     [1e+00, 1e+00]
+##   Objective range  [3e+01, 5e+02]
+##   Bounds range     [4e+02, 4e+02]
+##   RHS range        [1e+02, 3e+02]
+## Presolve removed 2 rows and 5 columns
+## Presolve time: 0.06s
+## Presolved: 4 rows, 7 columns, 10 nonzeros
+## 
+## Iteration    Objective       Primal Inf.    Dual Inf.      Time
+##        0    3.8200000e+04   1.137500e+02   0.000000e+00      0s
+##        4    3.5020000e+05   0.000000e+00   0.000000e+00      0s
+## 
+## Solved in 4 iterations and 0.11 seconds
+## Optimal objective  3.502000000e+05</code></pre>
+<pre class="python"><code>if m.status == GRB.status.OPTIMAL:
+    print(&#39;\nMinimum objective is :&#39;,m.objval)</code></pre>
+<pre><code>## 
+## Minimum objective is : 350200.0</code></pre>
+<pre class="python"><code>if m.status == GRB.status.OPTIMAL:
+    print (&#39;\nOptimal inventory :&#39;)
+    for t in calender:
+        print(&#39;produced at &#39;+ str(t) + &#39;: &#39; + str(produced[t].x))
+        print(&#39;held at &#39; + str(t) + &#39;: &#39; + str(held[t].x))</code></pre>
+<pre><code>## 
+## Optimal inventory :
+## produced at Jan: 475.0
+## held at Jan: 375.0
+## produced at Feb: 0.0
+## held at Feb: 125.0
+## produced at Mar: 440.0
+## held at Mar: 375.0
+## produced at Apr: 95.0
+## held at Apr: 330.0
+## produced at May: 0.0
+## held at May: 110.0
+## produced at Jun: 0.0
+## held at Jun: 0.0</code></pre>

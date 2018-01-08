@@ -17,11 +17,11 @@
       
     
   
-  <meta name="description" content="body {text-align: justify}The problem we are solving is the Brisbane Earth Moving Problem from the book Optimization in Operations Research (2nd Edition) by Rardin.
-A major expansion of the Brisbane airport will require moving substantial quantities of earth from 4 sites where it is surplus to 7 locations where it is needed. The following table shows the haul distances (hundreds of meters) between points, as well as the quantity available at each surplus site.">
+  <meta name="description" content="body {text-align: justify}This is a simple example of multiperiod programming. The question was also derived from Optimization in Operations Research by Rardin. The question reads:
+Ace Green Windows (AGW) manufactures environmentally efficient windows as replacements of those in existing homes. It has just received a contract for the next 6 months, requiring 100, 250, 190, 140, 220, and 110 units in months 1 through 6, respectively. Production costs for windows vary with time due to the specialized materials.">
 
   
-  <link rel="alternate" hreflang="en-us" href="/post/optimization-with-gurobi/">
+  <link rel="alternate" hreflang="en-us" href="/post/multiperiod-optimization-with-gurobi/">
 
   
 
@@ -69,7 +69,7 @@ A major expansion of the Brisbane airport will require moving substantial quanti
   <link rel="icon" type="image/png" href="/img/icon.png">
   <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
 
-  <link rel="canonical" href="/post/optimization-with-gurobi/">
+  <link rel="canonical" href="/post/multiperiod-optimization-with-gurobi/">
 
   <meta property="twitter:card" content="summary_large_image">
   
@@ -77,10 +77,10 @@ A major expansion of the Brisbane airport will require moving substantial quanti
   <meta property="twitter:creator" content="@pallav_routh">
   
   <meta property="og:site_name" content="Home">
-  <meta property="og:url" content="/post/optimization-with-gurobi/">
-  <meta property="og:title" content="Optimization with Gurobi | Home">
-  <meta property="og:description" content="body {text-align: justify}The problem we are solving is the Brisbane Earth Moving Problem from the book Optimization in Operations Research (2nd Edition) by Rardin.
-A major expansion of the Brisbane airport will require moving substantial quantities of earth from 4 sites where it is surplus to 7 locations where it is needed. The following table shows the haul distances (hundreds of meters) between points, as well as the quantity available at each surplus site."><meta property="og:image" content="/img/headers/networked.jpg">
+  <meta property="og:url" content="/post/multiperiod-optimization-with-gurobi/">
+  <meta property="og:title" content="Multiperiod Optimization with Gurobi | Home">
+  <meta property="og:description" content="body {text-align: justify}This is a simple example of multiperiod programming. The question was also derived from Optimization in Operations Research by Rardin. The question reads:
+Ace Green Windows (AGW) manufactures environmentally efficient windows as replacements of those in existing homes. It has just received a contract for the next 6 months, requiring 100, 250, 190, 140, 220, and 110 units in months 1 through 6, respectively. Production costs for windows vary with time due to the specialized materials."><meta property="og:image" content="/img/headers/window.jpg">
   <meta property="og:locale" content="en-us">
   
   <meta property="article:published_time" content="2018-01-07T00:00:00&#43;00:00">
@@ -90,7 +90,7 @@ A major expansion of the Brisbane airport will require moving substantial quanti
 
   
 
-  <title>Optimization with Gurobi | Home</title>
+  <title>Multiperiod Optimization with Gurobi | Home</title>
 
 </head>
 <body id="top" data-spy="scroll" data-target="#toc" data-offset="71" >
@@ -235,7 +235,7 @@ A major expansion of the Brisbane airport will require moving substantial quanti
 
   
 <div class="article-header">
-  <img src="/img/headers/networked.jpg" class="article-banner" itemprop="image">
+  <img src="/img/headers/window.jpg" class="article-banner" itemprop="image">
   
 </div>
 
@@ -243,7 +243,7 @@ A major expansion of the Brisbane airport will require moving substantial quanti
 
   <div class="article-container">
     <div class="article-inner">
-      <h1 itemprop="name">Optimization with Gurobi</h1>
+      <h1 itemprop="name">Multiperiod Optimization with Gurobi</h1>
 
       
 
@@ -289,35 +289,35 @@ A major expansion of the Brisbane airport will require moving substantial quanti
   <ul class="share">
     <li>
       <a class="twitter"
-         href="https://twitter.com/intent/tweet?text=Optimization%20with%20Gurobi&amp;url=%2fpost%2foptimization-with-gurobi%2f"
+         href="https://twitter.com/intent/tweet?text=Multiperiod%20Optimization%20with%20Gurobi&amp;url=%2fpost%2fmultiperiod-optimization-with-gurobi%2f"
          target="_blank" rel="noopener">
         <i class="fa fa-twitter"></i>
       </a>
     </li>
     <li>
       <a class="facebook"
-         href="https://www.facebook.com/sharer.php?u=%2fpost%2foptimization-with-gurobi%2f"
+         href="https://www.facebook.com/sharer.php?u=%2fpost%2fmultiperiod-optimization-with-gurobi%2f"
          target="_blank" rel="noopener">
         <i class="fa fa-facebook"></i>
       </a>
     </li>
     <li>
       <a class="linkedin"
-         href="https://www.linkedin.com/shareArticle?mini=true&amp;url=%2fpost%2foptimization-with-gurobi%2f&amp;title=Optimization%20with%20Gurobi"
+         href="https://www.linkedin.com/shareArticle?mini=true&amp;url=%2fpost%2fmultiperiod-optimization-with-gurobi%2f&amp;title=Multiperiod%20Optimization%20with%20Gurobi"
          target="_blank" rel="noopener">
         <i class="fa fa-linkedin"></i>
       </a>
     </li>
     <li>
       <a class="weibo"
-         href="http://service.weibo.com/share/share.php?url=%2fpost%2foptimization-with-gurobi%2f&amp;title=Optimization%20with%20Gurobi"
+         href="http://service.weibo.com/share/share.php?url=%2fpost%2fmultiperiod-optimization-with-gurobi%2f&amp;title=Multiperiod%20Optimization%20with%20Gurobi"
          target="_blank" rel="noopener">
         <i class="fa fa-weibo"></i>
       </a>
     </li>
     <li>
       <a class="email"
-         href="mailto:?subject=Optimization%20with%20Gurobi&amp;body=%2fpost%2foptimization-with-gurobi%2f">
+         href="mailto:?subject=Multiperiod%20Optimization%20with%20Gurobi&amp;body=%2fpost%2fmultiperiod-optimization-with-gurobi%2f">
         <i class="fa fa-envelope"></i>
       </a>
     </li>
@@ -335,134 +335,106 @@ A major expansion of the Brisbane airport will require moving substantial quanti
 body {
 text-align: justify}
 </style>
-<p>The problem we are solving is the <strong>Brisbane Earth Moving Problem</strong> from the book <strong>Optimization in Operations Research (2nd Edition)</strong> by <em>Rardin</em>.</p>
-<p><em>A major expansion of the Brisbane airport will require moving substantial quantities of earth from 4 sites where it is surplus to 7 locations where it is needed. The following table shows the haul distances (hundreds of meters) between points, as well as the quantity available at each surplus site. Quantities needed are 247 cubic meters at the extension, 394 at the dry pond, 265 along roads, 105 in the parking area, 90 at the fire station, 85 in the industrial park, and 145 along the perimeter road. The site engineer wishes to compute a minimum total distance times volume plan for accomplishing the required earth moving.</em></p>
-<p>The parameters of the problem are (1) the volume of earth avaialable at the supply site, (2) the volume of earth required at the need sites and (3) the distance between the supply and the need sites</p>
-<ul>
-<li>Let <span class="math inline">\(s_i\)</span> represent the supply sites where <span class="math inline">\(i = 1,...,4\)</span></li>
-<li>Let <span class="math inline">\(n_j\)</span> represent the need/demand sites where <span class="math inline">\(j = 1,....,7\)</span></li>
-<li>Let <span class="math inline">\(d_{i,j}\)</span> represent the distance between a particular <span class="math inline">\(s_i\)</span> and <span class="math inline">\(n_j\)</span></li>
-</ul>
-<p>Given the above parameters the <strong>objective function</strong> can be represented as:</p>
-<p><span class="math display">\[ \text{min} \quad \sum_{i=1}^{4} \sum_{j=1}^4 d_{i,j}∗v_{i,j} \]</span></p>
+<p>This is a simple example of multiperiod programming. The question was also derived from <strong>Optimization in Operations Research</strong> by <em>Rardin</em>. The question reads:</p>
+<p><em>Ace Green Windows (AGW) manufactures environmentally efficient windows as replacements of those in existing homes. It has just received a contract for the next 6 months, requiring 100, 250, 190, 140, 220, and 110 units in months 1 through 6, respectively. Production costs for windows vary with time due to the specialized materials. AGW estimates production will cost $250, $450,$350, $400, $520, and $500 per unit in periods 1 through 6, respectively. To take advantage of cost variations, AGW may produce more windows than the contract requires in some months and hold up to 375 of them in inventory for later months. But holding inventory costs $30 per window per month. Assume there is no beginning inventory.</em></p>
+<p>For simplicity let’s assume that the months are from January to June. This creates the dimension of the problem. Let it be indexed by . Let the requirements for each month be denoted by <span class="math inline">\(d_t\)</span>. Let the cost of production for each month be denoted by <span class="math inline">\(p_t\)</span>.</p>
+<p>The time-phased linear optimization model can be written as:</p>
+<p><span class="math display">\[\sum_{t = Jan}^{Jun} p_t x_t + 30 \sum_{t = Jan}^{Jun} h_t\]</span></p>
 <p><strong>Subject to:</strong></p>
-<p>Assuring full amount being moved from every surplus site can be collectively represented by the following indexed equality:<br />
-<span class="math display">\[ \sum^7_{j = 1} v_{i,j} = s_i \quad \forall \quad i = 1,..,4\]</span></p>
-<p>Assuring the required amount being moved to each needed location can be represented by the following indexed equality:<br />
-<span class="math display">\[ \sum^4_{i = 1} v_{i,j} = n_j \quad \forall \quad j = 1,..,7\]</span></p>
-<p>Since the volume of earth moved has to zero or positive, we can write the following variable-type constraint:<br />
-<span class="math display">\[ v_{i,j} \geq 0 \quad \forall \quad i=1,..,4 \quad \textrm{and} \quad j = 1,..,7 \]</span></p>
-<p>Here’s the solution in Python using Gurobi</p>
-<pre class="python"><code># import from gurobi library
-from gurobipy import *
-## create dimensions of the problem
-#create list of surplus sites
-surplus = [&#39;Apron&#39;,&#39;Term&#39;,&#39;Cargo&#39;,&#39;Access&#39;] #will be indexed by i
-#create list of need sites
-need = [&#39;Extension&#39;,&#39;Dry Pond&#39;,&#39;Roads&#39;,&#39;Parking&#39;,&#39;Fire Station&#39;,
-                                     &#39;Industrial Park&#39;,&#39;Perimeter Road&#39;] #will be indexed by j
-                                     
-## create indexed data
-#the distance between the surplus and need 
-distance_matrix = {
-    (&#39;Apron&#39;,&#39;Extension&#39;):26,
-    (&#39;Apron&#39;,&#39;Dry Pond&#39;):12,
-    (&#39;Apron&#39;,&#39;Roads&#39;):10,
-    (&#39;Apron&#39;,&#39;Parking&#39;):18,
-    (&#39;Apron&#39;,&#39;Fire Station&#39;):11,
-    (&#39;Apron&#39;,&#39;Industrial Park&#39;):8,
-    (&#39;Apron&#39;,&#39;Perimeter Road&#39;):20,
-    (&#39;Term&#39;,&#39;Extension&#39;):28,
-    (&#39;Term&#39;,&#39;Dry Pond&#39;):14,
-    (&#39;Term&#39;,&#39;Roads&#39;):12,
-    (&#39;Term&#39;,&#39;Parking&#39;):20,
-    (&#39;Term&#39;,&#39;Fire Station&#39;):13,
-    (&#39;Term&#39;,&#39;Industrial Park&#39;):10,
-    (&#39;Term&#39;,&#39;Perimeter Road&#39;):22,
-    (&#39;Cargo&#39;,&#39;Extension&#39;):20,
-    (&#39;Cargo&#39;,&#39;Dry Pond&#39;):26,
-    (&#39;Cargo&#39;,&#39;Roads&#39;):20,
-    (&#39;Cargo&#39;,&#39;Parking&#39;):2,
-    (&#39;Cargo&#39;,&#39;Fire Station&#39;):6,
-    (&#39;Cargo&#39;,&#39;Industrial Park&#39;):22,
-    (&#39;Cargo&#39;,&#39;Perimeter Road&#39;):18,
-    (&#39;Access&#39;,&#39;Extension&#39;):26,
-    (&#39;Access&#39;,&#39;Dry Pond&#39;):10,
-    (&#39;Access&#39;,&#39;Roads&#39;):4,
-    (&#39;Access&#39;,&#39;Parking&#39;):16,
-    (&#39;Access&#39;,&#39;Fire Station&#39;):24,
-    (&#39;Access&#39;,&#39;Industrial Park&#39;):14,
-    (&#39;Access&#39;,&#39;Perimeter Road&#39;):21,
-}
-#available volume at the surplus sites
-quantity_available = {&#39;Apron&#39;:660,&#39;Term&#39;:301,&#39;Cargo&#39;:271,&#39;Access&#39;:99}
-#the requirements at the need sites
-requirements = {&#39;Extension&#39;:247,&#39;Dry Pond&#39;:394,&#39;Roads&#39;:265,&#39;Parking&#39;:105,&#39;Fire Station&#39;:90,
-                                                        &#39;Industrial Park&#39;:85,&#39;Perimeter Road&#39;:145}
-                                                        
-## create model
-m = Model(&#39;Brisbane Airport&#39;)
-## create decision variables
-#let flow represent the cubic meters moved from surplus i to site j
-flow = {}
-for i in surplus:
-    for j in need:
-        flow[i,j] = m.addVar(lb = 0, vtype = GRB.CONTINUOUS, name=&#39;flow_%s_%s&#39; % (i, j))
-        
+<p><span class="math display">\[ h_{t-1} + x_t = d_t + h_t \quad \forall \quad t = 1,..6;  ....(1) \]</span></p>
+<p><span class="math display">\[ h_t \leq 375 \quad \forall \quad t = 1,..6; ....(2)\]</span></p>
+<p><span class="math display">\[ h_t, x_t \geq 0 \quad ....(3)\]</span></p>
+<p>The first constraint defines the relationship between closing inventory from last period, current production and the current inventory with the present demand. The second constraint follows from the instruction in the question allowing an upper bound on the holding inventory to go beyond the required for every month. Lastly, we assume both are non negative.</p>
+<p>We should take care while interpreting the first constraint in the opening and closing months. For January <span class="math inline">\(h_{t-1}\)</span> is just 0 while for the closing month in June, the <span class="math inline">\(h_t\)</span> is zero thereby reassuring the remaining inventory from May and current production from June equals current requirement for June and there are no left-over windows.</p>
+<p>Here’s the solution in Python:</p>
+<pre class="python"><code>from gurobipy import *
+m = Model(&#39;Window Inventory&#39;)
+#create dimensions of the problem
+calender = [&#39;Jan&#39;,&#39;Feb&#39;,&#39;Mar&#39;,&#39;Apr&#39;,&#39;May&#39;,&#39;Jun&#39;] #will be indexed by t
+#monthly requirements
+requirements = {&#39;Jan&#39;:100,
+                &#39;Feb&#39;:250,
+                &#39;Mar&#39;:190,
+                &#39;Apr&#39;:140,
+                &#39;May&#39;:220,
+                &#39;Jun&#39;:110}
+# production costs
+prod_cost =    {&#39;Jan&#39;:250,
+                &#39;Feb&#39;:450,
+                &#39;Mar&#39;:350,
+                &#39;Apr&#39;:400,
+                &#39;May&#39;:520,
+                &#39;Jun&#39;:500}
+                
+                
+#create decision variables
+#units produced in month t
+produced = {}
+for t in calender:
+    produced[t] = m.addVar(lb = 0, vtype = GRB.CONTINUOUS, name = &#39;produced_%s&#39;%(t))
+# units held at time t
+held = {}
+for t in calender:
+    held[t] = m.addVar(lb = 0, ub = 375, vtype = GRB.CONTINUOUS, name = &#39;held_%s&#39;%(t))
+    
 m.update()
 #set the objective
-obj = quicksum ( flow[i,j]*distance_matrix[i,j] for i in surplus for j in need )
+obj1 = quicksum( produced[t]*prod_cost[t] for t in calender )
+obj2 = 30*quicksum( held[t] for t in calender )
+obj = obj1 + obj2
 m.setObjective(obj)
-# Add supply constraints
-for i in surplus:
-    m.addConstr(quicksum(flow[i,j] for j in need) == quantity_available[i], &#39;supply_%s&#39; % (i))
-    
-# Add demand constraints
-for j in need:
-    m.addConstr(quicksum(flow[i,j] for i in surplus) == requirements[j], &#39;demand_%s&#39; % (j))
-  
-# optimize  
-m.optimize()
-## Print solution
-# The objective value</code></pre>
-<pre><code>## Optimize a model with 11 rows, 28 columns and 56 nonzeros
+#define constraints
+#beginning inventory + production amount - ending inventory = demand
+#begining inventory + production amount = demand + ending inventory
+#initial balance
+m.addConstr(produced[&#39;Jan&#39;] == requirements[&#39;Jan&#39;]+held[&#39;Jan&#39;], &#39;inital&#39;)
+#closing balance
+m.addConstr(produced[&#39;Jun&#39;]+held[&#39;May&#39;] == requirements[&#39;Jun&#39;], &#39;closing&#39;)
+# remaining balances
+for t in calender:
+    if t != calender[0] and t != calender[5]:
+        m.addConstr(held[calender[calender.index(t) -1]]+produced[t] == requirements[t]+held[t], &#39;remaining&#39;)
+        
+m.optimize()</code></pre>
+<pre><code>## Optimize a model with 6 rows, 12 columns and 16 nonzeros
 ## Coefficient statistics:
 ##   Matrix range     [1e+00, 1e+00]
-##   Objective range  [2e+00, 3e+01]
-##   Bounds range     [0e+00, 0e+00]
-##   RHS range        [9e+01, 7e+02]
+##   Objective range  [3e+01, 5e+02]
+##   Bounds range     [4e+02, 4e+02]
+##   RHS range        [1e+02, 3e+02]
+## Presolve removed 2 rows and 5 columns
 ## Presolve time: 0.06s
-## Presolved: 11 rows, 28 columns, 56 nonzeros
+## Presolved: 4 rows, 7 columns, 10 nonzeros
 ## 
 ## Iteration    Objective       Primal Inf.    Dual Inf.      Time
-##        0    1.3980000e+04   1.752000e+03   0.000000e+00      0s
-##        6    1.7592000e+04   0.000000e+00   0.000000e+00      0s
+##        0    3.8200000e+04   1.137500e+02   0.000000e+00      0s
+##        4    3.5020000e+05   0.000000e+00   0.000000e+00      0s
 ## 
-## Solved in 6 iterations and 0.16 seconds
-## Optimal objective  1.759200000e+04</code></pre>
+## Solved in 4 iterations and 0.11 seconds
+## Optimal objective  3.502000000e+05</code></pre>
 <pre class="python"><code>if m.status == GRB.status.OPTIMAL:
-    print(&#39;\nMinimum objective is :&#39;,m.objval)
-# The optimal flows</code></pre>
+    print(&#39;\nMinimum objective is :&#39;,m.objval)</code></pre>
 <pre><code>## 
-## Minimum objective is : 17592.0</code></pre>
+## Minimum objective is : 350200.0</code></pre>
 <pre class="python"><code>if m.status == GRB.status.OPTIMAL:
-    print (&#39;\nOptimal flows :&#39;)
-    for i in surplus:
-        for j in need:
-            if flow[i,j].x &gt; 0:
-                print (i, &#39;-&gt;&#39;, j, &#39;:&#39;, flow[i,j].x)</code></pre>
+    print (&#39;\nOptimal inventory :&#39;)
+    for t in calender:
+        print(&#39;produced at &#39;+ str(t) + &#39;: &#39; + str(produced[t].x))
+        print(&#39;held at &#39; + str(t) + &#39;: &#39; + str(held[t].x))</code></pre>
 <pre><code>## 
-## Optimal flows :
-## Apron -&gt; Extension : 81.0
-## Apron -&gt; Dry Pond : 93.0
-## Apron -&gt; Roads : 166.0
-## Apron -&gt; Fire Station : 90.0
-## Apron -&gt; Industrial Park : 85.0
-## Apron -&gt; Perimeter Road : 145.0
-## Term -&gt; Dry Pond : 301.0
-## Cargo -&gt; Extension : 166.0
-## Cargo -&gt; Parking : 105.0
-## Access -&gt; Roads : 99.0</code></pre>
+## Optimal inventory :
+## produced at Jan: 475.0
+## held at Jan: 375.0
+## produced at Feb: 0.0
+## held at Feb: 125.0
+## produced at Mar: 440.0
+## held at Mar: 375.0
+## produced at Apr: 95.0
+## held at Apr: 330.0
+## produced at May: 0.0
+## held at May: 110.0
+## produced at Jun: 0.0
+## held at Jun: 0.0</code></pre>
 
       </div>
 
@@ -473,9 +445,7 @@ m.optimize()
   
   <a class="btn btn-primary btn-outline" href="/tags/linear-programming">Linear programming</a>
   
-  <a class="btn btn-primary btn-outline" href="/tags/python">Python</a>
-  
-  <a class="btn btn-primary btn-outline" href="/tags/network-flow">Network Flow</a>
+  <a class="btn btn-primary btn-outline" href="/tags/multiperiod-optimization">Multiperiod Optimization</a>
   
 </div>
 
@@ -493,7 +463,7 @@ m.optimize()
   <h3>Related</h3>
   <ul>
     
-    <li><a href="/post/multiperiod-optimization-with-gurobi/">Multiperiod Optimization with Gurobi</a></li>
+    <li><a href="/post/optimization-with-gurobi/">Optimization with Gurobi</a></li>
     
   </ul>
 </div>

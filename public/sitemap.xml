@@ -14,6 +14,15 @@
     
     <url>
     
+      <loc>/post/multiperiod-optimization-with-gurobi/</loc>
+      <lastmod>2018-01-07T00:00:00+00:00</lastmod>
+    </url>
+    
+  
+    
+    
+    <url>
+    
       <loc>/post/of-fortune-tellers-and-crystal-balls/</loc>
       <lastmod>2018-01-07T00:00:00+00:00</lastmod>
     </url>
@@ -201,6 +210,16 @@
     <url>
     
       <loc>/tags/market-basket/</loc>
+      <lastmod>2018-01-07T00:00:00+00:00</lastmod>
+      <priority>0</priority>
+    </url>
+    
+  
+    
+    
+    <url>
+    
+      <loc>/tags/multiperiod-optimization/</loc>
       <lastmod>2018-01-07T00:00:00+00:00</lastmod>
       <priority>0</priority>
     </url>
