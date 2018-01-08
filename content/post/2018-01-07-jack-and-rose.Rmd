@@ -29,7 +29,7 @@ Jack and Rose from *Titanic* epitomized the concept of romance in the late 1990s
 
 Multiple regression is one of the oldest ML techniques. The simple yet formidable OLS estimation algorithm dates way back to the $18^{th}$ century. The algorithm works by minimizing the sum of squares between the best fit line and the response variable. Today, the OLS regression is not the most accurate algorithm and therefore has been replaced by more sophisticated ML techniques. Yet, the weakness of this technique is also its strength. No other algorithm is as tractable as regression. Therefore, regression is almost always a starting point in any data analysis task. 
 
-In this tutorial, I will implement this technique in R on the famous **Titanic** data set (link on this page) and discuss how to interpret the outputs. Finally I will use a data set from Kaggle to demonstrate the steps one should take when implementing this technique for prediction purposes.
+In this tutorial, I will implement this technique in R on a data set (link on this page) and discuss how to interpret the outputs. Finally I will use the famous **Titanic** data set from Kaggle to demonstrate the steps one should take when implementing this technique for prediction purposes.
 
 # Get the packages
 
@@ -184,7 +184,7 @@ resid <- mutl.lm$residuals
 qqplot.data(resid)
 ```
 
-All the residuals are on the straight line. This indicates normality is met.
+Most of the residuals are on the straight line. This indicates normality is met.
 
 A test statistic that confirms normality is the Durbin Watson Test Stat.
 
@@ -566,7 +566,7 @@ predict.df %>%
    theme_minimal()
 ```
 
-Females predicted survival rates are higher than men. Within each sex, older men probably died more when Titanic sank. But in general as age increased the predicted survival probability fell. Finally class 1 have higher survival rates. They were probably first to be rescued followed by 2 and then 3.
+Female predicted survival rates are higher than male. Within each sex, the elderly probably died more when Titanic sank. But in general as age increased the predicted survival probability fell. Finally class 1 have higher survival rates. They were probably first to be rescued followed by 2 and then 3.
 
 ## Using a naive classification boundary
 
@@ -581,7 +581,7 @@ print(paste('Accuracy:',round((t[1]+t[4])/(t[1]+t[2]+t[3]+t[4]),2)))
 
 ## ROC charts
 
-A ROC chart is useful when finding the balance between true positive and true negative is manually impossible. The ROC plots all the values for true positive and true negative for different cutoff points. A weak classifier will have the ROC line passing diagonally across the plot whereas a strong classifier will have a prominent 'elbow' with at least one point where the TPR is sufficiently high and the FPR will be sufficiently low.
+A ROC chart is useful when finding the balance between true positive and true negative is manually tricky. The ROC plots all the values for true positive and true negative for different cutoff points. A weak classifier will have the ROC line passing diagonally across the plot whereas a strong classifier will have a prominent 'elbow' with at least one point where the TPR is sufficiently high and the FPR will be sufficiently low.
 
 The following function (adapted from this [link ](https://www.r-bloggers.com/simple-roc-plots-with-ggplot2-part-1/)) calculates the AUC (Area under curve) as well as the ROC data which can then be used inside the ggplot2 framework.
 

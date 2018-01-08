@@ -21,7 +21,7 @@ header:
 body {
 text-align: justify}
 </style>
-<p>Ever wondered how online retail purchasers come up with <em>‘recommendations’</em>? How they already know what to refer after you’ve made a purchase? The powerful <em>Apriori</em> algorithm that based on simple high school probability concepts that’s working behind the scenes to discover these connections. Association mining is based on the Apriori Algorithm. Association mining helps analyse the habits of buyers to find the relationship between different items in a ‘market basket’. The discovery of these relationships can help to develop a sales strategy by considering the items frequently purchased in sequence by customers. .This tutorial demonstrates the concepts in Market Basket Analysis and how to perform the analysis in R.</p>
+<p>Ever wondered how online retail sellers come up with <em>‘recommendations’</em>? How they already know what to refer after you’ve made a purchase? The powerful <em>Apriori</em> algorithm that is based on simple high school probability concepts is working behind the scenes to discover these connections. Association mining is based on the Apriori Algorithm. Association mining helps analyse the habits of buyers to find the relationship between different items in a ‘market basket’. The discovery of these relationships can help to develop a sales strategy by considering the items frequently purchased in sequence by customers. .This tutorial demonstrates the concepts in Market Basket Analysis and how to perform the analysis in R.</p>
 <div id="get-the-libraries" class="section level1">
 <h1>Get the libraries</h1>
 <pre class="r"><code>library(readxl) # reading in file 
@@ -291,8 +291,8 @@ inspect(rules.new[1:20])</code></pre>
 <h2>Tuning the apriori</h2>
 <p>One can further tune the parameters inside the <code>apriori</code> function. Here are 2 important adjustments:</p>
 <ul>
-<li><p><code>maxlen</code>: The max len is specified within the <code>parameter</code> list. This allows you to specify the maximum length of items to be considered within each basket. This is a good idea to specify because it is not very intuitive to see the relationship between too many items within each basket.</p></li>
-<li><p><code>minlen</code>: Just as you wouldn’t want too many items, you wouldn’t want too few either. One item in a basket does not make sense either. The minlen should be set to 2.</p></li>
+<li><p><code>maxlen</code>: The max len is specified within the <code>parameter</code> list. This allows you to specify the maximum length of items to be considered within each basket. It is a good idea to specify max len because it is not very intuitive to see the relationship between too many items within each basket.</p></li>
+<li><p><code>minlen</code>: Just as you wouldn’t want too many items, you wouldn’t want too few either. One item in a basket does not make sense. The minlen should be set to 2.</p></li>
 <li><p><code>appearence</code>: This useful option allows you to specify a list where you can filter the rules created by a specific item. This could be useful in creating network plots that will then show these associations.</p></li>
 </ul>
 <p>Here is an example.</p>
@@ -302,7 +302,7 @@ inspect(rules.new[1:20])</code></pre>
                         # control the appearence
                         appearance = list(default=&quot;rhs&quot;,lhs=&quot;PARTY BUNTING&quot;),
                         control = list(verbose=F))</code></pre>
-<p>Note that <code>rhs</code> within the<code>appearence</code> option controls the fact that Party Bunting appears only on the right hand side of the rules. These rules show which items were bought after someone bought Party Bunting. And obviously you can reverse this procedure to inspect what items are bought <em>before</em> Party Bunting.Inspect the elements:</p>
+<p>Note that <code>rhs</code> within the<code>appearence</code> option controls the fact that Party Bunting appears only on the left hand side of the rules. These rules show which items were bought after someone bought Party Bunting. And obviously you can reverse this procedure to inspect what items are bought <em>before</em> Party Bunting.Inspect the elements:</p>
 <pre class="r"><code>inspect(tuned.aprior[1:10])</code></pre>
 <pre><code>##      lhs                rhs                                     support confidence     lift
 ## [1]  {PARTY BUNTING} =&gt; {TEA TIME PARTY BUNTING}            0.009246960  0.1324067 7.690591

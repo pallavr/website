@@ -25,7 +25,7 @@ text-align: justify}
 knitr::opts_chunk$set(cache = TRUE)
 ```
 
-Ever wondered how online retail purchasers come up with *'recommendations'*? How they already know what to refer after you've made a purchase? The powerful *Apriori* algorithm that based on simple high school probability concepts that's working behind the scenes to discover these connections. Association mining is based on the Apriori Algorithm. Association mining helps analyse the habits of buyers to find the relationship between different items in a 'market basket'. The discovery of these relationships can help to develop a sales strategy by considering the items frequently purchased in sequence by customers. .This tutorial demonstrates the concepts in Market Basket Analysis and how to perform the analysis in R.
+Ever wondered how online retail sellers come up with *'recommendations'*? How they already know what to refer after you've made a purchase? The powerful *Apriori* algorithm that is based on simple high school probability concepts is working behind the scenes to discover these connections. Association mining is based on the Apriori Algorithm. Association mining helps analyse the habits of buyers to find the relationship between different items in a 'market basket'. The discovery of these relationships can help to develop a sales strategy by considering the items frequently purchased in sequence by customers. .This tutorial demonstrates the concepts in Market Basket Analysis and how to perform the analysis in R.
 
 # Get the libraries
 
@@ -159,9 +159,9 @@ We can see that the rules no longer appear!
 
 One can further tune the parameters inside the `apriori` function. Here are 2 important adjustments:
 
-- `maxlen`: The max len is specified within the `parameter` list. This allows you to specify the maximum length of items to be considered within each basket. This is a good idea to specify because it is not very intuitive to see the relationship between too many items within each basket.
+- `maxlen`: The max len is specified within the `parameter` list. This allows you to specify the maximum length of items to be considered within each basket. It is a good idea to specify max len because it is not very intuitive to see the relationship between too many items within each basket.
 
-- `minlen`: Just as you wouldn't want too many items, you wouldn't want too few either. One item in a basket does not make sense either. The minlen should be set to 2.
+- `minlen`: Just as you wouldn't want too many items, you wouldn't want too few either. One item in a basket does not make sense. The minlen should be set to 2.
 
 - `appearence`: This useful option allows you to specify a list where you can filter the rules created by a specific item. This could be useful in creating network plots that will then show these associations.
 
@@ -177,7 +177,7 @@ tuned.aprior <- apriori(transactions,
 ```
 
 
-Note that `rhs` within the`appearence` option controls the fact that Party Bunting appears only on the right hand side of the rules. These rules show which items were bought after someone bought Party Bunting. And obviously you can reverse this procedure to inspect what items are bought *before* Party Bunting.Inspect the elements:
+Note that `rhs` within the`appearence` option controls the fact that Party Bunting appears only on the left hand side of the rules. These rules show which items were bought after someone bought Party Bunting. And obviously you can reverse this procedure to inspect what items are bought *before* Party Bunting.Inspect the elements:
 
 ```{r}
 inspect(tuned.aprior[1:10])

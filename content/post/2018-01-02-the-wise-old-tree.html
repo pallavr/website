@@ -19,7 +19,7 @@ header:
 body {
 text-align: justify}
 </style>
-<p>Gandalf is one of the primary fictional character in J.R.R Tolkien <em>Lord of the Ring</em>. He is a wise old character who people turn to for council on matters that are tough to decide. A decision tree is like Gandalf.The greatest gift of decision trees is it makes extremely hard decisions easy to interpret. It’s what statisticians call <em>white box</em>. We know exactly whats going on when a tree makes a decision. In this tutorial I will explain the mathematics behind the working of a decision tree and how to build a functioning decision tree in R that can predict.</p>
+<p>Gandalf is one of the primary fictional character in J.R.R Tolkien <em>Lord of the Ring</em>. He is a wise old wizard who people turn to for council on matters that are tough to decide. A decision tree is a lot like Gandalf. The greatest gift of decision trees is that it makes extremely hard decisions easy to interpret. It’s what statisticians call <em>white box</em>. We know exactly whats going on when a tree makes a decision. In this tutorial I will explain the mathematics behind the working of a decision tree and how to build a functioning decision tree in R that can predict.</p>
 <div id="the-packages" class="section level1">
 <h1>The packages</h1>
 <pre class="r"><code>library(readr) # read in data
@@ -32,7 +32,7 @@ library(party) # decision tree</code></pre>
 <div id="the-data" class="section level1">
 <h1>The data</h1>
 <p>I will be using the <em>Pokemon</em> data set from <a href="https://www.kaggle.com/abcsds/pokemon">Kaggle</a>. Pokemon is a media franchise owned by Nintendo. It became famous when the game was turned into a animation series where an ambitious young boy tries to capture creatures/Pokemon who help him win Pokemon-battles. In his quest to become the best Pokemon trainer, he comes across a variety of Pokemon but it was always his dream to capture the legendary Pokemon <em>MewTwo</em>. A Pokemon is legendary when it’s extremely powerful (measured by its attacking or defense style) and is extremely rare.</p>
-<p>The Pokemon data set comes with all the Pokemon and their type and stats. We will use a decision tree to decide if the Pokemon is legendary or not. This would also help us realize what factors contribute to deciding if a Pokemon is legendary.</p>
+<p>The Pokemon data set comes with all the Pokemon and their type and stats. We will use a decision tree to decide if the Pokemon is legendary or not. This would also help us realize what factors contribute to deciding if a Pokemon is legendary or not.</p>
 <pre class="r"><code>pokemon &lt;- read_csv(&quot;C:/Users/routh/Desktop/Study Materials/My website/Trees/Pokemon.csv&quot;, col_types = cols(`#` = col_skip()))</code></pre>
 </div>
 <div id="data-inspection" class="section level1">
@@ -107,17 +107,17 @@ library(party) # decision tree</code></pre>
 <p>Decision Trees or <strong>CART</strong> (Classification and Regression Trees) have the following elements:</p>
 <p>Take a look at this <a href="https://clearpredictions.com/Images/Decision_Tree_2.png">picture</a>.</p>
 <ul>
-<li><p>A <strong>root node</strong> is where the first split in decision occurs. A <strong>decision or internal</strong> node is the rest of the nodes following the root node where a decision is made. Finally the <strong>terminal or leaf</strong> node is where the outcome (based on the previous decisions) are finalized.</p></li>
+<li><p>A <strong>root node</strong> is where the first split in decision occurs. A <strong>decision or internal</strong> node is the rest of the nodes following the root node where a decision is made. Finally the <strong>terminal or leaf</strong> node is where the outcomes (based on the previous decisions) are finalized.</p></li>
 <li><p>The initial splitting node is the <strong>parent</strong> node to it’s <strong>children</strong> nodes. The children form the branches of the whole tree</p></li>
 </ul>
 </div>
 <div id="splitting-criterion" class="section level2">
 <h2>Splitting Criterion</h2>
 <p>We know that splitting occurs at every node. But what splits? Or more important how does it split? The split occurs on the values of the predictor variables. A node <em>splits into</em> two values (which is why it’s also called a binary tree). Technically though, the node can split into more than two values but most trees have binary splits.That brings us to the first kind of tree called the <strong>Recursive Partitioning Tree (RP)</strong>. It does exactly what the name suggests. Refer to this nice <a href="http://cdn.iopscience.com/images/1749-4699/5/1/015004/Full/csd422281fig1.jpg">picture</a></p>
-<p>If you would think about a decision tree with 2 variables, what a RP does is it partitions the space (containing values of the response) again and again until each small little partition has one kind of values of the response. That’s it! that’s all the decision tree does. Brilliant yet simple! But there is one final hurdle - how does it decide what variable to pick first or at what value of a predictor variable it should ideally split on?</p>
-<p>To answer the first question, in an RP tree, there are a number of <em>criterions</em> that can be used to split a node. <em>Information Gain</em> is a popular splitting criterion that uses <em>entropy</em>. Entropy is a fundamental concept of <em>Information Theory</em>. Tbh, <a href="https://en.wikipedia.org/wiki/Information_theory">Info Theory</a> is a huge topic by itself and (much) beyond the scope of this tutorial (and myself) for sure. Intuitively, entropy is <em>how much information is missing</em>. If you asked me where I am from and I answer, “India”; there is lots of “entropy” in this answer. Translate this to DTs and splits, an entropy for a variable is how much information you are loosing if you pick to split on a variable out of many. Mathematically, this is:</p>
+<p>If you would think about a decision tree with 2 variables, what a RP does is it partitions the space (containing values of the response) again and again until each small little partition has one kind or class of values of the response. That’s it! That’s all that a decision tree does. Brilliant yet simple! But there is one final hurdle - how does it decide what variable to pick first or at what value of a predictor variable it should ideally split on?</p>
+<p>To answer the first question, in an RP tree, there are a number of <em>criterions</em> that can be used to split a node. <em>Information Gain</em> is a popular splitting criterion that uses <em>entropy</em>. Entropy is a fundamental concept of <em>Information Theory</em>. Tbh, <a href="https://en.wikipedia.org/wiki/Information_theory">Info Theory</a> is a huge topic by itself and (much) beyond the scope of this tutorial (and myself) for sure. Intuitively, entropy is <em>how much information is missing</em>. If you asked me where I am from and I answer, “India”; there is lots of “entropy” in this answer. Translate this to DTs and splits, an entropy for a variable is how much information you are loosing if you pick a variable to split on out of many other variables. Mathematically, this is:</p>
 <p><span class="math display">\[    E = \sum_{i=1}^c - p_i log_2(p_i)     \]</span></p>
-<p>Lets understand with an example. Lets say the repose variable is if I go out today or not. Arbitrarily, out of 14 instances (Lets say), I assign 9 to yes (I go out) and 5 to no. So what is the entropy for these decision?</p>
+<p>Lets understand with an example. Lets say the repose variable is if I go out today or not. Arbitrarily, out of 14 instances (Lets say), I assign 9 to yes (I go out) and 5 to no. So what is the entropy for these decisions?</p>
 <pre class="r"><code>entropy &lt;- function(vector){
   p = vector/sum(vector) # gives you the p_i&#39;s
   sum(-(p*log2(p))) # the sum
@@ -161,18 +161,18 @@ entropy.var(c(7,1),c(3,3)) </code></pre>
 <pre><code>## [1] 0.7391797</code></pre>
 <p>Therefore <strong>Information Gain</strong> is:</p>
 <p><span class="math display">\[ Gain(Target|Variable) = Entrpoy(Target) - Entropy(Target|Variable)  \]</span></p>
-<p>For sunny it would be <span class="math inline">\(0.94 - 0.788 = 0.15\)</span> and for lazy it would be <span class="math inline">\(0.94 - 0.739 = 0.2\)</span>. If a decision tree now *selects the variable with the largest information gain. In this case, me going out or not would depend on if I was feeling lazy first (so true) and then if it was sunny.</p>
-<p>To answer the second question of what value it chose to split on? We can use Information Gain here too. For every value of a variable, an Information Gain is calculated and then the maximum IG is the best possible IG for that variable. This best possible IG is calculated for all variables. After that we would choose the variable with the <em>highest maximum</em> IG and then the best split point for that variable is chosen as the point of split.</p>
+<p>For sunny it would be <span class="math inline">\(0.94 - 0.788 = 0.15\)</span> and for lazy it would be <span class="math inline">\(0.94 - 0.739 = 0.2\)</span>. The decision tree now <em>selects the variable with the largest information gain</em>. In this case, me going out or not would depend on if I was feeling lazy first (so true) and then if it was sunny.</p>
+<p>To answer the second question of what value it chose to split on? We can use Information Gain here too. For every value of a variable, the Information Gain is calculated and then the maximum IG is chosen as the best possible IG for that variable. This best possible IG is calculated for all variables. After that we would choose the variable with the <em>highest maximum</em> IG and then the best split point (the one with the highest IG) for that variable is chosen as the point of split.</p>
 <p>Now, CARTs can also be used to build <strong>regression trees</strong>, where the outcomes are not categorical. The splitting criterion for such trees is the <strong>MSE</strong> for a particular predictor (p) on the response variable instead, where MSE is:</p>
 <p><span class="math display">\[  MSE_p = 1/n\sum_{i=1}^n (\hat{Y_{i,p}} - Y_{i,p})    \]</span></p>
 <p>Where <span class="math inline">\(\hat{Y}\)</span> is the mean response value for that region or partition. Obviously here, the variable with the <em>lowest</em> MSE is then chosen as the splitting variable and the value of predictor with minimum possible MSE is chosen as the split point.</p>
-<p><strong>Note:</strong> The second kind of tree is called <strong>Conditional Partitioning</strong>. Instead of using IG as splitting criterion, this tree is grown using hypothesis tests at every node and the variable that is most significant is chosen as the candidate variable to split on.</p>
+<p><strong>Note:</strong> The second kind of tree is called <strong>Conditional Partitioning Tree</strong>. Instead of using IG as splitting criterion, this tree is grown using hypothesis tests at every node and the variable that is most significant is chosen as the candidate variable to split on.</p>
 </div>
 <div id="prunning" class="section level2">
 <h2>Prunning</h2>
 <p>A DT grown using the process above may produce good predictions on the training set, but is likely to overfit the data, leading to poor test set performance. A way to overcome the variance (overfitting) is to grow a smaller tree at the cost of lower bias.</p>
-<p>One possible way to tackle this is to build the tree only so long as the decrease in the RSS or increase in IG due to each split exceeds some (high) threshold. This strategy will result in smaller trees, but is too short-sighted since a seemingly worthless split early on in the tree might be followed by a very good split-that later on.</p>
-<p>Another way is to grow the tree to full depth and the <em>prune</em> it back to create a <em>subtree</em> in a way that gives the lowest possible test error rate. Later on we will see how to calculate the CV error for a tree. If we record the CV error for all possible subtrees we can select the subtree with lowest error. However this might be a inefficient procedure especially for a larger tree with alot of internal nodes. We essentially tell <code>rpart</code> to see if a split is improving the fit by an amount (specified by the <strong>CP or cost complexity</strong> criterion). If it doesn’t the algorithm will not pursue further splitting.</p>
+<p>One possible way to tackle this is to build the tree only as long as the decrease in the RSS or increase in IG due to each split exceeds some (high) threshold. This strategy will result in smaller trees, but is too “risky” since a seemingly worthless split early on in the tree might be followed by a very good split-that later on.</p>
+<p>Another way is to grow the tree to full depth and the <em>prune</em> it back to create a <em>subtree</em> in a way that gives the lowest possible test error rate. Later on we will see how to calculate the CV error for a tree. If we record the CV error for all possible subtrees we can select the subtree with lowest error. However this might be a inefficient procedure especially for a larger tree with alot of internal nodes. With the <code>prune</code> function in R we essentially tell <code>rpart</code> to see if a split is improving the fit by an amount (specified by the <strong>CP or cost complexity</strong> criterion). If it doesn’t the algorithm will not pursue further splitting.</p>
 </div>
 </div>
 <div id="prediction" class="section level1">
@@ -202,7 +202,7 @@ train &lt;- list$train; test &lt;- list$test</code></pre>
 rattle::fancyRpartPlot(rtree.fit)</code></pre>
 <p><img src="/post/2018-01-02-the-wise-old-tree_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
 <p>This is R’s representation of the decision tree. We can see that not all variables were used to grow the tree. The most important variable was total points. Let’s take the first node. 92% of observations are not Legendary with the total points less than 580. The label (True/False) above these proportions indicates the way the nodes are voting while the numbers below indicates the composition of the node.</p>
-<p>Let’s move on to the next node. If the total is less than 580, you move <em>left</em> and you reach the second node. Here 86% (of the total) of Pokemon are not Legendary. The tree stops because this node correctly votes all these Pokemon as non legendary (indicated by the 1 against 0). If we move to node 3 however, where the total is greater than 580, out of the 14% (do the math 86+14 = 100% of the data, which shows the binary partition) of the passengers, about 42% was correctly voted as the 58% was incorrectly voted as non legendary. Therefore, this node splits again. This process continues until all nodes (see the nodes below) are as pure as possible. Theoretically one could keep on going until all nodes are 100% pure.</p>
+<p>Let’s move on to the next node. If the total is less than 580, you move <em>left</em> and you reach the second node. Here 86% (of the total) of Pokemon are not Legendary. The tree stops because this node correctly votes all these Pokemon as non legendary (indicated by the 1 against 0). If we move to node 3 however, where the total is greater than 580, out of the 14% (do the math 86+14 = 100% of the data, which shows the binary partition) of the passengers, about 42% was correctly voted and the 58% was incorrectly voted as non legendary. Therefore, this node splits again. This process continues until all nodes (see the nodes below) are as pure as possible. Theoretically one could keep on going until all nodes are 100% pure.</p>
 </div>
 <div id="controlled-split" class="section level2">
 <h2>Controlled split</h2>
@@ -282,7 +282,7 @@ ggplot(roc_df,aes(x = FPR, y = TPR))+
 <p><img src="/post/2018-01-02-the-wise-old-tree_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
 <div id="pruning" class="section level3">
 <h3>Pruning</h3>
-<p>Finally one can also prune using the <code>prune</code> function.</p>
+<p>Finally one can prune a tree using the <code>prune</code> function.</p>
 <pre class="r"><code>my3cols &lt;- c(&quot;#E7B800&quot;, &quot;#2E9FDF&quot;, &quot;#FC4E07&quot;)
 my2cols &lt;- c(&quot;#2E9FDF&quot;, &quot;#FC4E07&quot;)
 
@@ -298,7 +298,7 @@ cp %&gt;%
   scale_color_manual(values = my3cols)+
   theme_minimal()</code></pre>
 <p><img src="/post/2018-01-02-the-wise-old-tree_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
-<p>The results show that 3 splits gives us the minimum xerror (related to the <a href="https://en.wikipedia.org/wiki/PRESS_statistic">PRESS</a> error) at a CP value of 0.06 approximately. We can prune the tree using this CP value. If we choose to use relative error instead, we would choose 6 splits and a CP of 0.01 instead. Different error measures gives us different CP values and different number of splits.We will create the pruned tree by supplying the minimum CP value based on xerror and get the prediction accuracy.</p>
+<p>The results show that 3 splits gives us the minimum xerror (related to the <a href="https://en.wikipedia.org/wiki/PRESS_statistic">PRESS</a> error) at a CP value of 0.06 approximately. We can prune the tree using this CP value. If we choose to use relative error instead, we would choose 6 splits and a CP of 0.01 instead. Different error measures gives us different CP values and different number of splits. We will create the pruned tree by supplying the minimum CP value based on xerror and get the prediction accuracy.</p>
 <pre class="r"><code>prune.tree &lt;- prune(rtree.fit, cp = best.cp)
 
 rattle::fancyRpartPlot(prune.tree)</code></pre>
@@ -319,7 +319,7 @@ predict.df.prune &lt;- data.frame(
 <pre><code>## [1] &quot;Accuracy: 0.94&quot;</code></pre>
 <p>In this case, prunning doesn’t really improve the accuracy in prediction.</p>
 <p><strong>Using Cross-Validation</strong></p>
-<p>Resampling methods such as Cross-Validation can also be used on the training data to pick out a CP value to prune and fit the best tree. The most convenient way to perform cross-validation is to use the <code>train</code> function from the <code>caret</code> package. The call to the object output the best CP (which in this case is picked according to the accuracy of 1-missclassification rate) value that can then be used to prune the tree.</p>
+<p>Resampling methods such as Cross-Validation can also be used on the training data to pick out a CP value to prune and fit the best tree. The most convenient way to perform cross-validation is to use the <code>train</code> function from the <code>caret</code> package. The call to the object outputs the best CP (which in this case is picked according to the accuracy of 1-missclassification rate) value that can then be used to prune the tree.</p>
 <pre class="r"><code>tc &lt;- caret::trainControl(&quot;cv&quot;,50,classProbs = T)
 
 train.rpart &lt;- caret::train(Legendary ~., 

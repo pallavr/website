@@ -335,7 +335,7 @@ text-align: justify}
 </style>
 <p>Jack and Rose from <em>Titanic</em> epitomized the concept of romance in the late 1990s. If you watched this movie you would realize how Jack and Rose are <strong>dependent</strong> on one another for surviving the sinking ship. Sometimes these dependencies can be represented by a straight line. This is what regression represents. The “best fit” regression line quantifies the relationship between two or more variables.</p>
 <p>Multiple regression is one of the oldest ML techniques. The simple yet formidable OLS estimation algorithm dates way back to the <span class="math inline">\(18^{th}\)</span> century. The algorithm works by minimizing the sum of squares between the best fit line and the response variable. Today, the OLS regression is not the most accurate algorithm and therefore has been replaced by more sophisticated ML techniques. Yet, the weakness of this technique is also its strength. No other algorithm is as tractable as regression. Therefore, regression is almost always a starting point in any data analysis task.</p>
-<p>In this tutorial, I will implement this technique in R on the famous <strong>Titanic</strong> data set (link on this page) and discuss how to interpret the outputs. Finally I will use a data set from Kaggle to demonstrate the steps one should take when implementing this technique for prediction purposes.</p>
+<p>In this tutorial, I will implement this technique in R on a data set (link on this page) and discuss how to interpret the outputs. Finally I will use the famous <strong>Titanic</strong> data set from Kaggle to demonstrate the steps one should take when implementing this technique for prediction purposes.</p>
 <div id="get-the-packages" class="section level1">
 <h1>Get the packages</h1>
 <pre class="r"><code>library(readr) # read in a csv/txt file
@@ -595,7 +595,7 @@ ggplot(tmp, aes(x = fitted, y = residual))+
 resid &lt;- mutl.lm$residuals
 qqplot.data(resid)</code></pre>
 <p><img src="/post/2018-01-07-jack-and-rose_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
-<p>All the residuals are on the straight line. This indicates normality is met.</p>
+<p>Most of the residuals are on the straight line. This indicates normality is met.</p>
 <p>A test statistic that confirms normality is the Durbin Watson Test Stat.</p>
 <pre class="r"><code>lmtest::dwtest(mutl.lm)</code></pre>
 <pre><code>## 
@@ -1154,7 +1154,7 @@ predict.df %&gt;%
    scale_color_manual(values = my3cols)+
    theme_minimal()</code></pre>
 <p><img src="/post/2018-01-07-jack-and-rose_files/figure-html/unnamed-chunk-32-1.png" width="672" /></p>
-<p>Females predicted survival rates are higher than men. Within each sex, older men probably died more when Titanic sank. But in general as age increased the predicted survival probability fell. Finally class 1 have higher survival rates. They were probably first to be rescued followed by 2 and then 3.</p>
+<p>Female predicted survival rates are higher than male. Within each sex, the elderly probably died more when Titanic sank. But in general as age increased the predicted survival probability fell. Finally class 1 have higher survival rates. They were probably first to be rescued followed by 2 and then 3.</p>
 </div>
 <div id="using-a-naive-classification-boundary" class="section level2">
 <h2>Using a naive classification boundary</h2>
@@ -1170,7 +1170,7 @@ predict.df %&gt;%
 </div>
 <div id="roc-charts" class="section level2">
 <h2>ROC charts</h2>
-<p>A ROC chart is useful when finding the balance between true positive and true negative is manually impossible. The ROC plots all the values for true positive and true negative for different cutoff points. A weak classifier will have the ROC line passing diagonally across the plot whereas a strong classifier will have a prominent ‘elbow’ with at least one point where the TPR is sufficiently high and the FPR will be sufficiently low.</p>
+<p>A ROC chart is useful when finding the balance between true positive and true negative is manually tricky. The ROC plots all the values for true positive and true negative for different cutoff points. A weak classifier will have the ROC line passing diagonally across the plot whereas a strong classifier will have a prominent ‘elbow’ with at least one point where the TPR is sufficiently high and the FPR will be sufficiently low.</p>
 <p>The following function (adapted from this <a href="https://www.r-bloggers.com/simple-roc-plots-with-ggplot2-part-1/">link</a>) calculates the AUC (Area under curve) as well as the ROC data which can then be used inside the ggplot2 framework.</p>
 <pre class="r"><code>rocdata &lt;- function(grp, pred){
   # Produces x and y co-ordinates for ROC curve plot

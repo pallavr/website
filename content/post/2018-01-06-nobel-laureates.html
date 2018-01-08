@@ -21,7 +21,7 @@ text-align: justify}
 </style>
 <div id="motivation" class="section level1">
 <h1>Motivation</h1>
-<p>I was always curious to know if there was any relationship between the Intelligent Quotient (IQ) levels and the number of number laureates a country has produced. After I found the <a href="https://www.kaggle.com/nobelfoundation/nobel-laureates">Nobel Prize</a> data set on Kaggle, I was eager to check how the numbers matched up against the IQ levels of a country. I found some average IQ data (from 1990s to 2010) for several country from this <a href="https://www.worlddata.info/iq-by-country.php">website</a> and I was able to scrap it out to match it up with the nobel prize data. The results were quite surprising (especially for me and I will explain why). I decided to extend the plot to include more features. Surely the number of nobel laureates a country produces has to depend on how advanced the country is. A few months ago when I was working to deliver a lecture on <code>ggplot2</code> at my school I had stumbled upon a <strong>Human Development Index</strong> data set from this website. The HDI is a good indicator of how advanced the country is. When I added this aesthetic to the plot the results finally made more sense. More after the plot below.</p>
+<p>I was always curious to know if there is any relationship between the Intelligent Quotient (IQ) levels and the number of nobel laureates a country has produced. After I found the <a href="https://www.kaggle.com/nobelfoundation/nobel-laureates">Nobel Prize</a> data set on Kaggle, I was eager to check how the numbers matched up against the IQ levels of a country. I found some average IQ data (from 1990s to 2010) for several country from this <a href="https://www.worlddata.info/iq-by-country.php">website</a> and I was able to scrap it out to match it up with the nobel prize data. The results were quite surprising (especially for me and I will explain why). I decided to extend the plot to include more features. Surely the number of nobel laureates a country produces has to depend on how advanced the country is. A few months ago when I was working to deliver a lecture on <code>ggplot2</code> at my school I had stumbled upon a <strong>Human Development Index</strong> data set from this website. HDI is a good indicator of how advanced the country is. When I added this aesthetic to the plot the results finally made more sense. More after the plot below.</p>
 </div>
 <div id="the-libraries" class="section level1">
 <h1>The libraries</h1>
@@ -92,7 +92,7 @@ knitr::kable(head(iq,5))</code></pre>
 </div>
 <div id="nobel-prize-data" class="section level2">
 <h2>Nobel Prize Data</h2>
-<p>The Nobel Prize Data has several variables. I was interested only in the <code>bornCountry</code> variable. I made the assumption that for a nobel prize winner who was born in a country, the credits of the prize went to that country even if he/she had moved out. Also if the name of the country changed over time (some cities belong to different countries now), I preserved the older country since the person was originally born in that country.</p>
+<p>The Nobel Prize Data has several variables. I was interested only in the <code>bornCountry</code> variable. I made the assumption that for a nobel prize winner who was born in a country, the credits of the prize went to that country even if he/she had moved out later on in life. Also if the name of the country changed over time (some cities belong to different countries now), I preserved the older membership since the person was originally born in that country.</p>
 <pre class="r"><code>nobel &lt;- read_csv(&quot;C:/Users/routh/Desktop/Study Materials/My website/Visuals/Nobel Prize/nobel_prize_by_winner.csv&quot;)
 glimpse(nobel)</code></pre>
 <pre><code>## Observations: 972
@@ -174,7 +174,7 @@ iq.country$Country &lt;- gsub(&quot;United States&quot;, &quot;USA&quot;, iq.cou
 </div>
 <div id="visualization" class="section level1">
 <h1>Visualization</h1>
-<p>Finally we’re ready to merge the frames. A few things to note before you move on to the plots. I rescaled the x and y variable on to a logarithmic scale to make the points closer and easier to interpret.</p>
+<p>Finally we’re ready to merge the frames. A few things to note before you move on to the plots is that I rescaled the x and y variable on to a logarithmic scale to make the points closer and easier to interpret.</p>
 <pre class="r"><code>combine &lt;- list(nobel.prize,iq.country,HDI)%&gt;%
                       purrr::reduce(left_join,&quot;Country&quot;) %&gt;%
                       na.omit() %&gt;%
@@ -214,7 +214,7 @@ ggplot(combine, aes(x = log.count, y = log.iq, size = exp_per_capita, fill = ran
 <ul>
 <li><p>I had initially thought India would be ahead in terms of IQ but the lower position is justified by the low HDI level.</p></li>
 <li><p>Turns out there is a relationship between the number of nobel prizes and the IQ level.</p></li>
-<li><p>Some countries however don’t exhibit the relationship for instance Luxembourg and New Zealand.</p></li>
-<li><p>There is a strong relationship however between HDI and IQ levels. We can see 3 clear strata. This is also true for expenditure per capita. Countries higher up in the IQ levels have higher expenditures for expenditure.</p></li>
+<li><p>Some countries however don’t exhibit this relationship for instance Luxembourg and New Zealand.</p></li>
+<li><p>There is a strong relationship however between HDI and IQ levels. We can see 3 clear stratas. This is also true for expenditure per capita. Countries higher up in the IQ levels have higher expenditures for expenditure.</p></li>
 </ul>
 </div>
