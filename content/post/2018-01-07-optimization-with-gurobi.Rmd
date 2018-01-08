@@ -3,6 +3,7 @@ title: Optimization with Gurobi
 author: ''
 date: '2018-01-07'
 slug: optimization-with-gurobi
+summary: "Learn how to code an optimization model in Python using the Gurobi Solver engine"
 categories:
   - prescriptive analytics
 tags:

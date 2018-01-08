@@ -3,6 +3,7 @@ title: What's In A Basket
 author: ''
 date: '2018-01-07'
 slug: what-s-in-a-basket
+summary: "Learn how major retail firms already know what you will buy next"
 categories:
   - predictive analytics
 tags:

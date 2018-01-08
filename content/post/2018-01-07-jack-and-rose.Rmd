@@ -3,6 +3,7 @@ title: Jack and Rose
 author: ''
 date: '2018-01-07'
 slug: jack-and-rose
+summary: "Learn how to use Logistic Regression to predict the survival of passengers aboard the Titanic"
 categories:
   - predictive analytics
 tags:

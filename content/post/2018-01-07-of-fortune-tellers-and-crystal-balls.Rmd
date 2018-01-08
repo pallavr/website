@@ -3,6 +3,7 @@ title: Of Fortune Tellers and Crystal Balls
 author: ''
 date: '2018-01-07'
 slug: of-fortune-tellers-and-crystal-balls
+summary: "Learn everything you need to know to perform ARIMA modeling in R to forecast weather!"
 categories:
   - predictive analytics
 tags:

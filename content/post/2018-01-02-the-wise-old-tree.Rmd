@@ -3,6 +3,7 @@ title: The Wise Old Tree
 author: ''
 date: '2018-01-02'
 slug: the-wise-old-tree
+summary: "Learn how to use Decision Trees to predict the if a Pokemon is Legendary or not"
 categories:
   - predictive analytics
 tags:
