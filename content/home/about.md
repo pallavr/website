@@ -29,7 +29,7 @@ weight = 5
 [[education.courses]]
   course = "BS. Chemistry"
   institution = "St. Xavier's College, Kolkata , India"
-  year = 2010
+  year = 2013
  
 +++
 

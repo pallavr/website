@@ -11,6 +11,480 @@
     <atom:link href="/" rel="self" type="application/rss+xml" />
     
     <item>
+      <title>Death Note (Part I)</title>
+      <link>/post/death-note-part-i/</link>
+      <pubDate>Sun, 14 Jan 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/post/death-note-part-i/</guid>
+      <description>&lt;style&gt;
+body {
+text-align: justify}
+&lt;/style&gt;
+&lt;p&gt;&lt;em&gt;Death Note&lt;/em&gt; is a Japanese manga series depicting an evil book that would kill people if their names were written on it. Now, there are no such books in the real world, but a field of study called &lt;strong&gt;Survival Analysis&lt;/strong&gt; allows statisticians to measure and predict the risk(s) individuals will face. It also allows statisticians to measure the duration of life until an event(s) occurs. The earliest forms of survival analysis originated in the 17th century in the form of &lt;strong&gt;life tables&lt;/strong&gt;. It was popularized by the work of the infamous &lt;em&gt;D.R.Cox&lt;/em&gt; and his &lt;strong&gt;semi-parametric&lt;/strong&gt; models.&lt;/p&gt;
+&lt;div id=&#34;the-libraries&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;The libraries&lt;/h1&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(invGauss) # has the data
+library(dplyr) # data manipulation
+library(tidyr) # data manipulation
+library(ggplot2) # data viz
+library(ggfortify)
+library(survival) # survival analysis&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;the-data&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;The Data&lt;/h1&gt;
+&lt;p&gt;It’s very difficult to obtain time-to-event data on the internet. One interesting data set I found is shipped with the &lt;code&gt;invGauss&lt;/code&gt; package. The data set is about cancer in the oropharynx. This data set was given by Kalbfleisch and Prentice and has 192 observations or patients with carcinoma of the oropharynx carried out by the Radiation Therapy Oncology Group in the United States.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;CASE:&lt;/strong&gt; Case Number&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;INST:&lt;/strong&gt; Participating Institution&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;SEX:&lt;/strong&gt; 1=male, 2=female&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;TX:&lt;/strong&gt; Treatment: 1=standard, 2=test&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;GRADE:&lt;/strong&gt; 1=well differentiated, 2=moderately differentiated,3=poorly differentiated, 9=missing&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;AGE:&lt;/strong&gt; In years at time of diagnosis&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;COND:&lt;/strong&gt; Condition: 1=no disability, 2=restricted work, 3=requires assistance with self care, 4=bed confined, 9=missing&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;SITE:&lt;/strong&gt; 1=facial arch, 2=tonsillar fossa, 3=posterior pillar,4=pharyngeal tongue, 5=posterior wall&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;T_STAGE:&lt;/strong&gt; 1=primary tumor measuring 2 cm or less in largest diameter,2=primary tumor measuring 2 cm to 4 cm in largest diameter with minimal infiltration in depth, 3=primary tumor measuring more than 4 cm, 4=massive invasive tumor&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;N_STAGE:&lt;/strong&gt; 0=no clinical evidence of node metastases, 1=single positive node 3 cm or less in diameter, not fixed, 2=single positive node more than 3 cm in diameter, not fixed, 3=multiple positive nodes or fixed positive nodes&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ENTRY_DT:&lt;/strong&gt; Date of study entry: Day of year and year, dddyy&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;STATUS:&lt;/strong&gt; 0=censored, 1=dead&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;TIME:&lt;/strong&gt; Survival time in days from day of diagnosis&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;data(&amp;quot;d.oropha.rec&amp;quot;)
+data &amp;lt;- d.oropha.rec&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;elements-of-survival-analysis&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Elements of Survival analysis&lt;/h1&gt;
+&lt;div id=&#34;survival-time-and-event&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Survival Time and Event&lt;/h2&gt;
+&lt;p&gt;The two most important measures in survival studies include:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;The &lt;strong&gt;time to death&lt;/strong&gt; is a number (in days, week or years) that reflects the number of time intervals until which the person experiences the event. Let this be represented by $ t_i $ or &lt;em&gt;event time&lt;/em&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;The &lt;strong&gt;status&lt;/strong&gt; of the patient is usually a number that identifies whether or not the person has experienced the event. Typically, “0” is used to represent observations that are active (or censored) while “1” is used to represent patients who has experienced the event. Let this be represented by $ _i $&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;survivial_object &amp;lt;- with(data,Surv(time = time, event = status, type = c(&amp;quot;right&amp;quot;)))
+
+(survivial_object)[1:30]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##  [1] 1.7287671  0.7397260  0.8958904  0.6657534  2.5095890  4.9945205+
+##  [7] 1.7452055  0.6438356  0.6986301  0.5041096  2.9150685  1.1342466 
+## [13] 0.5917808  0.8876712  1.3150685  0.6712329  4.2876712+ 1.5342466 
+## [19] 1.0301370  2.4958904  0.7643836  0.3945205  2.9917808  0.2575342 
+## [25] 0.4849315  4.0328767+ 1.4410959  0.4739726  1.5753425  0.6082192&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;One can create a survival object in R using the &lt;code&gt;Surv&lt;/code&gt; function. A call to the object shows the observations coded as censored (with the &lt;code&gt;+&lt;/code&gt;) and non censored. The &lt;code&gt;time&lt;/code&gt; column in the data represents the time to death or censoring time.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;censoring&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Censoring&lt;/h2&gt;
+&lt;p&gt;For individuals who have not experienced the event, (called the &lt;strong&gt;censored observations&lt;/strong&gt;), we only know the &lt;em&gt;censoring time&lt;/em&gt; (represented by $ c_i $) or the time for which the particular observation was under study. Therefore, for such observations we do not know the actual event time. Now imagine any individual &lt;em&gt;i&lt;/em&gt; there is a pair of times $ (,)$ but depending on the status we choose either one of them. If the individual experiences the event and &lt;span class=&#34;math inline&#34;&gt;\(\delta_i=1\)&lt;/span&gt; we see &lt;span class=&#34;math inline&#34;&gt;\(t_i\)&lt;/span&gt; but if there is no event and the individual is censored, we see &lt;span class=&#34;math inline&#34;&gt;\(c_i\)&lt;/span&gt;. This information can be compactly represented by &lt;span class=&#34;math inline&#34;&gt;\((min(t_i,c_i),\delta_i)\)&lt;/span&gt;. The &lt;code&gt;status&lt;/code&gt; column in the data reflects the status of the individual until event time or censoring time.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;kaplan-meier-analysis&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Kaplan Meier Analysis&lt;/h1&gt;
+&lt;p&gt;Kaplan-Meier (KM) estimation is a non parametric method of estimating the survival at time &lt;em&gt;t&lt;/em&gt;. If you were to order the time in ascending order by the event times &lt;span class=&#34;math inline&#34;&gt;\(t_i\)&lt;/span&gt; and if &lt;span class=&#34;math inline&#34;&gt;\(\delta_i\)&lt;/span&gt; was the number of deaths and let &lt;span class=&#34;math inline&#34;&gt;\(n_i\)&lt;/span&gt; be the number alive just before &lt;span class=&#34;math inline&#34;&gt;\(t_i\)&lt;/span&gt;, then the KM or &lt;strong&gt;product limit estimate&lt;/strong&gt; of the survivor function is:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[S(t) = S(t-1)(1 - \frac{d_t}{n_t} )\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Let’s understand where this comes from. Let &lt;span class=&#34;math inline&#34;&gt;\(t_1,t_2,t_3...\)&lt;/span&gt; be the actual times of death of the &lt;em&gt;n&lt;/em&gt; individuals and let &lt;span class=&#34;math inline&#34;&gt;\(d_1,d_2,d_3....\)&lt;/span&gt; represent the number of deaths during those times and let &lt;span class=&#34;math inline&#34;&gt;\(n_1,n_2,...\)&lt;/span&gt; be the people remaining. Now, &lt;span class=&#34;math inline&#34;&gt;\(n_2 = n_1 - d_1\)&lt;/span&gt; and so on. So, intuitively the proportion surviving at time &lt;span class=&#34;math inline&#34;&gt;\(t=2\)&lt;/span&gt; depends on the proportion surviving at &lt;span class=&#34;math inline&#34;&gt;\(t=1\)&lt;/span&gt;. Now for any time interval say $ t [t_1,t_2) $ the survival is:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[  S(t) = P(T \geq t) = P(\text{survive in}[0,t_1))* P(\text{survive in}[t_1,t]|\text{survive in}[0,t_1))            \]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[  S(t) = 1 * \frac{n_1-d_1}{n_1}  \]&lt;/span&gt;. This bring us to:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[ S(t) = \prod_{i=1}^{n}(1-\frac{d_i}{n_i}) \]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;The Kaplan-Meier estimate is a step function which &lt;strong&gt;discontinuities or jumps&lt;/strong&gt; at the observed death times. If there is no censoring, the K-M estimate coincides with the empirical survival function. The KM estimator can also be nicely interpreted as a NPML estimator. The &lt;code&gt;survfit&lt;/code&gt; function in the &lt;code&gt;survival&lt;/code&gt; package is used to find out the KM estimates of survival. We can use the &lt;code&gt;summary&lt;/code&gt; call to the &lt;code&gt;km&lt;/code&gt; object to get the following:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;n:&lt;/strong&gt; the total number of observations.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;time:&lt;/strong&gt; the time points at which the &lt;span class=&#34;math inline&#34;&gt;\(S(t)\)&lt;/span&gt; is calculated.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;n.risk:&lt;/strong&gt; the number of observations at risk at time t&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;n.event:&lt;/strong&gt; the number of events that occurred at time t.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;n.censor:&lt;/strong&gt; the number of censored observations, without an event, at time t.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;lower,upper:&lt;/strong&gt; lower and upper confidence limits for &lt;span class=&#34;math inline&#34;&gt;\(S(t)\)&lt;/span&gt;, respectively.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;strata:&lt;/strong&gt; indicates stratification of survival curves. If strata is specified, there are multiple curves in the result. There’s a demonstration later on.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;km.fit &amp;lt;- survfit(survivial_object ~ 1, # for a single survival curve
+                  data = data)
+
+time &amp;lt;- km.fit$time
+summary(km.fit, times = time[1:20])&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Call: survfit(formula = survivial_object ~ 1, data = data)
+## 
+##    time n.risk n.event survival std.err lower 95% CI upper 95% CI
+##  0.0301    192       2    0.990 0.00733        0.975        1.000
+##  0.0411    190       1    0.984 0.00895        0.967        1.000
+##  0.1041    189       1    0.979 0.01031        0.959        1.000
+##  0.2027    188       1    0.974 0.01149        0.952        0.997
+##  0.2219    187       1    0.969 0.01256        0.944        0.994
+##  0.2438    186       1    0.964 0.01353        0.937        0.990
+##  0.2466    185       0    0.964 0.01353        0.937        0.990
+##  0.2575    184       1    0.958 0.01443        0.930        0.987
+##  0.2712    183       2    0.948 0.01606        0.917        0.980
+##  0.2877    181       1    0.943 0.01680        0.910        0.976
+##  0.2932    180       1    0.937 0.01751        0.904        0.972
+##  0.3068    179       3    0.922 0.01942        0.884        0.961
+##  0.3479    176       1    0.916 0.02001        0.878        0.956
+##  0.3507    175       1    0.911 0.02057        0.872        0.952
+##  0.3562    174       1    0.906 0.02110        0.866        0.948
+##  0.3671    173       1    0.901 0.02162        0.859        0.944
+##  0.3945    172       1    0.895 0.02212        0.853        0.940
+##  0.4027    171       2    0.885 0.02307        0.841        0.931
+##  0.4219    169       1    0.880 0.02352        0.835        0.927
+##  0.4356    168       1    0.875 0.02395        0.829        0.923&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here’s a neat plot of risk and survival estimated by the &lt;code&gt;survfit&lt;/code&gt; function.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;my3cols &amp;lt;- c(&amp;quot;#E7B800&amp;quot;, &amp;quot;#2E9FDF&amp;quot;, &amp;quot;#FC4E07&amp;quot;)
+my2cols &amp;lt;- c(&amp;quot;#2E9FDF&amp;quot;, &amp;quot;#FC4E07&amp;quot;)
+
+km.df &amp;lt;- data.frame(
+  time = time,
+  survival = km.fit$surv,
+  dead = km.fit$n.event
+)
+
+km.df %&amp;gt;%
+  mutate(deaths = cumsum(dead)) %&amp;gt;%
+  select(time,survival,deaths) %&amp;gt;%
+  gather(key, value, -time) %&amp;gt;%
+  ggplot(aes(x = time, y = value))+
+  geom_point(col = my2cols[2])+
+  geom_line(col = my2cols[2])+
+  facet_wrap(~key, scales = &amp;quot;free&amp;quot;)+
+  labs(title = &amp;quot;Survival and Event vs Time&amp;quot;)+
+  theme_minimal()&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning: package &amp;#39;bindrcpp&amp;#39; was built under R version 3.4.2&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-01-14-death-note-part-i_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;km-by-groups&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;KM by groups&lt;/h2&gt;
+&lt;p&gt;As I mentioned before, we can also create these KM estimates by groups. In R the best way to summarise all the information is to use the &lt;code&gt;ggsurvplot&lt;/code&gt; function from the &lt;code&gt;survminer&lt;/code&gt; package.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;km.sex.fit &amp;lt;- survfit(survivial_object ~ sex,
+                      data = data)
+
+# Using ggsurv package
+
+survminer::ggsurvplot(
+   km.sex.fit,               # survfit object with calculated statistics.
+   data = data,
+   pval = TRUE,              # show p-value of log-rank test.
+   conf.int = TRUE,          # show confidence intervals for 
+                             # point estimaes of survival curves.
+   conf.int.style = &amp;quot;step&amp;quot;,  # customize style of confidence intervals
+   xlab = &amp;quot;Time in years&amp;quot;,    # customize X axis label.
+   ggtheme = theme_light(),  # customize plot and risk table with a theme.
+   risk.table = &amp;quot;abs_pct&amp;quot;,   # absolute number and percentage at risk.
+   risk.table.y.text.col = T,# colour risk table text annotations.
+   risk.table.y.text = FALSE,# show bars instead of names in text annotations
+   ncensor.plot = TRUE,      # plot the number of censored subjects at time t
+   surv.median.line = &amp;quot;hv&amp;quot;,  # add the median survival pointer.
+   legend.labs = c(&amp;quot;Male&amp;quot;, &amp;quot;Female&amp;quot;),     # change legend labels.
+   palette = my2cols         # custom color palettes.
+)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-01-14-death-note-part-i_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The Kaplan-Meier plot can be interpreted as follow:&lt;/p&gt;
+&lt;p&gt;The x axis represents time in years, and the vertical axis (y-axis) shows the proportion of people surviving. The lines represent survival curves of the two groups. &lt;strong&gt;A vertical drop in the curves indicates an event.&lt;/strong&gt; The vertical tick mark on the last plot means that a observation was censored at this time and the group it belongs to.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;At time zero, the survival probability is 1.0 (or 100% of the participants are alive).&lt;/li&gt;
+&lt;li&gt;At time 1.5 years, the probability of survival is approximately 0.50 (or 55%) for males. It is slightly higher for females.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;interpret-the-output&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Interpret the output&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;summary(km.sex.fit)$table&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##       records n.max n.start events   *rmean *se(rmean)   median   0.95LCL
+## sex=1     147   147     147    108 1.854084  0.1360870 1.263014 0.9616438
+## sex=2      45    45      45     31 2.096910  0.2490365 1.364384 0.9479452
+##        0.95UCL
+## sex=1 1.493151
+## sex=2       NA&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The median survival time for female is indeed higher. The &lt;code&gt;rmean&lt;/code&gt; stands for restricted mean survival time. The restricted mean is a measure of average survival from time 0 to a specified time point, and may be estimated as the area under the survival curve up to that point.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Complicated Groups&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;One can also use facet grids to compare survival curves across complex groups.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;km.sex.treat.fit &amp;lt;- survfit(survivial_object ~ sex + treatm,
+                      data = data)
+
+ggsurv &amp;lt;- survminer::ggsurvplot(km.sex.treat.fit, data = data,fun = &amp;quot;cumhaz&amp;quot;, conf.int = TRUE)
+   
+ggsurv$plot +
+  theme_minimal() + 
+  theme (legend.position = &amp;quot;right&amp;quot;)+
+  facet_grid(sex ~ treatm)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-01-14-death-note-part-i_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;hazard&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Hazard&lt;/h2&gt;
+&lt;p&gt;In survival literature, the opposite of survival is hazard. Hazard refers to the instantaneous rate of death of the subject at time &lt;span class=&#34;math inline&#34;&gt;\(t\)&lt;/span&gt; conditional on survival to that time. Mathematically,&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[  \lambda(t) = \lim_{\Delta t \to 0} \frac{ \text{Pr}\{(t \leq T \leq t+\Delta t)|T \geq t\}   }{\Delta t} = \frac{f(t)}{S(t)}         \]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;The numerator in the equation represents the conditional probability that an event will occur within the time interval of &lt;span class=&#34;math inline&#34;&gt;\([t,t+\Delta t)\)&lt;/span&gt; given that it has not occurred before (that is $ T t $). This conditional probability may be represented by a joint probability (Using the axioms of probability: P(AB) = P(A)P(B|A)). The former is represented by $ f(t) $ in the above equation while the latter is $ S(t) $ by definition. Dividing this by the width of the interval gives us a rate (of death) per unit time. Therefore, Hazard and survival have a one to one relationship (and it’s definitely not &lt;strong&gt;1-Survival&lt;/strong&gt;).&lt;/p&gt;
+&lt;p&gt;One can calculate hazard non parametrically using the &lt;strong&gt;Nelson Aalen Estimator&lt;/strong&gt;. Mathematically the NE estimator is:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[  \hat{H(t)} = \sum_{t_i \leq T}\frac{d_i}{n_i}      \]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;with $ d_{i} $ the number of events at $ t_{i} $ and $ n_{i} $ the total individuals at risk at $ t_{i} $. You can also visualize the hazard using the &lt;code&gt;ggsurvplot&lt;/code&gt; function by specifying the value of &lt;code&gt;fun&lt;/code&gt; as &lt;code&gt;cumhaz&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;survminer::ggsurvplot(
+   km.sex.fit,               # survfit object with calculated statistics.
+   data = data,
+   fun = &amp;quot;cumhaz&amp;quot;,
+   pval = TRUE,              # show p-value of log-rank test.
+   conf.int = TRUE,          # show confidence intervals for 
+                             # point estimaes of survival curves.
+   conf.int.style = &amp;quot;step&amp;quot;,  # customize style of confidence intervals
+   xlab = &amp;quot;Time in years&amp;quot;,    # customize X axis label.
+   ggtheme = theme_light(),  # customize plot and risk table with a theme.
+   risk.table = &amp;quot;abs_pct&amp;quot;,   # absolute number and percentage at risk.
+   risk.table.y.text.col = T,# colour risk table text annotations.
+   risk.table.y.text = FALSE,# show bars instead of names in text annotations
+   ncensor.plot = TRUE,      # plot the number of censored subjects at time t
+   legend.labs = c(&amp;quot;Male&amp;quot;, &amp;quot;Female&amp;quot;),     # change legend labels.
+   palette = my2cols         # custom color palettes.
+)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-01-14-death-note-part-i_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;comparing-survival-curves&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Comparing Survival Curves&lt;/h2&gt;
+&lt;p&gt;The &lt;strong&gt;Log Rank Test&lt;/strong&gt; is the most popular hypothesis test to distinguish two or more survival curves. Basically the LR test compares the Hazard of the two survival curves at every point in time. If you’re interested in the formulation and the derivation of the test statistic, the &lt;a href=&#34;https://en.wikipedia.org/wiki/Log-rank_test&#34;&gt;wikipedia&lt;/a&gt; page has a nice explanation.&lt;/p&gt;
+&lt;p&gt;The function &lt;code&gt;survdiff()&lt;/code&gt; [in survival package] can be used to compute log-rank test comparing two or more survival curves.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;survdiff(survivial_object ~ sex,data = data)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Call:
+## survdiff(formula = survivial_object ~ sex, data = data)
+## 
+##         N Observed Expected (O-E)^2/E (O-E)^2/V
+## sex=1 147      108    103.8     0.174     0.688
+## sex=2  45       31     35.2     0.511     0.688
+## 
+##  Chisq= 0.7  on 1 degrees of freedom, p= 0.407&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The function returns a list of components, including:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;n:&lt;/strong&gt; the number of subjects in each group.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;obs:&lt;/strong&gt; the weighted observed number of events in each group.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;exp:&lt;/strong&gt; the weighted expected number of events in each group.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;chisq:&lt;/strong&gt; the chi square statistic for a test of equality.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;strata:&lt;/strong&gt; optionally, the number of subjects contained in each stratum.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The log rank test for difference in survival gives a p-value of p = 0.4, indicating that the sex groups do not differ significantly in survival.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;cox-proportional-survival-analysis&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Cox Proportional Survival Analysis&lt;/h1&gt;
+&lt;p&gt;The proportional hazards model (introduced by Cox, 1972) is a family of survival models that allow for covariates to be linked to the hazard directly. The first key to this relationship is that its &lt;strong&gt;multiplicative&lt;/strong&gt;. This means that we can only allow the logarithm of the hazard to be linked to the covariates by:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[  \text{log} \lambda_i(t) = \alpha + \beta_1x_{i1} + ...                   \]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;or equivalently, $ _i(t) = (+ &lt;em&gt;1x&lt;/em&gt;{i1} + …) $.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; The &lt;span class=&#34;math inline&#34;&gt;\(\alpha\)&lt;/span&gt; in this multiplicative version represents some sort a &lt;em&gt;baseline&lt;/em&gt;. If all &lt;span class=&#34;math inline&#34;&gt;\(x_i\)&lt;/span&gt;’s are zero, then the logarithm of hazard equals &lt;span class=&#34;math inline&#34;&gt;\(e^\alpha\)&lt;/span&gt;. The good part of this family of models is it allows for this baseline to remain unspecified (or we don’t necessarily need to compute the coefficient for this intercept-like term).This makes the model &lt;em&gt;semi-parametric&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;The second key aspect of the Cox model is the &lt;strong&gt;proportionality&lt;/strong&gt;. This means that &lt;em&gt;hazard ratios&lt;/em&gt; of say two observations are &lt;em&gt;independent of time&lt;/em&gt;. The &lt;span class=&#34;math inline&#34;&gt;\(\beta\)&lt;/span&gt;s are estimated using proportionalily. This means that the coefficients are interpreted differently (see below). A value &lt;span class=&#34;math inline&#34;&gt;\(\beta\)&lt;/span&gt; greater than zero, or equivalently a hazard ratio greater than one, indicates that as the value of the ith covariate increases, the event hazard increases and thus the length of survival decreases. Put another way, a hazard ratio above 1 indicates a covariate that is positively associated with the event probability, and thus negatively associated with the length of survival.&lt;/p&gt;
+&lt;p&gt;In summary,&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;HR = 1: No effect&lt;/li&gt;
+&lt;li&gt;HR &amp;lt; 1: Reduction in the hazard&lt;/li&gt;
+&lt;li&gt;HR &amp;gt; 1: Increase in Hazard&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div id=&#34;fitting-the-model&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Fitting the model&lt;/h2&gt;
+&lt;p&gt;The &lt;code&gt;coxph&lt;/code&gt; function is used to estimate the coefficients of the parameters. The &lt;code&gt;summary&lt;/code&gt; call then shows all the estimates along with the following output:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cox.fit &amp;lt;- coxph(formula = Surv(time,status)~.,
+                 data = data[,-1],
+                 ties = &amp;quot;efron&amp;quot;)
+
+summary(cox.fit)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Call:
+## coxph(formula = Surv(time, status) ~ ., data = data[, -1], ties = &amp;quot;efron&amp;quot;)
+## 
+##   n= 192, number of events= 139 
+## 
+##              coef  exp(coef)   se(coef)      z Pr(&amp;gt;|z|)    
+## inst   -0.0407864  0.9600342  0.0555278 -0.735   0.4626    
+## sex    -0.3031563  0.7384836  0.2077356 -1.459   0.1445    
+## treatm  0.1153139  1.1222257  0.1763759  0.654   0.5132    
+## grade  -0.1697348  0.8438886  0.1348991 -1.258   0.2083    
+## age    -0.0009324  0.9990680  0.0086164 -0.108   0.9138    
+## cond    0.9144639  2.4954371  0.1523929  6.001 1.96e-09 ***
+## site   -0.0506363  0.9506244  0.0740743 -0.684   0.4942    
+## tstage  0.2650927  1.3035517  0.1198984  2.211   0.0270 *  
+## nstage  0.1546905  1.1672966  0.0774096  1.998   0.0457 *  
+## ---
+## Signif. codes:  0 &amp;#39;***&amp;#39; 0.001 &amp;#39;**&amp;#39; 0.01 &amp;#39;*&amp;#39; 0.05 &amp;#39;.&amp;#39; 0.1 &amp;#39; &amp;#39; 1
+## 
+##        exp(coef) exp(-coef) lower .95 upper .95
+## inst      0.9600     1.0416    0.8610     1.070
+## sex       0.7385     1.3541    0.4915     1.110
+## treatm    1.1222     0.8911    0.7942     1.586
+## grade     0.8439     1.1850    0.6478     1.099
+## age       0.9991     1.0009    0.9823     1.016
+## cond      2.4954     0.4007    1.8511     3.364
+## site      0.9506     1.0519    0.8222     1.099
+## tstage    1.3036     0.7671    1.0306     1.649
+## nstage    1.1673     0.8567    1.0030     1.359
+## 
+## Concordance= 0.691  (se = 0.027 )
+## Rsquare= 0.208   (max possible= 0.999 )
+## Likelihood ratio test= 44.83  on 9 df,   p=9.94e-07
+## Wald test            = 52.47  on 9 df,   p=3.69e-08
+## Score (logrank) test = 56.79  on 9 df,   p=5.556e-09&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The Cox regression results can be interpreted as follow:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Statistical significance:&lt;/strong&gt; The is the column under “z” and it corresponds to the ratio of each regression coefficient to its standard error (z = coef/se(coef)). This signifies, whether the coefficient of a given variable is statistically significantly different from 0.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;The regression coefficients signs:&lt;/strong&gt; A positive sign means that the hazard is higher, and this suggests that with the increase of the variable the hazard increases. For categorical variables the Cox model gives the hazard ratio (HR) for the one group relative to the other group. The beta coefficient for sex = -0.3 indicates that females have &lt;em&gt;lower&lt;/em&gt; risk of death (lower survival rates) than males.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Hazard ratios:&lt;/strong&gt; The exponentiated coefficients in the second column of the first panel (and in the first column of the second panel) of the output are interpretable as multiplicative effects on the hazard. Thus, for example, holding the other covariates constant, an additional year of age reduces the yearly hazard of rearrest by 73 percent. a factor of&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Confidence intervals:&lt;/strong&gt; of the hazard ratios. The summary output also gives upper and lower 95% confidence intervals for the hazard ratio (exp(coef))&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Global statistical significance of the model:&lt;/strong&gt; The likelihood-ratio, Wald, and score chi-square statistics at the bottom of the output are asymptotically (for large enough N, they will give similar results. For small N, they may differ somewhat) equivalent tests of the omnibus null hypothesis that all of the ??’s are zero. In this instance, the test statistics are in close agreement, and the hypothesis is soundly rejected.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;survival-curves&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Survival curves&lt;/h2&gt;
+&lt;p&gt;One can extract the survival probabilities from the cox object in R and simultaneously plot it using the &lt;code&gt;ggsurvplot&lt;/code&gt; function.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;survminer::ggsurvplot(survfit(cox.fit), color = &amp;quot;#2E9FDF&amp;quot;,ggtheme = theme_minimal())&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-01-14-death-note-part-i_files/figure-html/unnamed-chunk-12-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;assumption-checking&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Assumption Checking&lt;/h2&gt;
+&lt;p&gt;In order to check these model assumptions, Residuals method are used. The common residuals for - the Cox model include:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Schoenfeld residuals&lt;/strong&gt; to check the proportional hazards assumption&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Martingale residual&lt;/strong&gt; to assess nonlinearity&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Deviance residuals&lt;/strong&gt; (symmetric transformation of the Martingale residuals), to examine influential observations&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Proportionality:&lt;/strong&gt; The proportional hazards (PH) assumption can be checked using statistical tests and graphical diagnostics based on the scaled Schoenfeld residuals. In principle, the Schoenfeld residuals are independent of time. A plot that shows a non-random pattern against time is evidence of violation of the PH assumption. The function &lt;code&gt;cox.zph&lt;/code&gt; provides a convenient solution to test the proportional hazards assumption for each covariate included in a Cox regression model fit. For each covariate, the function &lt;code&gt;cox.zph&lt;/code&gt; correlates the corresponding set of scaled Schoenfeld residuals with time, to test for independence between residuals and time. Additionally, it performs a global test for the model as a whole. The proportional hazard assumption is supported by a non-significant relationship between residuals and time, and refuted by a significant relationship.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cox.fit &amp;lt;- coxph(formula = Surv(time,status)~ sex + treatm,
+                 data = data[,-1],
+                 ties = &amp;quot;efron&amp;quot;)
+
+cox.zph(cox.fit)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##            rho  chisq     p
+## sex    -0.0227 0.0734 0.786
+## treatm -0.0961 1.2965 0.255
+## GLOBAL      NA 1.3270 0.515&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;From the output above, the test is not statistically significant for each of the covariates, and the global test is also not statistically significant. Therefore, we can assume the proportional hazards. It’s possible to do a graphical diagnostic using the function &lt;code&gt;ggcoxzph&lt;/code&gt;, which produces, for each covariate, graphs of the scaled Schoenfeld residuals against the transformed time.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;survminer::ggcoxzph(cox.zph(cox.fit))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-01-14-death-note-part-i_files/figure-html/unnamed-chunk-14-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;In the figure above, the solid line is a smoothing spline fit to the plot, with the dashed lines representing a +/- 2-standard-error band around the fit. Note that, systematic departures from a horizontal line are indicative of non-proportional hazards, since proportional hazards assumes that estimates do not vary much over time. From the graphical inspection, there is no pattern with time. The assumption of proportional hazards appears to be supported for the covariates sex (which is, recall, a two-level factor, accounting for the two bands in the graph), wt.loss and age.&lt;/p&gt;
+&lt;p&gt;A violations of proportional hazards assumption can be resolved by: - Adding covariate*time interaction - Stratification - Stratification is useful for “nuisance” con founders, where you do not care to estimate the effect. You cannot examine the effects of the stratification variable (John Fox &amp;amp; Sanford Weisberg).&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Influential Observations:&lt;/strong&gt; To test influential observations or outliers, we can visualize either the deviance residuals or the dfbeta values. The function &lt;code&gt;ggcoxdiagnostics&lt;/code&gt; provides a convenient solution for checking influential observations. The simplified format is as follows:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;survminer::ggcoxdiagnostics(cox.fit, type = &amp;quot;martingale&amp;quot; ,linear.predictions = F, ggtheme = ggplot2::theme_minimal())&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-01-14-death-note-part-i_files/figure-html/unnamed-chunk-15-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Specifying the argument type = “dfbeta”, plots the estimated changes in the regression coefficients upon deleting each observation in turn; likewise, type=“dfbetas” produces the estimated changes in the coefficients divided by their standard errors.&lt;/p&gt;
+&lt;p&gt;For example:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;survminer::ggcoxdiagnostics(cox.fit, type = &amp;quot;dfbeta&amp;quot; ,linear.predictions = F, ggtheme = ggplot2::theme_minimal())&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-01-14-death-note-part-i_files/figure-html/unnamed-chunk-16-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The above index plots show that comparing the magnitudes of the largest dfbeta values to the regression coefficients suggests that none of the observations is terribly influential individually&lt;/p&gt;
+&lt;p&gt;It’s also possible to check outliers by visualizing the deviance residuals. The deviance residual is a normalized transform of the martingale residual. These residuals should be roughly symmetrically distributed about zero with a standard deviation of 1. Positive values correspond to individuals that “died too soon” compared to expected survival times. Negative values correspond to individual that “lived too long”. Very large or small values are outliers, which are poorly predicted by the model. Example of deviance residuals:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;survminer::ggcoxdiagnostics(cox.fit, type = &amp;quot;deviance&amp;quot; ,linear.predictions = F, ggtheme = ggplot2::theme_minimal())&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-01-14-death-note-part-i_files/figure-html/unnamed-chunk-17-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Non-linearity:&lt;/strong&gt;Often, we assume that continuous covariates have a linear form. However, this assumption should be checked. Plotting the Martingale residuals against continuous covariates is a common approach used to detect nonlinearity or, in other words, to assess the functional form of a covariate. For a given continuous covariate, patterns in the plot may suggest that the variable is not properly fit. Nonlinearity is not an issue for categorical variables, so we only examine plots of martingale residuals and partial residuals against a continuous variable.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Martingale residuals may present any value in the range (-INF, +1) and a value of martingale residuals near 1 represents individuals that “died too soon”, and large negative values correspond to individuals that “lived too long”. To assess the functional form of a continuous variable in a Cox proportional hazards model, we’ll use the function &lt;code&gt;ggcoxfunctional&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The function displays graphs of continuous covariates against martingale residuals of null cox proportional hazards model. This might help to properly choose the functional form of continuous variable in the Cox model. Fitted lines with lowess function should be linear to satisfy the Cox proportional hazards model assumptions.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;survminer::ggcoxfunctional(formula = Surv(time,status)~ age + log(age) + sqrt(age), data = data)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-01-14-death-note-part-i_files/figure-html/unnamed-chunk-18-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;prediction&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Prediction&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;train_test_split &amp;lt;- function(data,percent,seed){
+  set.seed(seed)
+  rows = sample(nrow(data))
+  data &amp;lt;- data[rows,]
+  split = round(nrow(data)*percent)
+  list(train = data[1:split,], test =  data[(split+1):nrow(data),])
+}
+
+list &amp;lt;- train_test_split(data,0.6,66)
+train &amp;lt;- list$train; test &amp;lt;- list$test
+
+cox.fit2 &amp;lt;- coxph(formula = Surv(time,status)~.,data = train)
+
+# predict the survival
+predictions &amp;lt;- survfit(cox.fit2, newdata = test)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;visualize-the-predictions&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Visualize the predictions&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# transponse the frame
+survival.prediction &amp;lt;- data.frame(t(predictions$surv))
+# add IDs
+survival.prediction &amp;lt;- cbind(id = test$case,survival.prediction)
+# rename column
+colnames(survival.prediction) &amp;lt;- c(&amp;quot;id&amp;quot;,round(predictions$time,3))
+
+survival.prediction %&amp;gt;%
+        gather(key,value,-id) %&amp;gt;%
+        mutate(key = as.numeric(key)) %&amp;gt;%
+        ggplot(aes(x = key, y = value, group = id))+
+        geom_line(alpha = 0.25)+
+        theme_minimal()+
+        labs(y = &amp;quot;Probability&amp;quot;,x = &amp;quot;Time&amp;quot;, title = &amp;quot;Survival vs Time&amp;quot;)+
+        theme(axis.text.x = element_blank())+
+        scale_x_continuous(breaks = c(0.203,3.608,0.5))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-01-14-death-note-part-i_files/figure-html/unnamed-chunk-20-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# using pec
+
+predictions.pec &amp;lt;- pec::predictSurvProb(cox.fit2, newdata = test, times = km.fit$time)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;Cumulative Hazard&lt;/strong&gt; at time &lt;em&gt;t&lt;/em&gt; can also be extracted using the &lt;code&gt;cumhaz&lt;/code&gt; component.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;hazard.prediction &amp;lt;- predictions$cumhaz # hazard&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;validating-the-predicton&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Validating the predicton&lt;/h2&gt;
+&lt;p&gt;A measure used to assess the strength of a risk classification system is discrimination, and when the outcome is survival time, the most commonly applied global measure of discrimination is the concordance probability. The concordance probability represents the pairwise probability of lower patient risk given longer survival time. It is the fraction of pairs in your data, where the observation with the higher survival time has the higher probability of survival predicted by your model.&lt;/p&gt;
+&lt;p&gt;The Brier score is a proper score function that measures the accuracy of probabilistic predictions (&lt;a href=&#34;https://en.wikipedia.org/wiki/Brier_score&#34;&gt;wikipedia&lt;/a&gt;). Evaluating the performance of risk prediction models in survival analysis. The Brier score is a weighted average of the squared distances between the observed survival status and the predicted survival probability of a model. Roughly the weights correspond to the probabilities of not being censored. The weights can be estimated depend on covariates. Prediction error curves are obtained when the Brier score is followed over time. Cross-validation based on bootstrap resampling or bootstrap subsampling can be applied to assess and compare the predictive power of various regression modelling strategies on the same set of data.. We can calculate the Brier Scores for our model and compare it against a reference model (without covariates) and compare the performance.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(pec)
+library(prodlim)
+library(riskRegression)
+set.seed(17)
+
+cindex &amp;lt;- cindex(list(cox.fit2),
+                   formula = Hist(time,status) ~ 1,
+                   data = data,
+                   splitMethod=&amp;quot;bootcv&amp;quot;,
+                   M=round(NROW(data)*.6),
+                   B=100,
+                   cens.model=&amp;quot;marginal&amp;quot;)
+
+(cindex$BootCvCindex$coxph)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 0.6258364&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;Brier  &amp;lt;- pec(list(cox.fit2),
+                   formula = Hist(time,status) ~ 1,
+                   data = data,
+                   splitMethod=&amp;quot;bootcv&amp;quot;,
+                   M=round(NROW(data)*.6),
+                   B=100,
+                   cens.model=&amp;quot;marginal&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;reference &amp;lt;- Brier$BootCvErr$Reference
+cox &amp;lt;- Brier$BootCvErr$coxph
+err.frame &amp;lt;- data.frame(reference,cox,time=Brier$time)
+err.frame &amp;lt;- err.frame[1:171,]
+err.frame.long &amp;lt;- gather(err.frame,key,value,-time)
+ggplot(err.frame.long, aes(x = time, y = value, col = key))+
+  geom_line()+
+  scale_color_manual(&amp;quot;Metric&amp;quot;,values =c(&amp;quot;cox&amp;quot;=&amp;quot;red2&amp;quot;,&amp;quot;reference&amp;quot;=&amp;quot;navyblue&amp;quot;))+
+  theme_minimal()&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-01-14-death-note-part-i_files/figure-html/unnamed-chunk-22-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Clearly the model with all covariates have lower error rates than our reference model with no covariates. One can also check the accuracy of such models by examining the area under the curve by using ROC style analysis.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;additive-models&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Additive models&lt;/h1&gt;
+&lt;p&gt;Additive hazard or Aalen’s models are an alternative to proportional hazard models. Here the hazard model is more directly similar to a linear model. Here the covariates are allowed to vary over time. We can also allow the covariates to vary over time.&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[  \lambda(t|x(t)) = \beta_0(t) + \sum \beta_k(t)x_k(t)             \]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;We can fit the additive model in R using the &lt;code&gt;aareg&lt;/code&gt; function. Then we can use &lt;code&gt;autoplot&lt;/code&gt; from ggfortify to investigate which coefficients may vary over time.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;additive &amp;lt;- aareg(Surv(time,status)~., data = data)
+
+additive&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Call:
+## aareg(formula = Surv(time, status) ~ ., data = data)
+## 
+##   n= 192 
+##     124 out of 128 unique event times used
+## 
+##              slope      coef se(coef)      z        p
+## Intercept -0.66200 -4.50e-03 6.56e-03 -0.686 4.93e-01
+## case       0.00124  4.32e-06 1.38e-05  0.314 7.53e-01
+## inst      -0.03510 -1.81e-04 4.72e-04 -0.383 7.02e-01
+## sex       -0.31400 -3.08e-03 1.53e-03 -2.020 4.38e-02
+## treatm     0.13700  1.19e-03 1.47e-03  0.812 4.17e-01
+## grade     -0.19100 -1.70e-03 1.02e-03 -1.680 9.31e-02
+## age       -0.00608 -1.64e-05 6.94e-05 -0.236 8.13e-01
+## cond       2.59000  1.04e-02 2.39e-03  4.340 1.45e-05
+## site      -0.03200 -3.25e-04 6.16e-04 -0.528 5.97e-01
+## tstage     0.25100  2.16e-03 9.87e-04  2.180 2.89e-02
+## nstage     0.22300  1.58e-03 6.89e-04  2.290 2.21e-02
+## 
+## Chisq=35.19 on 10 df, p=0.00012; test weights=aalen&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;autoplot(additive)+
+  theme_minimal()+
+  theme(legend.position = &amp;quot;top&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-01-14-death-note-part-i_files/figure-html/unnamed-chunk-23-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Sex might vary over time. This is evident from the steep slope in comparison with the rest.&lt;/p&gt;
+&lt;p&gt;There are several other survival models for instance, accelerated failure time (AFT) model that model survival information using distributions. Part 2 of this tutorial is coming up next where I will demonstrate how to construct survival trees and forests.&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Customer Lifetime Value</title>
       <link>/publication/customer-lifetime-value/</link>
       <pubDate>Tue, 09 Jan 2018 00:00:00 +0000</pubDate>
@@ -23,7 +497,7 @@ text-align: justify}
 
 &lt;p&gt;This post is about my first publication in a local journal on outlining the contributions of Customer Lifetime Value (CLV) to marketing within a firm. Customer Lifetime Value is where my infatuation towards data science and likeness towards data science all began. I didn&amp;rsquo;t even know about CLV until I was asked to present on it in my marketing strategy class by my professor, Dr. Banerjee. That lead me to an article called &amp;ldquo;Modeling Customer Lifetime Value&amp;rdquo; by Gupta et al (2006). That article had opened my eyes to a fascinating world of quantitative marketing and customer relationship management (CRM).&lt;/p&gt;
 
-&lt;p&gt;Here is a link to my &lt;a href=&#34;http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.741.7971&amp;amp;rep=rep1&amp;amp;type=pdf&#34; target=&#34;_blank&#34;&gt;article&lt;/a&gt;. It gives a gentle introduction to how CLV fits into the marketing machinery. Then the article focusses on the issue of balancing acquisition and retention expenses and how CLV easily helps to address the issue. I even go on to prove this with a hypothetical example that shows how CLV, even in its most simplest form, can capture the problem of balancing cost and guide managers in decision making. This is just one of the several uses of CLV as a marketing metric. CLV has evolved tremendously evolved over the years. I am planning to write another article that outlines how several CLV models have grown both structurally and functionally. I am also planning to use R to solve several models that other researchers have proposed so that my website could act as a hub for all future aspiring CRM specialists for understanding how to perform the computations practically.&lt;/p&gt;
+&lt;p&gt;Here is a link to my &lt;a href=&#34;http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.741.7971&amp;amp;rep=rep1&amp;amp;type=pdf&#34; target=&#34;_blank&#34;&gt;article&lt;/a&gt;. It gives a gentle introduction to how CLV fits into the marketing machinery. Then the article focuses on the issue of balancing acquisition and retention expenses and how CLV easily helps to address the issue. I even go on to prove this with a hypothetical example that shows how CLV, even in its most simplest form, can capture the problem of balancing cost and guide managers in decision making. This is just one of the several uses of CLV as a marketing metric. CLV has evolved tremendously evolved over the years. I am planning to write another article that outlines how several CLV models have grown both structurally and functionally. I am also planning to use R to solve several models that other researchers have proposed so that my website could act as a hub for all future aspiring CRM specialists for understanding how to perform the computations practically.&lt;/p&gt;
 
 &lt;p&gt;I am on the verge of publishing my first real research article on an international journal. More on my current research topic on the next post.&lt;/p&gt;
 </description>

@@ -5,6 +5,15 @@
     
     <url>
     
+      <loc>/post/death-note-part-i/</loc>
+      <lastmod>2018-01-14T00:00:00+00:00</lastmod>
+    </url>
+    
+  
+    
+    
+    <url>
+    
       <loc>/publication/customer-lifetime-value/</loc>
       <lastmod>2018-01-09T00:00:00+00:00</lastmod>
     </url>
@@ -189,7 +198,7 @@
     <url>
     
       <loc>/tags/ggplot2/</loc>
-      <lastmod>2018-01-07T00:00:00+00:00</lastmod>
+      <lastmod>2018-01-14T00:00:00+00:00</lastmod>
       <priority>0</priority>
     </url>
     
@@ -249,7 +258,7 @@
     <url>
     
       <loc>/categories/predictive-analytics/</loc>
-      <lastmod>2018-01-07T00:00:00+00:00</lastmod>
+      <lastmod>2018-01-14T00:00:00+00:00</lastmod>
       <priority>0</priority>
     </url>
     
@@ -298,7 +307,7 @@
     <url>
     
       <loc>/tags/r/</loc>
-      <lastmod>2018-01-07T00:00:00+00:00</lastmod>
+      <lastmod>2018-01-14T00:00:00+00:00</lastmod>
       <priority>0</priority>
     </url>
     
@@ -309,6 +318,16 @@
     
       <loc>/tags/regression/</loc>
       <lastmod>2018-01-07T00:00:00+00:00</lastmod>
+      <priority>0</priority>
+    </url>
+    
+  
+    
+    
+    <url>
+    
+      <loc>/tags/survival-analysis/</loc>
+      <lastmod>2018-01-14T00:00:00+00:00</lastmod>
       <priority>0</priority>
     </url>
     
