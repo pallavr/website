@@ -86,7 +86,8 @@ One can create a survival object in R using the `Surv` function. A call to the o
 
 ## Censoring
 
-For individuals who have not experienced the event, (called the **censored observations**), we only know the *censoring time* (represented by $ c_i $) or the time for which the particular observation was under study. Therefore, for such observations we do not know the actual event time. Now imagine any individual *i* there is a pair of times $ (\tilde{t_i},\tilde{c_i})$ but depending on the status we choose either one of them. If the individual experiences the event and $\delta_i=1$ we see $t_i$ but if there is no event and the individual is censored, we see $c_i$. This information can be compactly represented by $(min(t_i,c_i),\delta_i)$. The `status` column in the data reflects the status of the individual until event time or censoring time.
+For individuals who have not experienced the event, (called the **censored observations**), we only know the *censoring time* (represented by $ c_i $) or the time for which the particular observation was under study. Therefore, for such observations we do not know the actual event time. Now imagine any individual *i* there is a pair of times 
+$ (\tilde{t_i},\tilde{c_i}) $ but depending on the status we choose either one of them. If the individual experiences the event and $\delta_i=1$ we see $t_i$ but if there is no event and the individual is censored, we see $c_i$. This information can be compactly represented by $(min(t_i,c_i),\delta_i)$. The `status` column in the data reflects the status of the individual until event time or censoring time.
 
 
 # Kaplan Meier Analysis
@@ -275,7 +276,9 @@ The proportional hazards model (introduced by Cox, 1972) is a family of survival
 
 $$  \text{log} \lambda_i(t) = \alpha + \beta_1x_{i1} + ...                   $$
 
-or equivalently, $ \lambda_i(t) = \text{exp}(\alpha + \beta_1x_{i1} + ...)          $. 
+or equivalently, 
+
+$$ \lambda_i(t) = \text{exp}(\alpha + \beta_1x_{i1} + ...)   $$. 
 
 **Note:** The $\alpha$ in this multiplicative version represents some sort a *baseline*. If all $x_i$'s are zero, then the logarithm of hazard equals $e^\alpha$. The good part of this family of models is it allows for this baseline to remain unspecified (or we don't necessarily need to compute the coefficient for this intercept-like term).This makes the model *semi-parametric*.
 
@@ -309,11 +312,10 @@ The Cox regression results can be interpreted as follow:
 
 - **Hazard ratios:** The exponentiated coefficients in the second column of the first panel (and in the first column of the second panel) of the output are interpretable as multiplicative effects on the hazard. Thus, for example,
 holding the other covariates constant, an additional year of age reduces the yearly hazard of rearrest by 73 percent.
-a factor of
 
 - **Confidence intervals:** of the hazard ratios. The summary output also gives upper and lower 95% confidence intervals for the hazard ratio (exp(coef))
 
-- **Global statistical significance of the model:** The likelihood-ratio, Wald, and score chi-square statistics at the bottom of the output are asymptotically (for large enough N, they will give similar results. For small N, they may differ somewhat) equivalent tests of the omnibus null hypothesis that all of the ??'s are zero. In this instance, the test statistics are in close agreement, and the hypothesis is soundly rejected.
+- **Global statistical significance of the model:** The likelihood-ratio, Wald, and score chi-square statistics at the bottom of the output are asymptotically (for large enough N, they will give similar results. For small N, they may differ somewhat) equivalent tests of the omnibus null hypothesis that all of the beta's are zero. In this instance, the test statistics are in close agreement, and the hypothesis is soundly rejected.
 
 
 ## Survival curves
@@ -350,11 +352,12 @@ survminer::ggcoxzph(cox.zph(cox.fit))
 In the figure above, the solid line is a smoothing spline fit to the plot, with the dashed lines representing a +/- 2-standard-error band around the fit. Note that, systematic departures from a horizontal line are indicative of non-proportional hazards, since proportional hazards assumes that estimates do not vary much over time. From the graphical inspection, there is no pattern with time. The assumption of proportional hazards appears to be supported for the covariates sex (which is, recall, a two-level factor, accounting for the two bands in the graph), wt.loss and age.
 
 A violations of proportional hazards assumption can be resolved by:
-- Adding covariate*time interaction
-- Stratification
+
+- Adding covariate*time interaction  
+- Stratification  
 - Stratification is useful for "nuisance" con founders, where you do not care to estimate the effect. You cannot examine the effects of the stratification variable (John Fox & Sanford Weisberg).
 
-- **Influential Observations:** To test influential observations or outliers, we can visualize either the deviance residuals or the dfbeta values. The function `ggcoxdiagnostics` provides a convenient solution for checking influential observations. The simplified format is as follows:
+**Influential Observations:** To test influential observations or outliers, we can visualize either the deviance residuals or the dfbeta values. The function `ggcoxdiagnostics` provides a convenient solution for checking influential observations. The simplified format is as follows:
 
 ```{r,message=FALSE,message=FALSE}
 survminer::ggcoxdiagnostics(cox.fit, type = "martingale" ,linear.predictions = F, ggtheme = ggplot2::theme_minimal())
@@ -449,7 +452,7 @@ hazard.prediction <- predictions$cumhaz # hazard
 
 A measure used to assess the strength of a risk classification system is discrimination, and when the outcome is survival time, the most commonly applied global measure of discrimination is the concordance probability. The concordance probability represents the pairwise probability of lower patient risk given longer survival time. It is the fraction of pairs in your data, where the observation with the higher survival time has the higher probability of survival predicted by your model.
 
-The Brier score is a proper score function that measures the accuracy of probabilistic predictions ([wikipedia](https://en.wikipedia.org/wiki/Brier_score)). Evaluating the performance of risk prediction models in survival analysis. The Brier score is a weighted average of the squared distances between the observed survival status and the predicted survival probability of a model. Roughly the weights correspond to the probabilities of not being censored. The weights can be estimated depend on covariates. Prediction error curves are obtained when the Brier score is followed over time. Cross-validation based on bootstrap resampling or bootstrap subsampling can be applied to assess and compare the predictive power of various regression modelling strategies on the same set of data.. We can calculate the Brier Scores for our model and compare it against a reference model (without covariates) and compare the performance.
+The **Brier score** is a proper score function that measures the accuracy of probabilistic predictions ([wikipedia](https://en.wikipedia.org/wiki/Brier_score)). Evaluating the performance of risk prediction models in survival analysis. The Brier score is a weighted average of the squared distances between the observed survival status and the predicted survival probability of a model. Roughly the weights correspond to the probabilities of not being censored. The weights can be estimated depend on covariates. Prediction error curves are obtained when the Brier score is followed over time. Cross-validation based on bootstrap resampling or bootstrap subsampling can be applied to assess and compare the predictive power of various regression modelling strategies on the same set of data.. We can calculate the Brier Scores for our model and compare it against a reference model (without covariates) and compare the performance.
 
 ```{r,message=FALSE,warning=FALSE}
 library(pec)
