@@ -1,13 +1,14 @@
 ---
 title: 'From Subjectivity to Objectivity: Measuring Customer Lifetime Value Constructs'
-author: Shivaji Banerjee, Pallav Routh
-date: '2018-01-15'
+authors = ["GA Cushen"]
+date: ''
 slug: from-subjectivity-to-objectivity-measuring-customer-lifetime-value-constructs
 categories: []
 tags: []
 header:
   caption: ''
   image: ''
+url_pdf = "http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.741.7971&rep=rep1&type=pdf"
 ---
 
 <style>
