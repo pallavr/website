@@ -17,7 +17,7 @@ authors = ["Dr. Shivaji Banerjee", "Pallav Routh"]
 publication_types = ["2"]
 
 # Publication name and optional abbreviated version.
-publication = "In *Internation Journal of Marketing Management*."
+publication = "In *Internation Journal of Marketing Management*"
 publication_short = "In *IJMM*"
 
 
@@ -56,7 +56,7 @@ url_source = "#"
 
 # Custom links (optional).
 #   Uncomment line below to enable. For multiple links, use the form `[{...}, {...}, {...}]`.
-#   url_custom = [{name = "Custom Link", url = "http://example.org"}]
+url_custom = [{name = "Custom Link", url = "http://example.org"}]
 
 # Does the content use math formatting?
 math = true
@@ -71,10 +71,6 @@ image = "headers/bubbles-wide.jpg"
 caption = ""
 +++
 
-<style>
-body {
-text-align: justify}
-</style>
 
 
 This post is about my first publication in a local journal on outlining the contributions of Customer Lifetime Value (CLV) to marketing within a firm. Customer Lifetime Value is where my infatuation towards data science and likeness towards data science all began. I didn't even know about CLV until I was asked to present on it in my marketing strategy class by my professor, Dr. Banerjee. That lead me to an article called "Modeling Customer Lifetime Value" by Gupta et al (2006). That article had opened my eyes to a fascinating world of quantitative marketing and customer relationship management (CRM).
