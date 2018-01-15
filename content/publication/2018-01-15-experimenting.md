@@ -1,4 +1,4 @@
----
++++
 title = "From Subjectivity to Objectivity: Measuring Customer Lifetime Value Constructs"
 date = "2015-09-01"
 
@@ -45,6 +45,5 @@ highlight = true
 [header]
 image = ""
 caption = ""
-
----
++++
 
