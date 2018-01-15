@@ -491,25 +491,6 @@ additive&lt;/code&gt;&lt;/pre&gt;
     </item>
     
     <item>
-      <title>Customer Lifetime Value</title>
-      <link>/publication/customer-lifetime-value/</link>
-      <pubDate>Tue, 09 Jan 2018 00:00:00 +0000</pubDate>
-      
-      <guid>/publication/customer-lifetime-value/</guid>
-      <description>&lt;style&gt;
-body {
-text-align: justify}
-&lt;/style&gt;
-
-&lt;p&gt;This post is about my first publication in a local journal on outlining the contributions of Customer Lifetime Value (CLV) to marketing within a firm. Customer Lifetime Value is where my infatuation towards data science and likeness towards data science all began. I didn&amp;rsquo;t even know about CLV until I was asked to present on it in my marketing strategy class by my professor, Dr. Banerjee. That lead me to an article called &amp;ldquo;Modeling Customer Lifetime Value&amp;rdquo; by Gupta et al (2006). That article had opened my eyes to a fascinating world of quantitative marketing and customer relationship management (CRM).&lt;/p&gt;
-
-&lt;p&gt;Here is a link to my &lt;a href=&#34;http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.741.7971&amp;amp;rep=rep1&amp;amp;type=pdf&#34; target=&#34;_blank&#34;&gt;article&lt;/a&gt;. It gives a gentle introduction to how CLV fits into the marketing machinery. Then the article focuses on the issue of balancing acquisition and retention expenses and how CLV easily helps to address the issue. I even go on to prove this with a hypothetical example that shows how CLV, even in its most simplest form, can capture the problem of balancing cost and guide managers in decision making. This is just one of the several uses of CLV as a marketing metric. CLV has evolved tremendously evolved over the years. I am planning to write another article that outlines how several CLV models have grown both structurally and functionally. I am also planning to use R to solve several models that other researchers have proposed so that my website could act as a hub for all future aspiring CRM specialists for understanding how to perform the computations practically.&lt;/p&gt;
-
-&lt;p&gt;I am on the verge of publishing my first real research article on an international journal. More on my current research topic on the next post.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
       <title>Jack and Rose</title>
       <link>/post/jack-and-rose/</link>
       <pubDate>Sun, 07 Jan 2018 00:00:00 +0000</pubDate>
