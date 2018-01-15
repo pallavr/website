@@ -47,3 +47,4 @@ image = ""
 caption = ""
 +++
 
+This post is about my first publication in a local journal on outlining the contributions of Customer Lifetime Value (CLV) to marketing within a firm. Customer Lifetime Value is where my infatuation towards data science and likeness towards data science all began. I didn't even know about CLV until I was asked to present on it in my marketing strategy class by my professor, Dr. Banerjee. That lead me to an article called "Modeling Customer Lifetime Value" by Gupta et al (2006). That article had opened my eyes to a fascinating world of quantitative marketing and customer relationship management (CRM).
