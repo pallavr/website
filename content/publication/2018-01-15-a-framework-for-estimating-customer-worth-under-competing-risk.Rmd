@@ -1,6 +1,6 @@
 ---
-title: A Framework for Estimating Customer Worth under Competing Risk
-author: Pallav Routh, Dr Arkajyoti Roy, Dr. Jeff Meyer
+title: A Framework for Estimating Customer Worth Under Competing Risk
+author: Pallav Routh,Dr. Arkajyoti Roy, Dr. Jeff Meyer
 date: '2018-01-15'
 slug: a-framework-for-estimating-customer-worth-under-competing-risk
 categories: []
