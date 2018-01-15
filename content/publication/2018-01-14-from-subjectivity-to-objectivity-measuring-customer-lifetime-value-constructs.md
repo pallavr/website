@@ -1,4 +1,3 @@
-
 +++
 title = "From Subjectivity to Objectivity: Measuring Customer Lifetime Value Constructs"
 date = "2013-07-01"
@@ -20,6 +19,11 @@ publication_types = ["2"]
 # Publication name and optional abbreviated version.
 publication = "In *Internation Journal of Marketing Management*."
 publication_short = "In *IJMM*"
+
+<style>
+body {
+text-align: justify}
+</style>
 
 # Abstract and optional shortened version.
 abstract = "As data drives decision making in business more and more, it becomes essential to objectify
