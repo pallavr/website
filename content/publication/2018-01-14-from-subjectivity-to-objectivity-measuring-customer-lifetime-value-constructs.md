@@ -1,8 +1,8 @@
 +++
 title = "From Subjectivity to Objectivity: Measuring Customer Lifetime Value Constructs"
-date = "2013-07-01"
+date = "2018-01-14"
 
-# Authors. Comma separated list, e.g. `["Dr. Shivaji Banerjee", "Pallav Routh"]`.
+# Authors. Comma separated list, e.g. `["Bob Smith", "David Jones"]`.
 authors = ["Dr. Shivaji Banerjee", "Pallav Routh"]
 
 # Publication type.
@@ -20,8 +20,6 @@ publication_types = ["2"]
 publication = "In *Internation Journal of Marketing Management*"
 publication_short = "In *IJMM*"
 
-
-
 # Abstract and optional shortened version.
 abstract = "As data drives decision making in business more and more, it becomes essential to objectify
 key market metrics such as Customer Lifetime Value (CLV). CLV is the value added by a customer
@@ -31,32 +29,29 @@ we have taken this subjective aspect of CLV and given it a measurement. We have 
 measurement to establish a connection between customer satisfaction and maximization of
 ROI. Next we have again used this measurement to compare three different marketing strategies
 in a market driven firm."
+abstract_short = ""
 
 # Featured image thumbnail (optional)
 image_preview = ""
 
 # Is this a selected publication? (true/false)
-# selected = false
+selected = false
 
 # Projects (optional).
 #   Associate this publication with one or more of your projects.
 #   Simply enter the filename (excluding '.md') of your project file in `content/project/`.
-#   projects = ["example-external-project"]
+projects = ["deep-learning"]
 
 # Links (optional).
 url_pdf = "http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.741.7971&rep=rep1&type=pdf"
-url_preprint = "#"
-url_code = "#"
-url_dataset = "#"
-url_project = "#"
-url_slides = "#"
-url_video = "#"
-url_poster = "#"
-url_source = "#"
-
-# Custom links (optional).
-#   Uncomment line below to enable. For multiple links, use the form `[{...}, {...}, {...}]`.
-url_custom = [{name = "Custom Link", url = "http://example.org"}]
+url_preprint = ""
+url_code = ""
+url_dataset = ""
+url_project = ""
+url_slides = ""
+url_video = ""
+url_poster = ""
+url_source = ""
 
 # Does the content use math formatting?
 math = true
@@ -67,6 +62,68 @@ highlight = true
 # Featured image
 # Place your image in the `static/img/` folder and reference its filename below, e.g. `image = "example.jpg"`.
 [header]
-image = "headers/bubbles-wide.jpg"
+image = ""
 caption = ""
+
 +++
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
