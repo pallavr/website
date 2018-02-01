@@ -14,7 +14,7 @@ text-align: justify}
 
 Here is a sneak peak into my current working paper. Our research has potential in business settings where customers face multiple causes of churn.
 
-**Authors** Pallav Routh, Dr. Jeff Meyer,Dr. Arkajyoti Roy 
+**Authors** Pallav Routh, Dr. Jeff Meyer, Dr. Arkajyoti Roy 
 
 
 **Abstract**
