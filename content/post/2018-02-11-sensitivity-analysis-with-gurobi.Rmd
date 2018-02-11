@@ -1,0 +1,279 @@
+---
+title: Sensitivity Analysis with Gurobi
+author: ''
+date: '2018-02-11'
+slug: sensitivity-analysis-with-gurobi
+categories:
+  - prescriptive analytics
+tags:
+  - Linear programming
+  - Python
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+The problem is once again taken from Rardin's book *Optimization in Operations Research (2nd Ed)*. It's a simple problem that illustrates how to perform Sensitivity Analysis with Gurobi and Python.
+
+
+**Problem 6-25**
+
+*The NCAA is making plans for distributing tickets to the upcoming regional basketball championships. The up to 10,000 available seats will be divided between the media, the competing universities, and the general public. Media people are admitted free, but the NCAA receives \$45 per ticket from universities and \$100 per ticket from the general public. At least 500 tickets must be reserved for the media, and at least half as many tickets should go to the competing universities as to the general public. Within these restrictions, the NCAA wishes to find the allocation that raises the most money.*
+
+The optimization problem can be set up as:
+
+\[ \text{max} \; 45x_2 + 100x_3 \]
+\[ x_1 + x_2 + x_3 \leq 10,000 \]
+\[ x_2 - 0.5x_3 \geq 0  \]
+\[ x_1 \geq 500 \]
+\[ x_1,x_2,x_3 \geq 0 \]
+
+*(a) What is the marginal cost to the NCAA of each seat guaranteed the media?  * 
+*(b) Suppose that there is an alternative arrangement of the dome where the games will be played that can provide 15,000 seats. How much additional revenue would be gained from the expanded seating? How much would it be for 20,000 seats?  *  
+*(c) Since television revenue provides most of the income for NCAA events, another proposal would reduce the price of general public tickets to \$50. How much revenue would be lost from this change? What if the price were \$30?  *  
+*(d) Media-hating coach Sobby Day wants the NCAA to restrict media seats to 20% of those allocated for universities. Could this policy change the optimal solution? How about 10%?  *  
+*(e) To accommodate high demand from student supporters of participating universities, the NCAA is considering marketing a new “scrunch seat” that consumes only 80% of a regular bleacher seat but counts fully against the “university Ú half public” rule. Could an optimal solution allocate any such seats at a ticket price of \$35? At a price of \$25?*
+
+
+
+Solutions:
+
+
+```{python}
+from gurobipy import *
+import pandas as pd
+from collections import OrderedDict
+
+# create model
+m = Model()
+
+# Add decision variables 
+# Let x1 : number of media people
+# Let x2 : number of students from university
+# Let x3 : number of general public
+
+x1 = m.addVar(lb = 0, name = 'media')
+x2 = m.addVar(lb = 0, name = 'university')
+x3 = m.addVar(lb = 0, name = 'public')
+
+m.update()
+
+# set objective
+obj = 45*x2 + 100*x3
+m.setObjective(obj, GRB.MAXIMIZE)
+
+# add constraints
+con1 = m.addConstr(x1 + x2 + x3 <= 10000, name = 'total seat') # total seats are less than 10,000
+con2 = m.addConstr(x2 - 0.5*x3 >= 0, name = 'seating constraint') #half the number of seats should go to competing univs
+con3 = m.addConstr(x1 >= 500, name = 'reserved for media') #at least 500 seats for media
+
+m.optimize()
+#print solution and objective 
+for i in m.getVars(): 
+    print(i.varName, i.x)
+print('Obj:', m.objVal)
+
+
+#### Part (a) ####
+
+target_cell = {'Name':['Cost'],'Cost':[m.ObjVal]}
+
+# decision variable table
+decision_var = OrderedDict([
+    ('Name',['media','university','public']),
+    ('Final Value',[x1.x,x2.x,x3.x]),
+    ('Reduced Cost',[x1.RC,x2.RC,x3.RC]),
+    ('Objective Coefficient',[0,45,100]),
+    ('Allowable Coeff Increase',[x1.SAObjUp,x2.SAObjUp,x3.SAObjUp]),
+    ('Allowable Coeff Decrease',[x1.SAObjLow,x2.SAObjLow,x3.SAObjLow]),
+    ('Lower Bound',[x1.LB,x2.LB,x3.LB]),
+    ('Upper Bound',[x1.UB,x2.UB,x3.UB])
+])
+
+# constraint table
+
+constraint = OrderedDict([
+    ('Name',['total seat','seat constraint','reserved for media']),
+    ('Shadow Price',[con1.Pi,con2.Pi,con3.Pi]),
+    ('RHS Coeff',[1e4,0,500]),
+    ('Slack',[con1.Slack,con2.Slack,con3.Slack]),
+    ('Lower Range',[con1.SARHSLow,con2.SARHSLow,con3.SARHSLow]),
+    ('Upper Range',[con1.SARHSUp,con2.SARHSUp,con3.SARHSUp])
+])
+
+print(pd.DataFrame.from_dict(target_cell))
+
+print(pd.DataFrame.from_dict(decision_var))
+
+print(pd.DataFrame.from_dict(constraint))
+
+#### Part (a) ####
+
+## Changing the seating arrangement to 15,000
+
+con1.RHS = 15000
+# update the new RHS of constraint 1
+m.update()
+m.optimize()
+#print solution and objective 
+for i in m.getVars(): 
+    print(i.varName, i.x)
+print('Obj:', m.objVal)
+
+
+# constraint table
+
+constraint = OrderedDict([
+    ('Name',['total seat','seat constraint','reserved for media']),
+    ('Shadow Price',[con1.Pi,con2.Pi,con3.Pi]),
+    ('RHS Coeff',[con1.RHS,con2.RHS,con3.RHS]),
+    ('Slack',[con1.Slack,con2.Slack,con3.Slack]),
+    ('Lower Range',[con1.SARHSLow,con2.SARHSLow,con3.SARHSLow]),
+    ('Upper Range',[con1.SARHSUp,con2.SARHSUp,con3.SARHSUp])
+])
+
+print(pd.DataFrame.from_dict(constraint))
+
+## The shadow price of constraint 1 is once again 81.6. So for 5000 more units, there would be 81.6*5000 dollar increase or 40,800 dollar increase. Therefore the new objective should be 1184166 + 40,8000 = 1592166 approximately
+
+# revert back
+con1.RHS = 10000
+m.update()
+
+## Changing the seating arrangement to 20,000
+
+#change again
+con1.RHS = 20000
+m.optimize()
+#print solution and objective 
+for i in m.getVars(): 
+    print(i.varName, i.x)
+print('Obj:', m.objVal)
+
+# Close enough!
+
+#revert back
+con1.RHS = 10000
+m.update()
+
+#### Part (c) ####
+
+# set new objective
+obj = 45*x2 + 50*x3
+m.setObjective(obj, GRB.MAXIMIZE)
+
+m.optimize()
+#print solution and objective 
+for i in m.getVars(): 
+    print(i.varName, i.x)
+print('Obj:', m.objVal)
+
+## Reducing the cost for public by 50 would reduce the objectice by 50*633.33 dollar or by 316667 dollars. The new objcetive value should be 775833.3333333334 - 316667 = 459166.33 approximately. This matches the result above.
+
+# set new objective
+obj = 45*x2 + 30*x3
+m.setObjective(obj, GRB.MAXIMIZE)
+m.optimize()
+#print solution and objective 
+for i in m.getVars(): 
+    print(i.varName, i.x)
+print('Obj:', m.objVal)
+
+# We see above that the reduction is not equal to 20*633.33. This is because 30 is outside the range [45,\inf) for the coefficient of x3. The most reduction will therefore be only by 5*633.33 or (50 - 45)*633.33 from the previous objective value. So, the new value should be close to 427500 - 3166 = 424333 dollars approximately.
+
+#revert back to original
+obj = 45*x2 + 100*x3
+m.setObjective(obj, GRB.MAXIMIZE)
+m.optimize()
+
+#### Part (d) ####
+
+#add new constraints
+con4 = m.addConstr(x1 <= 0.2*x2, name = 'Media hating coach')
+m.update()
+
+m.optimize()
+#print solution and objective 
+for i in m.getVars(): 
+    print(i.varName, i.x)
+print('Obj:', m.objVal)
+
+# It does not change the optimal solutions or the objective value. The solution is the same as before. Because this new restriction is satified by the old primal solution.
+
+#remove constraint
+m.remove(m.getConstrs()[3])
+m.getConstrs()
+
+#add new constraints
+con4 = m.addConstr(x1 <= 0.1*x2, name = 'Media hating coach')
+m.update()
+
+m.optimize()
+#print solution and objective 
+for i in m.getVars(): 
+    print(i.varName, i.x)
+print('Obj:', m.objVal)
+
+## In this case the solution changes. We see that the new constraint was not satified by the old primal solution. We also get new solutions.
+
+# remove the constraint again
+m.remove(m.getConstrs()[3])
+m.getConstrs()
+
+#### Part (d) ####
+
+#lets add a new decision variable to the problem : x4
+x4 = m.addVar(lb = 1, name = 'scrunch seat')
+m.update()
+
+#lets remove all constraints and add new ones to accomodate the new decision var
+m.remove(m.getConstrs()[0:3])
+m.getConstrs()
+
+# set new objective
+obj = 45*x2 + 100*x3 + 35*x4
+m.setObjective(obj, GRB.MAXIMIZE)
+# add constraints
+con1 = m.addConstr(x1 + x2 + x3 + 0.8*x4 <= 1e4, name = 'total seat') 
+con2 = m.addConstr(x1 >= 500, name = 'reserved for media') 
+con3 = m.addConstr(x2 - 0.5*x3 + x4 >= 0, name = 'seating constraint') 
+m.optimize()
+#print solution and objective 
+for i in m.getVars(): 
+    print(i.varName, i.x)
+print('Obj:', m.objVal)
+
+# constraint table
+constraint = OrderedDict([
+    ('Name',['total seat','reserved for media','seat constraint']),
+    ('Shadow Price',[con1.Pi,con2.Pi,con3.Pi]),
+    ('RHS Coeff',[1e4,0,500]),
+    ('Slack',[con1.Slack,con2.Slack,con3.Slack]),
+    ('Lower Range',[con1.SARHSLow,con2.SARHSLow,con3.SARHSLow]),
+    ('Upper Range',[con1.SARHSUp,con2.SARHSUp,con3.SARHSUp])
+])
+
+print(pd.DataFrame.from_dict(constraint))
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,377 @@
+---
+title: Sensitivity Analysis with Gurobi
+author: ''
+date: '2018-02-11'
+slug: sensitivity-analysis-with-gurobi
+categories:
+  - prescriptive analytics
+tags:
+  - Linear programming
+  - Python
+---
+
+
+
+<style>
+body {
+text-align: justify}
+</style>
+<p>The problem is once again taken from Rardin’s book <em>Optimization in Operations Research (2nd Ed)</em>. It’s a simple problem that illustrates how to perform Sensitivity Analysis with Gurobi and Python.</p>
+<p><strong>Problem 6-25</strong></p>
+<p><em>The NCAA is making plans for distributing tickets to the upcoming regional basketball championships. The up to 10,000 available seats will be divided between the media, the competing universities, and the general public. Media people are admitted free, but the NCAA receives $45 per ticket from universities and $100 per ticket from the general public. At least 500 tickets must be reserved for the media, and at least half as many tickets should go to the competing universities as to the general public. Within these restrictions, the NCAA wishes to find the allocation that raises the most money.</em></p>
+<p>The optimization problem can be set up as:</p>
+<p><span class="math display">\[ \text{max} \; 45x_2 + 100x_3 \]</span> <span class="math display">\[ x_1 + x_2 + x_3 \leq 10,000 \]</span> <span class="math display">\[ x_2 - 0.5x_3 \geq 0  \]</span> <span class="math display">\[ x_1 \geq 500 \]</span> <span class="math display">\[ x_1,x_2,x_3 \geq 0 \]</span></p>
+<p><em>(a) What is the marginal cost to the NCAA of each seat guaranteed the media? </em> <em>(b) Suppose that there is an alternative arrangement of the dome where the games will be played that can provide 15,000 seats. How much additional revenue would be gained from the expanded seating? How much would it be for 20,000 seats? </em><br />
+<em>(c) Since television revenue provides most of the income for NCAA events, another proposal would reduce the price of general public tickets to $50. How much revenue would be lost from this change? What if the price were $30? </em><br />
+<em>(d) Media-hating coach Sobby Day wants the NCAA to restrict media seats to 20% of those allocated for universities. Could this policy change the optimal solution? How about 10%? </em><br />
+<em>(e) To accommodate high demand from student supporters of participating universities, the NCAA is considering marketing a new “scrunch seat” that consumes only 80% of a regular bleacher seat but counts fully against the “university Ú half public” rule. Could an optimal solution allocate any such seats at a ticket price of $35? At a price of $25?</em></p>
+<p>Solutions:</p>
+<pre class="python"><code>from gurobipy import *
+import pandas as pd
+from collections import OrderedDict
+# create model
+m = Model()
+# Add decision variables 
+# Let x1 : number of media people
+# Let x2 : number of students from university
+# Let x3 : number of general public
+x1 = m.addVar(lb = 0, name = &#39;media&#39;)
+x2 = m.addVar(lb = 0, name = &#39;university&#39;)
+x3 = m.addVar(lb = 0, name = &#39;public&#39;)
+m.update()
+# set objective
+obj = 45*x2 + 100*x3
+m.setObjective(obj, GRB.MAXIMIZE)
+# add constraints
+con1 = m.addConstr(x1 + x2 + x3 &lt;= 10000, name = &#39;total seat&#39;) # total seats are less than 10,000
+con2 = m.addConstr(x2 - 0.5*x3 &gt;= 0, name = &#39;seating constraint&#39;) #half the number of seats should go to competing univs
+con3 = m.addConstr(x1 &gt;= 500, name = &#39;reserved for media&#39;) #at least 500 seats for media
+m.optimize()
+#print solution and objective </code></pre>
+<pre><code>## Optimize a model with 3 rows, 3 columns and 6 nonzeros
+## Coefficient statistics:
+##   Matrix range     [5e-01, 1e+00]
+##   Objective range  [5e+01, 1e+02]
+##   Bounds range     [0e+00, 0e+00]
+##   RHS range        [5e+02, 1e+04]
+## Presolve removed 3 rows and 3 columns
+## Presolve time: 0.00s
+## Presolve: All rows and columns removed
+## Iteration    Objective       Primal Inf.    Dual Inf.      Time
+##        0    7.7583333e+05   0.000000e+00   0.000000e+00      0s
+## 
+## Solved in 0 iterations and 0.00 seconds
+## Optimal objective  7.758333333e+05</code></pre>
+<pre class="python"><code>for i in m.getVars(): 
+    print(i.varName, i.x)</code></pre>
+<pre><code>## media 500.0
+## university 3166.6666666666665
+## public 6333.333333333334</code></pre>
+<pre class="python"><code>print(&#39;Obj:&#39;, m.objVal)
+#### Part (a) ####</code></pre>
+<pre><code>## Obj: 775833.3333333334</code></pre>
+<pre class="python"><code>target_cell = {&#39;Name&#39;:[&#39;Cost&#39;],&#39;Cost&#39;:[m.ObjVal]}
+# decision variable table
+decision_var = OrderedDict([
+    (&#39;Name&#39;,[&#39;media&#39;,&#39;university&#39;,&#39;public&#39;]),
+    (&#39;Final Value&#39;,[x1.x,x2.x,x3.x]),
+    (&#39;Reduced Cost&#39;,[x1.RC,x2.RC,x3.RC]),
+    (&#39;Objective Coefficient&#39;,[0,45,100]),
+    (&#39;Allowable Coeff Increase&#39;,[x1.SAObjUp,x2.SAObjUp,x3.SAObjUp]),
+    (&#39;Allowable Coeff Decrease&#39;,[x1.SAObjLow,x2.SAObjLow,x3.SAObjLow]),
+    (&#39;Lower Bound&#39;,[x1.LB,x2.LB,x3.LB]),
+    (&#39;Upper Bound&#39;,[x1.UB,x2.UB,x3.UB])
+])
+# constraint table
+constraint = OrderedDict([
+    (&#39;Name&#39;,[&#39;total seat&#39;,&#39;seat constraint&#39;,&#39;reserved for media&#39;]),
+    (&#39;Shadow Price&#39;,[con1.Pi,con2.Pi,con3.Pi]),
+    (&#39;RHS Coeff&#39;,[1e4,0,500]),
+    (&#39;Slack&#39;,[con1.Slack,con2.Slack,con3.Slack]),
+    (&#39;Lower Range&#39;,[con1.SARHSLow,con2.SARHSLow,con3.SARHSLow]),
+    (&#39;Upper Range&#39;,[con1.SARHSUp,con2.SARHSUp,con3.SARHSUp])
+])
+print(pd.DataFrame.from_dict(target_cell))</code></pre>
+<pre><code>##             Cost  Name
+## 0  775833.333333  Cost</code></pre>
+<pre class="python"><code>print(pd.DataFrame.from_dict(decision_var))</code></pre>
+<pre><code>##          Name  Final Value  Reduced Cost  Objective Coefficient  \
+## 0       media   500.000000           0.0                      0   
+## 1  university  3166.666667           0.0                     45   
+## 2      public  6333.333333           0.0                    100   
+## 
+##    Allowable Coeff Increase  Allowable Coeff Decrease  Lower Bound  \
+## 0              8.166667e+01            -1.000000e+100          0.0   
+## 1              1.000000e+02             -2.000000e+02          0.0   
+## 2             1.000000e+100              4.500000e+01          0.0   
+## 
+##      Upper Bound  
+## 0  1.000000e+100  
+## 1  1.000000e+100  
+## 2  1.000000e+100</code></pre>
+<pre class="python"><code>print(pd.DataFrame.from_dict(constraint))
+#### Part (a) ####
+## Changing the seating arrangement to 15,000</code></pre>
+<pre><code>##                  Name  Shadow Price  RHS Coeff  Slack  Lower Range  \
+## 0          total seat     81.666667    10000.0    0.0        500.0   
+## 1     seat constraint    -36.666667        0.0    0.0      -4750.0   
+## 2  reserved for media    -81.666667      500.0    0.0         -0.0   
+## 
+##      Upper Range  
+## 0  1.000000e+100  
+## 1   9.500000e+03  
+## 2   1.000000e+04</code></pre>
+<pre class="python"><code>con1.RHS = 15000
+# update the new RHS of constraint 1
+m.update()
+m.optimize()
+#print solution and objective </code></pre>
+<pre><code>## Optimize a model with 3 rows, 3 columns and 6 nonzeros
+## Coefficient statistics:
+##   Matrix range     [5e-01, 1e+00]
+##   Objective range  [5e+01, 1e+02]
+##   Bounds range     [0e+00, 0e+00]
+##   RHS range        [5e+02, 2e+04]
+## Iteration    Objective       Primal Inf.    Dual Inf.      Time
+##        0    1.1841667e+06   0.000000e+00   0.000000e+00      0s
+## 
+## Solved in 0 iterations and 0.00 seconds
+## Optimal objective  1.184166667e+06</code></pre>
+<pre class="python"><code>for i in m.getVars(): 
+    print(i.varName, i.x)</code></pre>
+<pre><code>## media 500.0
+## university 4833.333333333333
+## public 9666.666666666668</code></pre>
+<pre class="python"><code>print(&#39;Obj:&#39;, m.objVal)
+# constraint table</code></pre>
+<pre><code>## Obj: 1184166.6666666667</code></pre>
+<pre class="python"><code>constraint = OrderedDict([
+    (&#39;Name&#39;,[&#39;total seat&#39;,&#39;seat constraint&#39;,&#39;reserved for media&#39;]),
+    (&#39;Shadow Price&#39;,[con1.Pi,con2.Pi,con3.Pi]),
+    (&#39;RHS Coeff&#39;,[con1.RHS,con2.RHS,con3.RHS]),
+    (&#39;Slack&#39;,[con1.Slack,con2.Slack,con3.Slack]),
+    (&#39;Lower Range&#39;,[con1.SARHSLow,con2.SARHSLow,con3.SARHSLow]),
+    (&#39;Upper Range&#39;,[con1.SARHSUp,con2.SARHSUp,con3.SARHSUp])
+])
+print(pd.DataFrame.from_dict(constraint))
+## The shadow price of constraint 1 is once again 81.6. So for 5000 more units, there would be 81.6*5000 dollar increase or 40,800 dollar increase. Therefore the new objective should be 1184166 + 40,8000 = 1592166 approximately
+# revert back</code></pre>
+<pre><code>##                  Name  Shadow Price  RHS Coeff  Slack  Lower Range  \
+## 0          total seat     81.666667    15000.0    0.0        500.0   
+## 1     seat constraint    -36.666667        0.0    0.0      -7250.0   
+## 2  reserved for media    -81.666667      500.0    0.0         -0.0   
+## 
+##      Upper Range  
+## 0  1.000000e+100  
+## 1   1.450000e+04  
+## 2   1.500000e+04</code></pre>
+<pre class="python"><code>con1.RHS = 10000
+m.update()
+## Changing the seating arrangement to 20,000
+#change again
+con1.RHS = 20000
+m.optimize()
+#print solution and objective </code></pre>
+<pre><code>## Optimize a model with 3 rows, 3 columns and 6 nonzeros
+## Coefficient statistics:
+##   Matrix range     [5e-01, 1e+00]
+##   Objective range  [5e+01, 1e+02]
+##   Bounds range     [0e+00, 0e+00]
+##   RHS range        [5e+02, 2e+04]
+## Iteration    Objective       Primal Inf.    Dual Inf.      Time
+##        0    1.5925000e+06   0.000000e+00   0.000000e+00      0s
+## 
+## Solved in 0 iterations and 0.00 seconds
+## Optimal objective  1.592500000e+06</code></pre>
+<pre class="python"><code>for i in m.getVars(): 
+    print(i.varName, i.x)</code></pre>
+<pre><code>## media 500.0
+## university 6500.0
+## public 13000.0</code></pre>
+<pre class="python"><code>print(&#39;Obj:&#39;, m.objVal)
+# Close enough!
+#revert back</code></pre>
+<pre><code>## Obj: 1592500.0</code></pre>
+<pre class="python"><code>con1.RHS = 10000
+m.update()
+#### Part (c) ####
+# set new objective
+obj = 45*x2 + 50*x3
+m.setObjective(obj, GRB.MAXIMIZE)
+m.optimize()
+#print solution and objective </code></pre>
+<pre><code>## Optimize a model with 3 rows, 3 columns and 6 nonzeros
+## Coefficient statistics:
+##   Matrix range     [5e-01, 1e+00]
+##   Objective range  [5e+01, 5e+01]
+##   Bounds range     [0e+00, 0e+00]
+##   RHS range        [5e+02, 1e+04]
+## Iteration    Objective       Primal Inf.    Dual Inf.      Time
+##        0    4.5916667e+05   0.000000e+00   0.000000e+00      0s
+## 
+## Solved in 0 iterations and 0.00 seconds
+## Optimal objective  4.591666667e+05</code></pre>
+<pre class="python"><code>for i in m.getVars(): 
+    print(i.varName, i.x)</code></pre>
+<pre><code>## media 500.0
+## university 3166.6666666666665
+## public 6333.333333333334</code></pre>
+<pre class="python"><code>print(&#39;Obj:&#39;, m.objVal)
+## Reducing the cost for public by 50 would reduce the objectice by 50*633.33 dollar or by 316667 dollars. The new objcetive value should be 775833.3333333334 - 316667 = 459166.33 approximately. This matches the result above.
+# set new objective</code></pre>
+<pre><code>## Obj: 459166.6666666667</code></pre>
+<pre class="python"><code>obj = 45*x2 + 30*x3
+m.setObjective(obj, GRB.MAXIMIZE)
+m.optimize()
+#print solution and objective </code></pre>
+<pre><code>## Optimize a model with 3 rows, 3 columns and 6 nonzeros
+## Coefficient statistics:
+##   Matrix range     [5e-01, 1e+00]
+##   Objective range  [3e+01, 5e+01]
+##   Bounds range     [0e+00, 0e+00]
+##   RHS range        [5e+02, 1e+04]
+## Iteration    Objective       Primal Inf.    Dual Inf.      Time
+##        0    1.0000000e+31   6.666667e+29   1.000000e+01      0s
+##        1    4.2750000e+05   0.000000e+00   0.000000e+00      0s
+## 
+## Solved in 1 iterations and 0.00 seconds
+## Optimal objective  4.275000000e+05</code></pre>
+<pre class="python"><code>for i in m.getVars(): 
+    print(i.varName, i.x)</code></pre>
+<pre><code>## media 500.0
+## university 9500.0
+## public 0.0</code></pre>
+<pre class="python"><code>print(&#39;Obj:&#39;, m.objVal)
+# We see above that the reduction is not equal to 20*633.33. This is because 30 is outside the range [45,\inf) for the coefficient of x3. The most reduction will therefore be only by 5*633.33 or (50 - 45)*633.33 from the previous objective value. So, the new value should be close to 427500 - 3166 = 424333 dollars approximately.
+#revert back to original</code></pre>
+<pre><code>## Obj: 427500.0</code></pre>
+<pre class="python"><code>obj = 45*x2 + 100*x3
+m.setObjective(obj, GRB.MAXIMIZE)
+m.optimize()
+#### Part (d) ####
+#add new constraints</code></pre>
+<pre><code>## Optimize a model with 3 rows, 3 columns and 6 nonzeros
+## Coefficient statistics:
+##   Matrix range     [5e-01, 1e+00]
+##   Objective range  [5e+01, 1e+02]
+##   Bounds range     [0e+00, 0e+00]
+##   RHS range        [5e+02, 1e+04]
+## Iteration    Objective       Primal Inf.    Dual Inf.      Time
+##        0    5.5000000e+31   2.500000e+30   5.500000e+01      0s
+##        1    7.7583333e+05   0.000000e+00   0.000000e+00      0s
+## 
+## Solved in 1 iterations and 0.00 seconds
+## Optimal objective  7.758333333e+05</code></pre>
+<pre class="python"><code>con4 = m.addConstr(x1 &lt;= 0.2*x2, name = &#39;Media hating coach&#39;)
+m.update()
+m.optimize()
+#print solution and objective </code></pre>
+<pre><code>## Optimize a model with 4 rows, 3 columns and 8 nonzeros
+## Coefficient statistics:
+##   Matrix range     [2e-01, 1e+00]
+##   Objective range  [5e+01, 1e+02]
+##   Bounds range     [0e+00, 0e+00]
+##   RHS range        [5e+02, 1e+04]
+## Iteration    Objective       Primal Inf.    Dual Inf.      Time
+##        0    7.7583333e+05   0.000000e+00   0.000000e+00      0s
+## 
+## Solved in 0 iterations and 0.00 seconds
+## Optimal objective  7.758333333e+05</code></pre>
+<pre class="python"><code>for i in m.getVars(): 
+    print(i.varName, i.x)</code></pre>
+<pre><code>## media 500.0
+## university 3166.6666666666665
+## public 6333.333333333334</code></pre>
+<pre class="python"><code>print(&#39;Obj:&#39;, m.objVal)
+# It does not change the optimal solutions or the objective value. The solution is the same as before. Because this new restriction is satified by the old primal solution.
+#remove constraint</code></pre>
+<pre><code>## Obj: 775833.3333333334</code></pre>
+<pre class="python"><code>m.remove(m.getConstrs()[3])
+m.getConstrs()
+#add new constraints
+con4 = m.addConstr(x1 &lt;= 0.1*x2, name = &#39;Media hating coach&#39;)
+m.update()
+m.optimize()
+#print solution and objective </code></pre>
+<pre><code>## Optimize a model with 4 rows, 3 columns and 8 nonzeros
+## Coefficient statistics:
+##   Matrix range     [1e-01, 1e+00]
+##   Objective range  [5e+01, 1e+02]
+##   Bounds range     [0e+00, 0e+00]
+##   RHS range        [5e+02, 1e+04]
+## Iteration    Objective       Primal Inf.    Dual Inf.      Time
+##        0    7.7583333e+05   1.833333e+02   0.000000e+00      0s
+##        1    6.7500000e+05   0.000000e+00   0.000000e+00      0s
+## 
+## Solved in 1 iterations and 0.00 seconds
+## Optimal objective  6.750000000e+05</code></pre>
+<pre class="python"><code>for i in m.getVars(): 
+    print(i.varName, i.x)</code></pre>
+<pre><code>## media 500.0
+## university 5000.0
+## public 4500.0</code></pre>
+<pre class="python"><code>print(&#39;Obj:&#39;, m.objVal)
+## In this case the solution changes. We see that the new constraint was not satified by the old primal solution. We also get new solutions.
+# remove the constraint again</code></pre>
+<pre><code>## Obj: 675000.0</code></pre>
+<pre class="python"><code>m.remove(m.getConstrs()[3])
+m.getConstrs()
+#### Part (d) ####
+#lets add a new decision variable to the problem : x4
+x4 = m.addVar(lb = 1, name = &#39;scrunch seat&#39;)
+m.update()
+#lets remove all constraints and add new ones to accomodate the new decision var
+m.remove(m.getConstrs()[0:3])
+m.getConstrs()
+# set new objective
+obj = 45*x2 + 100*x3 + 35*x4
+m.setObjective(obj, GRB.MAXIMIZE)
+# add constraints
+con1 = m.addConstr(x1 + x2 + x3 + 0.8*x4 &lt;= 1e4, name = &#39;total seat&#39;) 
+con2 = m.addConstr(x1 &gt;= 500, name = &#39;reserved for media&#39;) 
+con3 = m.addConstr(x2 - 0.5*x3 + x4 &gt;= 0, name = &#39;seating constraint&#39;) 
+m.optimize()
+#print solution and objective </code></pre>
+<pre><code>## Optimize a model with 3 rows, 4 columns and 8 nonzeros
+## Coefficient statistics:
+##   Matrix range     [5e-01, 1e+00]
+##   Objective range  [4e+01, 1e+02]
+##   Bounds range     [1e+00, 1e+00]
+##   RHS range        [5e+02, 1e+04]
+## Presolve removed 1 rows and 1 columns
+## Presolve time: 0.00s
+## Presolved: 2 rows, 3 columns, 6 nonzeros
+## 
+## Iteration    Objective       Primal Inf.    Dual Inf.      Time
+##        0    9.4995500e+05   5.935750e+02   0.000000e+00      0s
+##        1    7.9732143e+05   0.000000e+00   0.000000e+00      0s
+## 
+## Solved in 1 iterations and 0.00 seconds
+## Optimal objective  7.973214286e+05</code></pre>
+<pre class="python"><code>for i in m.getVars(): 
+    print(i.varName, i.x)</code></pre>
+<pre><code>## media 500.0
+## university 0.0
+## public 6785.714285714286
+## scrunch seat 3392.857142857143</code></pre>
+<pre class="python"><code>print(&#39;Obj:&#39;, m.objVal)
+# constraint table</code></pre>
+<pre><code>## Obj: 797321.4285714286</code></pre>
+<pre class="python"><code>constraint = OrderedDict([
+    (&#39;Name&#39;,[&#39;total seat&#39;,&#39;reserved for media&#39;,&#39;seat constraint&#39;]),
+    (&#39;Shadow Price&#39;,[con1.Pi,con2.Pi,con3.Pi]),
+    (&#39;RHS Coeff&#39;,[1e4,0,500]),
+    (&#39;Slack&#39;,[con1.Slack,con2.Slack,con3.Slack]),
+    (&#39;Lower Range&#39;,[con1.SARHSLow,con2.SARHSLow,con3.SARHSLow]),
+    (&#39;Upper Range&#39;,[con1.SARHSUp,con2.SARHSUp,con3.SARHSUp])
+])
+print(pd.DataFrame.from_dict(constraint))</code></pre>
+<pre><code>##                  Name  Shadow Price  RHS Coeff  Slack  Lower Range  \
+## 0          total seat     83.928571    10000.0    0.0        502.8   
+## 1  reserved for media    -83.928571        0.0    0.0         -0.0   
+## 2     seat constraint    -32.142857      500.0    0.0      -4748.6   
+## 
+##      Upper Range  
+## 0  1.000000e+100  
+## 1   9.997200e+03  
+## 2   1.187500e+04</code></pre>
