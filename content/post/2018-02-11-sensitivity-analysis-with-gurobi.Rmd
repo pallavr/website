@@ -3,6 +3,7 @@ title: Sensitivity Analysis with Gurobi
 author: ''
 date: '2018-02-11'
 slug: sensitivity-analysis-with-gurobi
+summary: "This tutorial demostrates how to perform sensitivity analysis in Gurobi"
 categories:
   - prescriptive analytics
 tags:
@@ -25,7 +26,7 @@ The problem is once again taken from Rardin's book *Optimization in Operations R
 
 **Problem 6-25**
 
-*The NCAA is making plans for distributing tickets to the upcoming regional basketball championships. The up to 10,000 available seats will be divided between the media, the competing universities, and the general public. Media people are admitted free, but the NCAA receives \$45 per ticket from universities and \$100 per ticket from the general public. At least 500 tickets must be reserved for the media, and at least half as many tickets should go to the competing universities as to the general public. Within these restrictions, the NCAA wishes to find the allocation that raises the most money.*
+*The NCAA is making plans for distributing tickets to the upcoming regional basketball championships. The up to 10,000 available seats will be divided between the media, the competing universities, and the general public. Media people are admitted free, but the NCAA receives* $\$45$ *per ticket from universities and* $\$100$ *per ticket from the general public. At least 500 tickets must be reserved for the media, and at least half as many tickets should go to the competing universities as to the general public. Within these restrictions, the NCAA wishes to find the allocation that raises the most money.*
 
 The optimization problem can be set up as:
 
@@ -37,9 +38,9 @@ The optimization problem can be set up as:
 
 *(a) What is the marginal cost to the NCAA of each seat guaranteed the media?  * 
 *(b) Suppose that there is an alternative arrangement of the dome where the games will be played that can provide 15,000 seats. How much additional revenue would be gained from the expanded seating? How much would it be for 20,000 seats?  *  
-*(c) Since television revenue provides most of the income for NCAA events, another proposal would reduce the price of general public tickets to \$50. How much revenue would be lost from this change? What if the price were \$30?  *  
+*(c) Since television revenue provides most of the income for NCAA events, another proposal would reduce the price of general public tickets to* $\$50$. *How much revenue would be lost from this change? What if the price were* $\$30$?    
 *(d) Media-hating coach Sobby Day wants the NCAA to restrict media seats to 20% of those allocated for universities. Could this policy change the optimal solution? How about 10%?  *  
-*(e) To accommodate high demand from student supporters of participating universities, the NCAA is considering marketing a new “scrunch seat” that consumes only 80% of a regular bleacher seat but counts fully against the “university Ú half public” rule. Could an optimal solution allocate any such seats at a ticket price of \$35? At a price of \$25?*
+*(e) To accommodate high demand from student supporters of participating universities, the NCAA is considering marketing a new “scrunch seat” that consumes only 80% of a regular bleacher seat but counts fully against the “university Ú half public” rule. Could an optimal solution allocate any such seats at a ticket price of* $\$35$? *At a price of* $\$25$?
 
 
 
