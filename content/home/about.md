@@ -17,7 +17,7 @@ weight = 5
 
 # List your qualifications (such as academic degrees).
 [[education.courses]]
-  course = "PhD. Marketing"
+  course = "PhD. in Marketing"
   institution = "University of Texas, San Antonio"
   year = 2022
   
