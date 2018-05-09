@@ -17,6 +17,11 @@ weight = 5
 
 # List your qualifications (such as academic degrees).
 [[education.courses]]
+  course = "PhD. Marketing"
+  institution = "University of Texas, San Antonio"
+  year = 2022
+  
+[[education.courses]]
   course = "MS. Applied Statistics and Operations Research"
   institution = "Bowling Green State University"
   year = 2018

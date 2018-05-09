@@ -10,9 +10,6 @@ tags:
   - regression
   - R
   - ggplot2
-header:
-  caption: ''
-  image: 'headers/titanic.jpg'
 ---
 
 ```{r setup, include=FALSE}

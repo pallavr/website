@@ -10,8 +10,6 @@ tags:
   - Time Series
   - Forecasting
   - ggplot2
-header:
-  image: "headers/crystal.jpg"
 ---
 
 <style>

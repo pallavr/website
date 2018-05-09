@@ -9,8 +9,6 @@ categories:
 tags:
   - Decision Tree
   - ggplot2
-header:
-  image: "headers/tree.jpg"
 ---
 
 <style>
