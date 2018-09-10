@@ -51,16 +51,16 @@ defaultContentLanguageInSubdir = false
 
   # Your details.
   name = "Pallav Routh"
-  role = "Graduate Assistant, Bowling Green State University"
+  role = "Graduate Research Assistant, University of Texas at San Antonio"
 
   # Organizations/Affiliations.
   #   Separate multiple entries with a comma, using the form: `[ {name="Org1", url=""}, {name="Org2", url=""} ]`.
-  organizations = [ { name = "Bowling Green State University", url = "bgsu.edu" } ]
+  organizations = [ { name = "University of Texas at San Antonio", url = "utsa.edu" } ]
 
   gravatar = true  # Get your avatar from Gravatar.com? (true/false)
   avatar = "portrait.jpg"  # Specify an avatar image (in `static/img/` folder) or delete value to disable avatar.
-  email = "pallavr@bgsu.edu"
-  address = "Room 309 Business Administration"
+  email = "pallav.routh@utsa.edu"
+  address = "BB 4.04.02"
   office_hours = "TBA"
   phone = "567-213-9494"
   skype = ""
